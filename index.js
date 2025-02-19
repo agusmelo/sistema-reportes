@@ -42,8 +42,30 @@ app.post('/generate-invoice', async (req, res) => {
         const dd = {
             footer: function(currentPage, pageCount) {
                 return {
-                    text: 'La Llave | Tel.: +598 99 354 032 | Email: lallavetaller@gmail.com | Dir.: Ildemaro Ribas 1320 | Sarandi Grande, Uruguay',
-                    style: 'footer'
+                    stack: [
+                        {
+                            text: 'DIAGNÓSTICO Y PREPARACIÓN MECÁNICA • INYECCIÓN ELECTRÓNICA - SCANNER • INYECCIÓN DIESEL ELECTRÓNICA AUTOMOTRIZ • PROGRAMACIÓN Y CODIFICACIÓN DEL AUTOMÓVIL • REPARACIÓN DE MÓDULOS',
+                            style: 'footerCapacidades'
+                        },
+                        {
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 40,
+                                    y1: 0,
+                                    x2: 515,
+                                    y2: 0,
+                                    lineWidth: 1,
+                                    lineColor: '#113f71'
+                                }
+                            ]
+                        },
+                        {
+                            text: 'La Llave | Tel.: +598 99 354 032 | Email: lallavetaller@gmail.com | Dir.: Ildemaro Ribas 1320 | Sarandi Grande, Uruguay',
+                            style: 'footerContacto'
+                        }
+                    ],
+                    margin: [40, 10, 40, 10]
                 };
             },
             content: [
@@ -114,12 +136,18 @@ app.post('/generate-invoice', async (req, res) => {
                 info: { fontSize: 16, color: '#113f71', bold: true },
                 tableHeader: { fillColor: '#ac292a', color: 'white', bold: true, fontSize: 12 },
                 total: { alignment: 'right', bold: true },
-                footer: { 
-                    fontSize: 10, 
-                    color: '#113f71', 
-                    margin: [40, 20, 40, 0], 
-                    alignment: 'center' 
+                footerCapacidades: {
+                    fontSize: 8,
+                    color: '#113f71',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 5]
                 },
+                footerContacto: {
+                    fontSize: 10,
+                    color: '#113f71',
+                    alignment: 'center',
+                    margin: [0, 5, 0, 0]
+                }
             },
         };
 
