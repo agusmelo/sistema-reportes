@@ -1,0 +1,21 @@
+{
+  "name": "pdf-gen",
+  "version": "1.0.0",
+  "description": "generador de pdfs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "pdf",
+    "facturas"
+  ],
+  "author": "Agustin Melo",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
+    "pdf-creator-node": "^2.3.5",
+    "pdf-gen": "file:"
+  }
+}

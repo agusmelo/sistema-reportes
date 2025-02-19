@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: start;
+            -ms-flex-align: start;
+            align-items: flex-start;
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-flow:row;
+            flex-flow:row;
+            -webkit-box-pack: start;
+                -ms-flex-pack: start;
+                    justify-content: flex-start;
+            /* gap:100px; */
+        }
+        .logo {
+            width: 250px;
+        }
+        .title {
+            margin-bottom: 20px;
+            /* margin-left: 20px; */
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .info {
+            /* margin: 20px 0; */
+            font-size: 16px;
+            margin-left: 30px;
+            margin-top: 20px;
+        }
+        .title, .info{
+            color: #113f71;
+            font-family: Courier New, serif;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #b84b2b;
+        }
+        th {
+            background-color: #ac292a;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+        tbody tr:nth-child(odd){
+            background-color: #f7e3dd;
+        }
+        .total {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        footer{
+            color: #113f71;
+            text-align: center;
+
+        }
+        footer hr{
+            background-color: #113f71;
+            height: 1px;
+            border: none;
+        }
+        .info_capacidades{
+            font-weight: bold;
+
+        }
+        /*TODO: Esto no esta funcionando, se sigue cortando la ultima row de la pagina*/
+        table { -webkit-column-break-inside:auto; -moz-column-break-inside:auto; break-inside:auto } 
+        tr    { 
+            -webkit-column-break-inside:avoid; 
+               -moz-column-break-inside:avoid; 
+                    break-inside:avoid;
+            -webkit-column-break-after:auto;
+               -moz-column-break-after:auto;
+                    break-after:auto
+         } 
+
+        /* table { border-collapse: collapse; }
+        table tbody tr {
+            height: 50px;
+            border: 5px solid red;
+            page-break-inside: avoid; 
+        } */
+
+
+    </style>
+</head>
+<body>
+    <div class="title">HOJA DE SERVICIO</div>
+    <div class="header">
+        <img src="http://localhost:3000/logo_prov.png" alt="Logo" class="logo">
+        <div class="info">
+            <p>Cliente: {{client}}</p>
+            <p>Fecha: {{date}}</p>
+            <p>Vehículo: {{make}} Modelo: {{model}}</p>
+            <p>Matrícula: {{plate}} Kms: {{mileage}}</p>
+        </div>
+    </div>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Cantidad</th>
+                <th>Descripción</th>
+                <th>Precio por unidad</th>
+                <th>Total de línea</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each items}}
+                <tr>
+                    <td>{{quantity}}</td>
+                    <td>{{description}}</td>
+                    <td>${{unitPrice}}</td>
+                    <td>${{lineTotal}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="total">Subtotal</td>
+                <td>${{subtotal}}</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="total">Total</td>
+                <td>${{total}}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    
+</body>
+</html>

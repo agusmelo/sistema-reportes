@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h3 {
+      color: #2c3e50;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: inline-block;
+      width: 150px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+      width: calc(100% - 160px);
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 10px;
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    td input {
+      width: 90%;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    td .line-total {
+      background: #f8f9fa;
+      font-weight: bold;
+    }
+
+    .add-row, .generate-button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #28a745;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-row:hover {
+      background-color: #218838;
+    }
+
+    .generate-button {
+      background-color: #007bff;
+    }
+
+    .generate-button:hover {
+      background-color: #0056b3;
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .delete-row {
+      padding: 5px 10px;
+      font-size: 12px;
+      color: #fff;
+      background-color: #dc3545;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .delete-row:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Invoice Generator</h1>
+    <button id="test-btn">LOAD TEST</button>
+
+    <!-- Basic Information -->
+    <h3>Client & Vehicle Information</h3>
+    <form action="/generate-invoice" method="POST" id="invoice-form">
+      <label for="client-name">Client Name:</label>
+      <input type="text" id="client-name" name="client" placeholder="Enter client name" required><br>
+
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required><br>
+
+      <label for="vehicle-make">Vehicle Make:</label>
+      <input type="text" id="vehicle-make" name="make" placeholder="e.g., Renault" required><br>
+
+      <label for="vehicle-model">Vehicle Model:</label>
+      <input type="text" id="vehicle-model" name="model" placeholder="e.g., Oroch" required><br>
+
+      <label for="vehicle-plate">Vehicle Plate:</label>
+      <input type="text" id="vehicle-plate" name="plate" placeholder="e.g., MAI6778" required><br>
+
+      <label for="mileage">Mileage:</label>
+      <input type="number" id="mileage" name="mileage" placeholder="e.g., 95595" required><br>
+
+      <!-- Items Table -->
+      <h3>Items</h3>
+      <table id="items-table">
+        <thead>
+          <tr>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Unit Price</th>
+            <th>Total for Line</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- <tr>
+            <td><input type="number" class="quantity" min="1" value="1" required></td>
+            <td><input type="text" class="description" placeholder="Enter description" required></td>
+            <td><input type="number" class="unit-price" min="0" step="0.01" placeholder="0.00" required></td>
+            <td class="line-total">$0.00</td>
+            <td><button type="button" class="delete-row">Delete</button></td>
+          </tr> -->
+        </tbody>
+      </table>
+      <button type="button" class="add-row">Add Row</button>
+
+      <!-- Subtotal -->
+      <p class="total">Subtotal: <span id="sub-total">$0.00</span></p>
+      <!-- IVA -->
+      <!-- <p class="total"></p> <button id="iva-toggle-btn">X</button> -->
+      <label class="total" for="iva">IVA:</label>
+      <span id="tax-iva">$0.00</span>  
+      <input name="iva" checked type="checkbox" id="iva-toggle-btn">
+      <!-- Total -->
+      <p class="total">Total: <span id="total-plus-tax">$0.00</span></p>
+      <!-- Generate Button -->
+      <button type="submit" class="generate-button">Generate Invoice</button>
+
+    </form>
+  </div>
+
+  <script>
+    const itemsTable = document.getElementById("items-table").querySelector("tbody");
+    const ivaEl = document.getElementById("tax-iva")
+    const subtotalEl = document.getElementById("sub-total");
+    const grandTotalEl = document.getElementById("total-plus-tax");
+    const ivaToggleBtn = document.getElementById("iva-toggle-btn");
+    let itemIndex = 1;
+    
+    // Factura con o sin IVA
+    let esConIVA = true
+
+    document.querySelector(".add-row").addEventListener("click",addRow);
+
+    itemsTable.addEventListener("input", (e) => {
+      if (e.target.classList.contains("quantity") || e.target.classList.contains("unit-price")) {
+        const row = e.target.closest("tr");
+        const quantity = parseFloat(row.querySelector(".quantity").value) || 0;
+        const unitPrice = parseFloat(row.querySelector(".unit-price").value) || 0;
+        const lineTotal = (quantity * unitPrice).toFixed(2);
+        row.querySelector(".line-total").textContent = `$${lineTotal}`;
+        updateGrandTotal();
+      }
+    });
+
+    itemsTable.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete-row")) {
+        e.target.closest("tr").remove();
+        updateGrandTotal();
+      }
+    });
+
+    ivaToggleBtn.addEventListener("click",(e)=>{
+        // e.preventDefault()
+        esConIVA = !esConIVA
+        updateGrandTotal()
+    })
+
+    function updateGrandTotal() {
+      let subTotal = 0;
+      let ivaPer = 0.22;
+      itemsTable.querySelectorAll(".line-total").forEach((lineTotalEl) => {
+        const lineTotal = parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
+        subTotal += lineTotal;
+      });
+
+      subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
+      if(!esConIVA){
+        ivaPer = 0;
+      }
+      ivaEl.textContent = `$${(subTotal*ivaPer).toFixed(2)}`;
+      grandTotalEl.textContent = `$${(subTotal + subTotal*ivaPer).toFixed(2)}`;
+      
+    }
+    
+    function addRow(data) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity" min="1" value="1" required></td>
+        <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Enter description" required></td>
+        <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price" min="0" step="0.01" placeholder="0.00" required></td>
+        <td class="line-total">$0.00</td>
+        <td><button type="button" class="delete-row">Delete</button></td>
+      `;
+      itemsTable.appendChild(row);
+      itemIndex++;
+    }
+    //DEBUG
+    document.getElementById('test-btn').addEventListener('click', (e) =>{
+      document.getElementById('client-name').value = "Agustin"
+      document.getElementById('date').value = "1/1/1"
+      document.getElementById('vehicle-make').value = "Marca"
+      document.getElementById('vehicle-model').value = "Modelo"
+      document.getElementById('vehicle-plate').value = "AAA 1234"
+      document.getElementById('mileage').value = "99999"
+      addRow();
+    })
+    
+  </script>
+</body>
+</html>
