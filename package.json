@@ -16,6 +16,7 @@
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
     "pdf-creator-node": "^2.3.5",
-    "pdf-gen": "file:"
+    "pdf-gen": "file:",
+    "pdfmake": "^0.2.18"
   }
 }
