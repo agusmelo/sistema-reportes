@@ -163,6 +163,15 @@
                 <td>${{subtotal}}</td>
             </tr>
             <tr>
+                <td colspan="3" class="total">IVA</td>
+                
+                <td>
+                    {{#if ivaSolo }}
+                        <span>${{ivaSolo}}</span>
+                    {{/if}}
+                </td>
+            </tr>
+            <tr>
                 <td colspan="3" class="total">Total</td>
                 <td>${{total}}</td>
             </tr>

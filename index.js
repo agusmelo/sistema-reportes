@@ -30,7 +30,7 @@ app.post('/generate-invoice', async (req, res) => {
 
         const subtotal = parsedItems.reduce((sum, item) => sum + item.lineTotal, 0);
         const total = iva === 'on' ? subtotal + subtotal*0.22 : subtotal;
-
+        const ivaSolo = iva === 'on' ? subtotal*0.22 : 0
 
         const paginatedItems = []
         
@@ -49,7 +49,8 @@ app.post('/generate-invoice', async (req, res) => {
             items: parsedItems,
             total: total.toFixed(2),
             subtotal: subtotal.toFixed(2),
-            paginatedItems
+            paginatedItems,
+            ivaSolo
         };
 
         // PDF options
