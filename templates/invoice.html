@@ -54,7 +54,7 @@
             border-collapse: collapse;
             margin-top: 20px;
         }
-        table, th, td {
+        th, td {
             border: 1px solid #b84b2b;
         }
         th {
@@ -90,7 +90,7 @@
 
         }
         /*TODO: Esto no esta funcionando, se sigue cortando la ultima row de la pagina*/
-        table { -webkit-column-break-inside:auto; -moz-column-break-inside:auto; break-inside:auto } 
+        /* table { -webkit-column-break-inside:auto; -moz-column-break-inside:auto; break-inside:auto } 
         tr    { 
             -webkit-column-break-inside:avoid; 
                -moz-column-break-inside:avoid; 
@@ -98,7 +98,7 @@
             -webkit-column-break-after:auto;
                -moz-column-break-after:auto;
                     break-after:auto
-         } 
+         }  */
 
         /* table { border-collapse: collapse; }
         table tbody tr {
@@ -107,6 +107,16 @@
             page-break-inside: avoid; 
         } */
 
+        table { page-break-inside:auto }
+        tr    { page-break-inside:avoid; page-break-after:auto }
+        thead { display:table-header-group }
+        tfoot { display:table-footer-group }
+        .page-separator td {
+            height: 20px;
+            border: none;
+            /*border-bottom: 2px dashed #b84b2b;*/
+            background-color: white !important;
+        }
 
     </style>
 </head>
@@ -133,12 +143,17 @@
             </tr>
         </thead>
         <tbody>
-            {{#each items}}
-                <tr>
-                    <td>{{quantity}}</td>
-                    <td>{{description}}</td>
-                    <td>${{unitPrice}}</td>
-                    <td>${{lineTotal}}</td>
+            {{#each paginatedItems}}
+                {{#each this}}
+                    <tr>
+                        <td>{{quantity}}</td>
+                        <td>{{description}}</td>
+                        <td>${{unitPrice}}</td>
+                        <td>${{lineTotal}}</td>
+                    </tr>
+                {{/each}}
+                <tr class="page-separator">
+                    <td colspan="4"></td>
                 </tr>
             {{/each}}
         </tbody>

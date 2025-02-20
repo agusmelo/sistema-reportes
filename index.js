@@ -31,6 +31,13 @@ app.post('/generate-invoice', async (req, res) => {
         const subtotal = parsedItems.reduce((sum, item) => sum + item.lineTotal, 0);
         const total = iva === 'on' ? subtotal + subtotal*0.22 : subtotal;
 
+
+        const paginatedItems = []
+        
+        paginatedItems.push(parsedItems.slice(0, 15));
+        for (let i = 15; i < parsedItems.length; i += 20) {
+            paginatedItems.push(parsedItems.slice(i, i + 20));
+        }
         // Invoice data
         const data = {
             client,
@@ -41,7 +48,8 @@ app.post('/generate-invoice', async (req, res) => {
             mileage: parseInt(mileage),
             items: parsedItems,
             total: total.toFixed(2),
-            subtotal: subtotal.toFixed(2)
+            subtotal: subtotal.toFixed(2),
+            paginatedItems
         };
 
         // PDF options
