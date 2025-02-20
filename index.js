@@ -61,6 +61,35 @@ app.post('/generate-invoice', async (req, res) => {
 
         // Crear la definición del documento
         const docDefinition = {
+            pageMargins: [ 40, 40, 40, 80 ], // [left, top, right, bottom]
+            footer: function(currentPage, pageCount) {
+                return {
+                    stack: [
+                        {
+                            text: 'DIAGNÓSTICO Y PREPARACIÓN MECÁNICA • INYECCIÓN ELECTRÓNICA - SCANNER • INYECCIÓN DIESEL ELECTRÓNICA AUTOMOTRIZ • PROGRAMACIÓN Y CODIFICACIÓN DEL AUTOMÓVIL • REPARACIÓN DE MÓDULOS',
+                            style: 'footerCapacidades'
+                        },
+                        {
+                            canvas: [
+                                {
+                                    type: 'line',
+                                    x1: 0,
+                                    y1: 5,
+                                    x2: 515,
+                                    y2: 5,
+                                    lineWidth: 1,
+                                    lineColor: '#113f71'
+                                }
+                            ]
+                        },
+                        {
+                            text: 'La Llave | Tel.: +598 99 354 032 | Email: lallavetaller@gmail.com | Dir.: Ildemaro Ribas 1320 | Sarandi Grande, Uruguay',
+                            style: 'footerContacto'
+                        }
+                    ],
+                    margin: [40, 10, 40, 10]
+                }
+            },
             content: [
                 {
                     style: 'invoiceInfo',
