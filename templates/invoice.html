@@ -70,15 +70,16 @@
         tbody tr:nth-child(odd){
             background-color: #f7e3dd;
         }
+
         .total {
             font-weight: bold;
             text-align: right;
+            color: #AC292A;
         }
 
         footer{
             color: #113f71;
             text-align: center;
-
         }
         footer hr{
             background-color: #113f71;
@@ -118,6 +119,11 @@
             background-color: white !important;
         }
 
+
+        .col-blank{
+            background-color: white;
+            border: none !important;
+        }
     </style>
 </head>
 <body>
@@ -152,19 +158,26 @@
                         <td>${{lineTotal}}</td>
                     </tr>
                 {{/each}}
-                <tr class="page-separator">
-                    <td colspan="4"></td>
-                </tr>
+                {{#if @last}} 
+                    {{! Skipea el ultimo separador }}
+                {{else}}
+                    <tr class="page-separator">
+                        <td colspan="4"></td>
+                    </tr>
+                {{/if}} 
             {{/each}}
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" class="total">Subtotal</td>
+                <td class="col-blank"></td>
+                <td class="col-blank"></td>
+                <td class="total">Subtotal</td>
                 <td>${{subtotal}}</td>
             </tr>
             <tr>
-                <td colspan="3" class="total">IVA</td>
-                
+                <td class="col-blank"></td>
+                <td class="col-blank"></td>
+                <td class="total">IVA</td>               
                 <td>
                     {{#if ivaSolo }}
                         <span>${{ivaSolo}}</span>
@@ -172,7 +185,9 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3" class="total">Total</td>
+                <td class="col-blank"></td>
+                <td class="col-blank"></td>
+                <td class="total">Total</td>
                 <td>${{total}}</td>
             </tr>
         </tfoot>
