@@ -1,5 +1,5 @@
 const HORIZONTAL_SPACE = '    '
-
+const CUSTOM_FIELDS = {}
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -58,7 +58,17 @@ app.post('/generate-invoice', async (req, res) => {
         const subtotal = parsedItems.reduce((sum, item) => sum + item.lineTotal, 0);
         const total = iva === 'on' ? subtotal + subtotal*0.22 : subtotal;
         const ivaSolo = iva === 'on' ? subtotal*0.22 : 0
-
+        
+        CUSTOM_FIELDS.ivaField = iva === 'on' ?
+                                    [
+                                        { text: 'IVA:', style: 'totalLabel' },
+                                        { text: `$${ivaSolo.toFixed(2)}`, style: 'totalAmount' }
+                                    ] 
+                                    : 
+                                    [
+                                        { text: '', style: 'totalLabel' },
+                                        { text: '', style: 'totalAmount' }
+                                    ]
         // Crear la definición del documento
         const docDefinition = {
             pageMargins: [ 40, 40, 40, 80 ], // [left, top, right, bottom]
@@ -91,27 +101,27 @@ app.post('/generate-invoice', async (req, res) => {
                 }
             },
             content: [
-                {
-                    style: 'invoiceInfo',
-                    columns: [
-                        {
-                            width: '*',
-                            stack: [
-                                { text: 'Fecha:', bold: true },
-                                { text: 'Número de factura:', bold: true },
-                                { text: 'Vencimiento:', bold: true }
-                            ]
-                        },
-                        {
-                            width: 'auto',
-                            stack: [
-                                { text: new Date().toLocaleDateString() },
-                                { text: '001-002-000000123' },
-                                { text: new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString() }
-                            ]
-                        }
-                    ]
-                },
+                // {
+                //     style: 'invoiceInfo',
+                //     columns: [
+                //         {
+                //             width: '*',
+                //             stack: [
+                //                 { text: 'Fecha:', bold: true },
+                //                 { text: 'Número de factura:', bold: true },
+                //                 { text: 'Vencimiento:', bold: true }
+                //             ]
+                //         },
+                //         {
+                //             width: 'auto',
+                //             stack: [
+                //                 { text: new Date().toLocaleDateString() },
+                //                 { text: '001-002-000000123' },
+                //                 { text: new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString() }
+                //             ]
+                //         }
+                //     ]
+                // },
                 { text: 'HOJA DE SERVICIO', style: 'title', alignment: 'center' },
                 {
                     columns: [
@@ -184,11 +194,13 @@ app.post('/generate-invoice', async (req, res) => {
                             table: {
                                 dontBreakRows: true,
                                 widths: [80, 80],
+                                heights:[12,12],
                                 body: [
                                     [
                                         { text: 'Subtotal:', style: 'totalLabel' },
                                         { text: `$${subtotal.toFixed(2)}`, style: 'totalAmount' }
                                     ],
+                                    CUSTOM_FIELDS.ivaField,
                                     [
                                         { text: 'Total:', style: 'totalLabel' },
                                         { text: `$${total.toFixed(2)}`, style: 'totalAmount' }
@@ -241,7 +253,7 @@ app.post('/generate-invoice', async (req, res) => {
                     alignment: 'right',
                     bold: true,
                     fontSize: 12,
-                    color: '#113f71',
+                    color: '#ac292a',
                     border: 0
                 },
                 totalAmount: {
@@ -276,6 +288,9 @@ app.post('/generate-invoice', async (req, res) => {
                 fontSize: 11
             }
         };
+
+        //Condicionales
+        
 
         // Generar el PDF
         const pdfDoc = pdfMake.createPdf(docDefinition, null, fonts);
