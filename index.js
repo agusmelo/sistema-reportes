@@ -1,5 +1,6 @@
 const HORIZONTAL_SPACE = '    '
 const CUSTOM_FIELDS = {}
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mmayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -45,8 +46,11 @@ const logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('
 // Route to process the form submission
 app.post('/generate-invoice', async (req, res) => {
     try {
-        const { client, date, make, model, plate, mileage, items, iva } = req.body;
+        const { client, date, make, model, plate, mileage, iva, items } = req.body;
         
+        const fechaFactura = new Date(date)
+        const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${MESES[fechaFactura.getMonth()]}_${fechaFactura.getFullYear()}_${make}_${model}`
+        console.log(items)
         // Calculate line totals and overall total
         const parsedItems = items.map(item => ({
             quantity: parseFloat(item.quantity),
@@ -289,25 +293,40 @@ app.post('/generate-invoice', async (req, res) => {
             }
         };
 
-        //Condicionales
         
-
         // Generar el PDF
         const pdfDoc = pdfMake.createPdf(docDefinition, null, fonts);
         
         // Guardar el PDF en el servidor
         pdfDoc.getBuffer((buffer) => {
-            fs.writeFileSync('./output/invoice.pdf', buffer);
+            const privateOutputPath = path.join(__dirname, 'output', `${nombreDeArchivo}.pdf`);
+            const publicOutputPath = path.join(__dirname, 'public', 'ultima_factura_generada', `${nombreDeArchivo}.pdf`);
+            
+            fs.writeFileSync(privateOutputPath, buffer);
+            // Crear un enlace simbólico del PDF en la carpeta public
+            if (fs.existsSync(publicOutputPath)) {
+                fs.unlinkSync(publicOutputPath);
+            }
+            fs.symlinkSync(privateOutputPath, publicOutputPath);
+            // fs.writeFileSync(`./public/${nombreDeArvhivo}.pdf`, buffer);
             
             // Guardar JSON
             const jsonOutputPath = './output/invoice.json';
             fs.writeFileSync(jsonOutputPath, JSON.stringify({ client, date, make, model, plate, mileage, items: parsedItems, total, subtotal }, null, 2), 'utf-8');
 
-            res.send({
-                message: "Invoice generated successfully!",
-                pdfPath: "/output/invoice.pdf",
-                jsonPath: "/output/invoice.json",
+
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('X-Redirect-Url', `/ultima_factura_generada/${nombreDeArchivo}.pdf`);
+            res.json({
+                message: "Factura generada exitosamente",
+                pdfUrl: `/ultima_factura_generada/${nombreDeArchivo}.pdf`,
+                jsonPath: jsonOutputPath
             });
+            // res.send({
+            //     message: "Invoice generated successfully!",
+            //     pdfPath: privateOutputPath,
+            //     jsonPath: jsonOutputPath,
+            // });
         });
     } catch (err) {
         console.error("Error generating invoice:", err);

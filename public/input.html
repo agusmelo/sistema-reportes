@@ -204,7 +204,7 @@
     let itemIndex = 1;
     
     // Factura con o sin IVA
-    let esConIVA = True
+    let esConIVA = true
 
     document.querySelector(".add-row").addEventListener("click",addRow);
 
@@ -272,6 +272,56 @@
       addRow();
     })
     
+    document.querySelector(".generate-button").addEventListener("click", (e) => {
+      e.preventDefault();
+      const form = document.getElementById("invoice-form");
+      const formData = new FormData();
+
+      // Agregar campos básicos
+      formData.append('client', form.querySelector('#client-name').value);
+      formData.append('date', form.querySelector('#date').value);
+      formData.append('make', form.querySelector('#vehicle-make').value);
+      formData.append('model', form.querySelector('#vehicle-model').value);
+      formData.append('plate', form.querySelector('#vehicle-plate').value);
+      formData.append('mileage', form.querySelector('#mileage').value);
+      formData.append('iva', form.querySelector('#iva-toggle-btn').checked ? 'on' : 'off');
+
+      // Convertir FormData a objeto para poder enviar JSON
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      // Agregar items
+      const items = [];
+      itemsTable.querySelectorAll('tr').forEach(row => {
+        const item = {
+          quantity: row.querySelector('.quantity').value,
+          description: row.querySelector('.description').value,
+          unitPrice: row.querySelector('.unit-price').value
+        };
+        items.push(item);
+      });
+      
+      data.items = items;
+
+      // Enviar como JSON
+      fetch('/generate-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        const redirectUrl = response.headers.get('X-Redirect-Url');
+        response.json().then(data => {
+          console.log('Respuesta:', data);
+          window.open(redirectUrl, '_blank');
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    });
   </script>
 </body>
 </html>
