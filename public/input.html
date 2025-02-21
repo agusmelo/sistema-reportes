@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Generator</title>
+  <title>Generador de facturas</title>
+  <link rel="stylesheet" href="checkbox.css">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -112,7 +113,6 @@
       font-size: 18px;
       font-weight: bold;
       text-align: right;
-      margin-top: 20px;
     }
 
     .delete-row {
@@ -128,44 +128,129 @@
     .delete-row:hover {
       background-color: #c82333;
     }
+
+    .final-price-wrapper{
+      display:flex;
+      flex-direction: column;
+      align-items: end;
+      gap: 20px;
+    } 
+
+    /* .total-row{
+      margin-bottom: 20px;
+    } */
+
+    .error-input {
+      border-color: #dc3545 !important;
+      background-color: #fff8f8;
+    }
+
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 1001;
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .popup-title {
+      color: #dc3545;
+      margin: 0;
+      font-size: 1.2em;
+    }
+
+    .close-popup {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .error-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .error-list li {
+      color: #dc3545;
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .error-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Invoice Generator</h1>
-    <button id="test-btn">LOAD TEST</button>
+    <h1>Generador de facturas</h1>
+    <button id="test-btn">CARGAR PRUEBA</button>
 
     <!-- Basic Information -->
-    <h3>Client & Vehicle Information</h3>
+    <h3>Información del cliente y vehículo</h3>
     <form action="/generate-invoice" method="POST" id="invoice-form">
-      <label for="client-name">Client Name:</label>
-      <input type="text" id="client-name" name="client" placeholder="Enter client name" required><br>
+      <label for="client-name">Nombre del cliente:</label>
+      <input type="text" id="client-name" name="client" placeholder="Ingrese nombre del cliente" required><br>
 
-      <label for="date">Date:</label>
+      <label for="date">Fecha:</label>
       <input type="date" id="date" name="date" required><br>
 
-      <label for="vehicle-make">Vehicle Make:</label>
-      <input type="text" id="vehicle-make" name="make" placeholder="e.g., Renault" required><br>
+      <label for="vehicle-make">Marca:</label>
+      <input type="text" id="vehicle-make" name="make" placeholder="ej., Renault" required><br>
 
-      <label for="vehicle-model">Vehicle Model:</label>
-      <input type="text" id="vehicle-model" name="model" placeholder="e.g., Oroch" required><br>
+      <label for="vehicle-model">Modelo:</label>
+      <input type="text" id="vehicle-model" name="model" placeholder="ej., Oroch" required><br>
 
-      <label for="vehicle-plate">Vehicle Plate:</label>
-      <input type="text" id="vehicle-plate" name="plate" placeholder="e.g., MAI6778" required><br>
+      <label for="vehicle-plate">Matrícula:</label>
+      <input type="text" id="vehicle-plate" name="plate" placeholder="ej., MAI6778" required><br>
 
-      <label for="mileage">Mileage:</label>
-      <input type="number" id="mileage" name="mileage" placeholder="e.g., 95595" required><br>
+      <label for="mileage">Kilometraje:</label>
+      <input type="number" id="mileage" name="mileage" placeholder="ej., 95595" required><br>
 
       <!-- Items Table -->
       <h3>Items</h3>
       <table id="items-table">
         <thead>
           <tr>
-            <th>Quantity</th>
-            <th>Description</th>
-            <th>Unit Price</th>
-            <th>Total for Line</th>
-            <th>Actions</th>
+            <th>Cantidad</th>
+            <th>Descripción</th>
+            <th>Precio Unit.</th>
+            <th>Total</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -178,21 +263,44 @@
           </tr> -->
         </tbody>
       </table>
-      <button type="button" class="add-row">Add Row</button>
+      <button type="button" class="add-row">Agregar Fila</button>
 
-      <!-- Subtotal -->
-      <p class="total">Subtotal: <span id="sub-total">$0.00</span></p>
-      <!-- IVA -->
-      <!-- <p class="total"></p> <button id="iva-toggle-btn">X</button> -->
-      <label class="total" for="iva">IVA:</label>
-      <span id="tax-iva">$0.00</span>  
-      <input name="iva" checked type="checkbox" id="iva-toggle-btn">
-      <!-- Total -->
-      <p class="total">Total: <span id="total-plus-tax">$0.00</span></p>
+      <div class="final-price-wrapper">
+        <!-- Subtotal -->
+        <div class="total-row">
+          <span class="total">Subtotal:</span>
+          <span id="sub-total">$0.00</span>
+        </div>
+        <!-- IVA -->
+        <div class="total-row">
+          <span class="total">IVA:</span>
+          <span id="tax-iva">$0.00</span>
+          <div class="checkbox-wrapper-2">
+            <input type="checkbox" checked class="sc-gJwTLC ikxBAC" id="iva-toggle-btn">
+          </div>
+          <!-- <input name="iva" checked type="checkbox" id="iva-toggle-btn"> -->
+        </div>
+        <!-- Total -->
+        <div class="total-row">
+          <span class="total">Total:</span>
+          <span id="total-plus-tax">$0.00</span>
+        </div>
+      </div>
       <!-- Generate Button -->
-      <button type="submit" class="generate-button">Generate Invoice</button>
+      <button type="submit" class="generate-button">Generar Factura</button>
 
     </form>
+  </div>
+
+  <!-- Agregar el HTML del popup al final del body, antes del script -->
+  <div class="popup-overlay" id="error-popup">
+    <div class="popup">
+      <div class="popup-header">
+        <h3 class="popup-title">Errores de Validación</h3>
+        <button class="close-popup">&times;</button>
+      </div>
+      <ul class="error-list" id="error-list"></ul>
+    </div>
   </div>
 
   <script>
@@ -253,10 +361,10 @@
       const row = document.createElement("tr");
       row.innerHTML = `
         <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity" min="1" value="1" required></td>
-        <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Enter description" required></td>
+        <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
         <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price" min="0" step="0.01" placeholder="0.00" required></td>
         <td class="line-total">$0.00</td>
-        <td><button type="button" class="delete-row">Delete</button></td>
+        <td><button type="button" class="delete-row">Eliminar</button></td>
       `;
       itemsTable.appendChild(row);
       itemIndex++;
@@ -272,8 +380,113 @@
       addRow();
     })
     
+    function showErrorPopup(errors) {
+      const popup = document.getElementById('error-popup');
+      const errorList = document.getElementById('error-list');
+      errorList.innerHTML = '';
+      
+      errors.forEach(error => {
+        const li = document.createElement('li');
+        li.textContent = error;
+        errorList.appendChild(li);
+      });
+      
+      popup.style.display = 'block';
+    }
+
+    // Cerrar popup
+    document.querySelector('.close-popup').addEventListener('click', () => {
+      document.getElementById('error-popup').style.display = 'none';
+    });
+
+    // Cerrar popup al hacer clic fuera
+    document.querySelector('.popup-overlay').addEventListener('click', (e) => {
+      if (e.target.classList.contains('popup-overlay')) {
+        document.getElementById('error-popup').style.display = 'none';
+      }
+    });
+
+    function clearErrorStyles() {
+      document.querySelectorAll('.error-input').forEach(input => {
+        input.classList.remove('error-input');
+      });
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const errorMessages = [];
+      clearErrorStyles();
+
+      // Validar campos básicos
+      const fields = [
+        { id: 'client-name', name: 'El nombre del cliente', validate: value => value.trim() !== '' },
+        { id: 'date', name: 'La fecha', validate: value => value !== '' },
+        { id: 'vehicle-make', name: 'La marca del vehículo', validate: value => value.trim() !== '' },
+        { id: 'vehicle-model', name: 'El modelo del vehículo', validate: value => value.trim() !== '' },
+        { id: 'vehicle-plate', name: 'La matrícula', validate: value => value.trim() !== '' },
+        { id: 'mileage', name: 'El kilometraje', validate: value => value > 0 }
+      ];
+
+      fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        const value = element.value;
+        
+        if (!field.validate(value)) {
+          errorMessages.push(`${field.name} es requerido`);
+          element.classList.add('error-input');
+          isValid = false;
+        }
+      });
+
+      // Validar items de la tabla
+      const rows = itemsTable.querySelectorAll('tr');
+      if (rows.length === 0) {
+        errorMessages.push('Debe agregar al menos un ítem');
+        isValid = false;
+      }
+
+      rows.forEach((row, index) => {
+        const quantityInput = row.querySelector('.quantity');
+        const descriptionInput = row.querySelector('.description');
+        const unitPriceInput = row.querySelector('.unit-price');
+
+        const quantity = quantityInput.value;
+        const description = descriptionInput.value.trim();
+        const unitPrice = unitPriceInput.value;
+
+        if (!quantity || quantity < 1) {
+          errorMessages.push(`Fila ${index + 1}: La cantidad debe ser mayor a 0`);
+          quantityInput.classList.add('error-input');
+          isValid = false;
+        }
+
+        if (!description) {
+          errorMessages.push(`Fila ${index + 1}: La descripción es requerida`);
+          descriptionInput.classList.add('error-input');
+          isValid = false;
+        }
+
+        if (!unitPrice || unitPrice <= 0) {
+          errorMessages.push(`Fila ${index + 1}: El precio unitario debe ser mayor a 0`);
+          unitPriceInput.classList.add('error-input');
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        showErrorPopup(errorMessages);
+      }
+
+      return isValid;
+    }
+
     document.querySelector(".generate-button").addEventListener("click", (e) => {
       e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+
       const form = document.getElementById("invoice-form");
       const formData = new FormData();
 

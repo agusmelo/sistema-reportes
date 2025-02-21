@@ -30,7 +30,7 @@ const fonts = {
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 
 // Serve static files (e.g., form HTML, styles)
 app.use(express.static('public'));
