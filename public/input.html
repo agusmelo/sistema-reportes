@@ -213,6 +213,43 @@
       position: absolute;
       left: 0;
     }
+
+    .success-popup {
+      background-color: #28a745 !important;
+    }
+
+    .success-popup .popup-title {
+      color: white;
+    }
+
+    .success-popup .close-popup {
+      color: white;
+    }
+
+    .success-message {
+      color: white;
+      font-size: 1.1em;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .success-popup .view-invoice-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: white;
+      color: #28a745;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s;
+    }
+
+    .success-popup .view-invoice-btn:hover {
+      background-color: #f8f9fa;
+    }
   </style>
 </head>
 <body>
@@ -300,6 +337,18 @@
         <button class="close-popup">&times;</button>
       </div>
       <ul class="error-list" id="error-list"></ul>
+    </div>
+  </div>
+
+  <!-- Agregar el HTML del popup de éxito antes del script -->
+  <div class="popup-overlay" id="success-popup">
+    <div class="popup success-popup">
+      <div class="popup-header">
+        <h3 class="popup-title">¡Éxito!</h3>
+        <button class="close-popup">&times;</button>
+      </div>
+      <p class="success-message">La factura se ha generado correctamente.</p>
+      <button class="view-invoice-btn" id="view-invoice-btn">Ver Factura</button>
     </div>
   </div>
 
@@ -480,6 +529,19 @@
       return isValid;
     }
 
+    function showSuccessPopup(invoiceUrl) {
+      const popup = document.getElementById('success-popup');
+      const viewInvoiceBtn = document.getElementById('view-invoice-btn');
+      
+      viewInvoiceBtn.onclick = () => {
+        window.open(invoiceUrl, '_blank');
+        popup.style.display = 'none';
+      };
+      
+      popup.style.display = 'block';
+    }
+
+    // Modificar el event listener del botón generar
     document.querySelector(".generate-button").addEventListener("click", (e) => {
       e.preventDefault();
       
@@ -530,10 +592,28 @@
         const redirectUrl = response.headers.get('X-Redirect-Url');
         response.json().then(data => {
           console.log('Respuesta:', data);
-          window.open(redirectUrl, '_blank');
+          showSuccessPopup(redirectUrl);
         });
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Error:', error);
+        showErrorPopup(['Ocurrió un error al generar la factura. Por favor, intente nuevamente.']);
+      });
+    });
+
+    // Agregar el cierre del popup de éxito
+    document.querySelectorAll('.popup-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target.classList.contains('popup-overlay')) {
+          overlay.style.display = 'none';
+        }
+      });
+    });
+
+    document.querySelectorAll('.close-popup').forEach(button => {
+      button.addEventListener('click', () => {
+        button.closest('.popup-overlay').style.display = 'none';
+      });
     });
   </script>
 </body>
