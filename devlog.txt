@@ -1,0 +1,2 @@
+23/02/2025 - El font esta casi pronto, faltaria agregar error handling de las requests y cambiar el estilo para asociarlo mas a la marca.
+Todavia no tiene una base de datos, podria setupear un redis o mongo, como algo rapido. O hacerlo dejarlo pendiente guardando todas las facturas que se generen en un array de jsons y luego procesarlas y cargarlas a una base de datos mas estructurada.

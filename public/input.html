@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generador de facturas</title>
-  <link rel="stylesheet" href="checkbox.css">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,15 +32,15 @@
 
     label {
       display: inline-block;
-      width: 150px;
+      /* width: 150px; */
       font-weight: bold;
       margin-bottom: 10px;
     }
 
     input[type="text"],
     input[type="date"],
-    input[type="number"] {
-      width: calc(100% - 160px);
+    input[type="number"],
+    textarea {
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 5px;
@@ -49,38 +48,53 @@
       box-sizing: border-box;
     }
 
-    table {
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      border-color: #4CAF50;
+      box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+      outline: none;
+    }
+
+    .form-group input:not([type="checkbox"]){
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
     }
 
     table, th, td {
       border: 1px solid #ddd;
     }
 
-    th {
-      background-color: #2c3e50;
-      color: #fff;
-      padding: 10px;
-    }
 
     td {
       padding: 10px;
       text-align: center;
     }
 
-    td input {
-      width: 90%;
+    .item-input {
+      /* width: 90%; */
       padding: 5px;
       border: 1px solid #ddd;
       border-radius: 5px;
     }
 
-    td .line-total {
+    .item-input.quantity{
+      width: 55px;
+    }
+    textarea.item-input {
+      max-width: 500px;
+      min-width: 300px;
+      max-height: 200px;
+      min-height: 60px;
+    }
+    .item-input.unit-price{
+      width:100px;
+    }
+
+    td.line-total {
       background: #f8f9fa;
       font-weight: bold;
+      min-width: 60px;
+
     }
 
     .add-row, .generate-button {
@@ -99,7 +113,6 @@
       margin-top: 30px;
     }
 
-
     .add-row:hover {
       background-color: #218838;
     }
@@ -108,15 +121,6 @@
       display: flex;
       justify-content: center;
       margin-top: 20px;
-    }
-    .generate-button {
-      background-color: #007bff;
-      padding: 15px 150px;
-
-    }
-
-    .generate-button:hover {
-      background-color: #0056b3;
     }
 
     .total {
@@ -269,6 +273,145 @@
       border-bottom: 1p  solid rgba(255, 255, 255, 0.3);
 
     }
+
+    /* Tooltip para ayuda */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+      color: #666;
+    }
+
+    .tooltip .tooltip-text {
+      visibility: hidden;
+      width: 200px;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Botones más intuitivos */
+    .action-button {
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .add-row-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .add-row-button:hover {
+      background-color: #45a049;
+      transform: translateY(-1px);
+    }
+
+    .remove-row-button {
+      background-color: #ff4444;
+      color: white;
+      padding: 5px 10px;
+    }
+
+    .remove-row-button:hover {
+      background-color: #cc0000;
+    }
+
+    .generate-button {
+      background-color: #2196F3;
+      color: white;
+      font-size: 1.1em;
+      padding: 12px 24px;
+    }
+
+    .generate-button:hover {
+      background-color: #1976D2;
+      transform: translateY(-1px);
+    }
+
+    /* Tabla más legible */
+    .items-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      margin: 20px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+    }
+
+    .items-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      background-color: #2c3e50;
+      color: #fff;
+    }
+
+    .items-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .items-table tr:hover {
+      background-color: #f8f8f8;
+    }
+
+    /* .items-table .item-input{
+      width: 100px;
+    } */
+
+    /* Sección de totales más destacada */
+    .final-price-wrapper {
+      background-color: #f8f8f8;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .total-row {
+      font-size: 1.1em;
+    }
+
+    .total-row:last-child {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 2px solid #ddd;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+      }
+      
+      .form-group {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -279,27 +422,51 @@
     <!-- Basic Information -->
     <h3>Información del cliente y vehículo</h3>
     <form action="/generate-invoice" method="POST" id="invoice-form">
-      <label for="client-name">Nombre del cliente:</label>
-      <input type="text" id="client-name" name="client" placeholder="Ingrese nombre del cliente" required><br>
+      <div class="form-group">
+        <label for="client-name">Nombre del Cliente</label>
+        <span class="tooltip">?<span class="tooltip-text">Ingrese el nombre completo del cliente</span></span>
+        <input type="text" id="client-name" name="client" placeholder="Ingrese nombre del cliente" required><br>
+      </div>
 
-      <label for="date">Fecha:</label>
-      <input type="date" id="date" name="date" required><br>
+      <div class="form-group">
+        <label for="date">Fecha</label>
+        <span class="tooltip">?<span class="tooltip-text">Seleccione la fecha de la factura</span></span>
+        <input type="date" id="date" name="date" required><br>
+      </div>
 
-      <label for="vehicle-make">Marca:</label>
-      <input type="text" id="vehicle-make" name="make" placeholder="ej., Renault" required><br>
+      <div class="form-group">
+        <label for="vehicle-make">Marca del Vehículo</label>
+        <span class="tooltip">?<span class="tooltip-text">Ingrese la marca del vehículo</span></span>
+        <input type="text" id="vehicle-make" name="make" placeholder="ej., Renault" required><br>
+      </div>
 
-      <label for="vehicle-model">Modelo:</label>
-      <input type="text" id="vehicle-model" name="model" placeholder="ej., Oroch" required><br>
+      <div class="form-group">
+        <label for="vehicle-model">Modelo del Vehículo</label>
+        <span class="tooltip">?<span class="tooltip-text">Ingrese el modelo del vehículo</span></span>
+        <input type="text" id="vehicle-model" name="model" placeholder="ej., Oroch" required><br>
+      </div>
 
-      <label for="vehicle-plate">Matrícula:</label>
-      <input type="text" id="vehicle-plate" name="plate" placeholder="ej., MAI6778" required><br>
+      <div class="form-group">
+        <label for="vehicle-plate">Matrícula</label>
+        <span class="tooltip">?<span class="tooltip-text">Formato: ABC-123 o similar</span></span>
+        <input type="text" id="vehicle-plate" name="plate" placeholder="ej., MAI6778" required><br>
+      </div>
 
-      <label for="mileage">Kilometraje:</label>
-      <input type="number" id="mileage" name="mileage" placeholder="ej., 95595" required><br>
+      <div class="form-group">
+        <label for="mileage">Kilometraje</label>
+        <span class="tooltip">?<span class="tooltip-text">Ingrese el kilometraje actual del vehículo</span></span>
+        <input type="number" id="mileage" name="mileage" placeholder="ej., 95595" required><br>
+      </div>
+
+      <div class="form-group">
+        <label for="iva-toggle-btn">Incluir IVA</label>
+        <span class="tooltip">?<span class="tooltip-text">Active para incluir IVA en la factura</span></span>
+        <input type="checkbox" checked id="iva-toggle-btn">
+      </div>
 
       <!-- Items Table -->
       <h3>Items</h3>
-      <table id="items-table">
+      <table id="items-table" class="items-table">
         <thead>
           <tr>
             <th>Cantidad</th>
@@ -331,10 +498,6 @@
         <div class="total-row">
           <span class="total">IVA:</span>
           <span id="tax-iva">$0.00</span>
-          <div class="checkbox-wrapper-2">
-            <input type="checkbox" checked class="sc-gJwTLC ikxBAC" id="iva-toggle-btn">
-          </div>
-          <!-- <input name="iva" checked type="checkbox" id="iva-toggle-btn"> -->
         </div>
         <!-- Total -->
         <div class="total-row">
@@ -430,10 +593,12 @@
     
     function addRow(data) {
       const row = document.createElement("tr");
+      
+      // <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
       row.innerHTML = `
-        <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity" min="1" value="1" required></td>
-        <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
-        <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price" min="0" step="0.01" placeholder="0.00" required></td>
+        <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity item-input" min="1" value="1" required></td>
+        <td><textarea name="items[${itemIndex}][description]" type="text" class="description item-input" placeholder="Ingrese descripción" required></textarea></td>
+        <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price item-input" min="0" step="0.01" placeholder="0.00" required></td>
         <td class="line-total">$0.00</td>
         <td><button type="button" class="delete-row">Eliminar</button></td>
       `;
@@ -443,7 +608,7 @@
     //DEBUG
     document.getElementById('test-btn').addEventListener('click', (e) =>{
       document.getElementById('client-name').value = "Agustin"
-      document.getElementById('date').value = "1/1/1"
+      document.getElementById('date').value = "2025-02-23"
       document.getElementById('vehicle-make').value = "Marca"
       document.getElementById('vehicle-model').value = "Modelo"
       document.getElementById('vehicle-plate').value = "AAA 1234"
@@ -636,6 +801,66 @@
       button.addEventListener('click', () => {
         button.closest('.popup-overlay').style.display = 'none';
       });
+    });
+
+    // function addTooltips() {
+    //   const tooltips = {
+    //     'client-name': 'Ingrese el nombre completo del cliente',
+    //     'vehicle-plate': 'Formato: ABC-123 o similar',
+    //     'mileage': 'Ingrese el kilometraje actual del vehículo',
+    //     'iva-toggle-btn': 'Active para incluir IVA en la factura'
+    //   };
+
+    //   for (const [id, text] of Object.entries(tooltips)) {
+    //     const element = document.getElementById(id);
+    //     if (element) {
+    //       const tooltip = document.createElement('span');
+    //       tooltip.className = 'tooltip';
+    //       tooltip.innerHTML = '?<span class="tooltip-text">' + text + '</span>';
+    //       element.parentNode.insertBefore(tooltip, element.nextSibling);
+    //     }
+    //   }
+    // }
+
+    // Autocompletar campos comunes
+    function setupAutoComplete() {
+      const makes = ['Toyota', 'Honda', 'Nissan', 'Chevrolet', 'Ford', 'Hyundai', 'Kia'];
+      const makeInput = document.getElementById('vehicle-make');
+      
+      const datalist = document.createElement('datalist');
+      datalist.id = 'makes-list';
+      makes.forEach(make => {
+        const option = document.createElement('option');
+        option.value = make;
+        datalist.appendChild(option);
+      });
+      
+      document.body.appendChild(datalist);
+      makeInput.setAttribute('list', 'makes-list');
+    }
+
+    // Atajos de teclado
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+          // Ctrl + Enter para generar factura
+          document.querySelector('.generate-button').click();
+        } else if (e.ctrlKey && e.key === 'i') {
+          // Ctrl + i para agregar nueva fila
+          e.preventDefault();
+          addRow();
+        }
+      });
+    }
+
+    // Inicializar mejoras
+    document.addEventListener('DOMContentLoaded', () => {
+      // addTooltips();
+      setupAutoComplete();
+      setupKeyboardShortcuts();
+      
+      // Establecer fecha actual por defecto
+      document.getElementById('date').valueAsDate = new Date();
     });
   </script>
 </body>
