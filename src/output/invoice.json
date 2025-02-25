@@ -1,0 +1,18 @@
+{
+  "client": "Agustin",
+  "date": "2025-02-23",
+  "make": "Marca",
+  "model": "Modelo",
+  "plate": "AAA 1234",
+  "mileage": "99999",
+  "items": [
+    {
+      "quantity": 1,
+      "description": "tes",
+      "unitPrice": 1233,
+      "lineTotal": 1233
+    }
+  ],
+  "total": 1504.26,
+  "subtotal": 1233
+}

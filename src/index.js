@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const DB = require('./db/connect_db.js')
 
 // Corregir las importaciones de pdfMake y sus fuentes
 const pdfMake = require('pdfmake/build/pdfmake');
@@ -35,12 +36,9 @@ app.use(bodyParser.json());
 // Serve static files (e.g., form HTML, styles)
 app.use(express.static('public'));
 
-// Read the HTML template for the PDF
-const templatePath = path.join(__dirname, 'templates/invoice.html');
-const template = fs.readFileSync(templatePath, 'utf-8');
 
 // Modificar la forma en que se maneja el logo
-const logoPath = path.join(__dirname, 'public/logo_prov.png');
+const logoPath = path.join(__dirname, '../public/logo_prov.png');
 const logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
 
 // Route to process the form submission
@@ -293,14 +291,21 @@ app.post('/generate-invoice', async (req, res) => {
             }
         };
 
-        
+
         // Generar el PDF
         const pdfDoc = pdfMake.createPdf(docDefinition, null, fonts);
         
+        // Guardar JSON
+        const jsonOutputPath = path.join(__dirname,'output/invoice.json');
+        fs.writeFileSync(jsonOutputPath, JSON.stringify({ client, date, make, model, plate, mileage, items: parsedItems, total, subtotal }, null, 2), 'utf-8');
+        
+        // Guardar en base de datos
+        
+
         // Guardar el PDF en el servidor
         pdfDoc.getBuffer((buffer) => {
             const privateOutputPath = path.join(__dirname, 'output', `${nombreDeArchivo}.pdf`);
-            const publicOutputPath = path.join(__dirname, 'public', 'ultima_factura_generada', `${nombreDeArchivo}.pdf`);
+            const publicOutputPath = path.join(__dirname, '../public', 'ultima_factura_generada', `${nombreDeArchivo}.pdf`);
             
             fs.writeFileSync(privateOutputPath, buffer);
             // Crear un enlace simbólico del PDF en la carpeta public
@@ -309,11 +314,6 @@ app.post('/generate-invoice', async (req, res) => {
             }
             fs.symlinkSync(privateOutputPath, publicOutputPath);
             // fs.writeFileSync(`./public/${nombreDeArvhivo}.pdf`, buffer);
-            
-            // Guardar JSON
-            const jsonOutputPath = './output/invoice.json';
-            fs.writeFileSync(jsonOutputPath, JSON.stringify({ client, date, make, model, plate, mileage, items: parsedItems, total, subtotal }, null, 2), 'utf-8');
-
 
             res.setHeader('Content-Type', 'application/json');
             res.setHeader('X-Redirect-Url', `/ultima_factura_generada/${nombreDeArchivo}.pdf`);

@@ -17,6 +17,7 @@
     "nodemon": "^3.1.9",
     "pdf-creator-node": "^2.3.5",
     "pdf-gen": "file:",
-    "pdfmake": "^0.2.18"
+    "pdfmake": "^0.2.18",
+    "sqlite3": "^5.1.7"
   }
 }
