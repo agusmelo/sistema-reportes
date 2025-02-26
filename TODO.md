@@ -6,3 +6,5 @@
 [-] es expandible a tener una base de datos de cliente?
 [-] es expandible a poder generar un reporte?
 [-] es exportable la informacion a un excel?
+[-] Si el cliente existe en el sistema, mostrar la info en pantalla. Si mas de uno existe, mostrar los dos y que elija cual
+[-] 

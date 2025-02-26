@@ -548,8 +548,10 @@
     // Factura con o sin IVA
     let esConIVA = true
 
-    document.querySelector(".add-row").addEventListener("click",addRow);
+    fetch()
 
+
+    document.querySelector(".add-row").addEventListener("click",addRow);
     itemsTable.addEventListener("input", (e) => {
       if (e.target.classList.contains("quantity") || e.target.classList.contains("unit-price")) {
         const row = e.target.closest("tr");
@@ -581,20 +583,17 @@
         const lineTotal = parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
         subTotal += lineTotal;
       });
-
       subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
       if(!esConIVA){
         ivaPer = 0;
       }
       ivaEl.textContent = `$${(subTotal*ivaPer).toFixed(2)}`;
       grandTotalEl.textContent = `$${(subTotal + subTotal*ivaPer).toFixed(2)}`;
-      
     }
     
     //TODO: usar el parametro data para cargar tests
     function addRow(data) {
       const row = document.createElement("tr");
-      
       // <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
       row.innerHTML = `
         <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity item-input" min="1" value="1" required></td>
@@ -729,10 +728,9 @@
       popup.style.display = 'block';
     }
 
-    // Modificar el event listener del botón generar
+    // Submit form
     document.querySelector(".generate-button").addEventListener("click", (e) => {
       e.preventDefault();
-      
       if (!validateForm()) {
         return;
       }
@@ -740,7 +738,7 @@
       const form = document.getElementById("invoice-form");
       const formData = new FormData();
 
-      // Agregar campos básicos
+      // TODO: borrar el form data, hacerlo directo con un objecto
       formData.append('client', form.querySelector('#client-name').value);
       formData.append('date', form.querySelector('#date').value);
       formData.append('make', form.querySelector('#vehicle-make').value);
@@ -804,6 +802,11 @@
       });
     });
 
+    document.getElementById('client-name').addEventListener('keypress',(e)=>{
+      const name = document.getElementById('client-name').value;
+      
+    })
+
     // function addTooltips() {
     //   const tooltips = {
     //     'client-name': 'Ingrese el nombre completo del cliente',
@@ -823,6 +826,7 @@
     //   }
     // }
 
+    
     // Autocompletar campos comunes
     function setupAutoComplete() {
       const makes = ['Toyota', 'Honda', 'Nissan', 'Chevrolet', 'Ford', 'Hyundai', 'Kia'];

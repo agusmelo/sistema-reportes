@@ -10,7 +10,7 @@ function connected(err){
         return;
     }
     const tables = {
-        facturas:`CREATE TABLE facturas (
+        facturas:`CREATE TABLE IF NOT EXISTS facturas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cliente_id INTEGER NOT NULL,
         fecha DATE NOT NULL,
@@ -38,10 +38,8 @@ function connected(err){
         CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
-        telefono TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );`
-
+        );`,
     }
 
     DB.run(tables.facturas, [], (err) => {

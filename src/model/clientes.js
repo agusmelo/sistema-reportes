@@ -2,9 +2,9 @@ const path = require('path');
 const db = require(path.join(__dirname,'../db/connect_db.js'))
 
 
-async function agregarCliente(cliente) {
+async function agregarCliente(nombreCliente) {
   try {
-    const resultado = await db.query('INSERT INTO clientes SET ?', [cliente]);
+    const resultado = await db.query('INSERT INTO clientes(nombre) SET ?', [nombreCliente]);
     return resultado;
   } catch (error) {
     throw error;

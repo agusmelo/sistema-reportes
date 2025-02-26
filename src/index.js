@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
-const DB = require('./db/connect_db.js')
+const router = require('./routes');
 
 // Corregir las importaciones de pdfMake y sus fuentes
 const pdfMake = require('pdfmake/build/pdfmake');
@@ -33,19 +33,19 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()); 
 
-// Serve static files (e.g., form HTML, styles)
-app.use(express.static('public'));
+app.use(express.static('public')); // serve static files
+app.use('/api',router) // serve api
 
 
 // Modificar la forma en que se maneja el logo
-const logoPath = path.join(__dirname, '../public/logo_prov.png');
-const logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
 
 // Route to process the form submission
 app.post('/generate-invoice', async (req, res) => {
     try {
         const { client, date, make, model, plate, mileage, iva, items } = req.body;
         
+        const logoPath = path.join(__dirname, '../public/logo_prov.png');
+        const logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
         const fechaFactura = new Date(date)
         const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${MESES[fechaFactura.getMonth()]}_${fechaFactura.getFullYear()}_${make}_${model}`
         console.log(items)
@@ -300,7 +300,7 @@ app.post('/generate-invoice', async (req, res) => {
         fs.writeFileSync(jsonOutputPath, JSON.stringify({ client, date, make, model, plate, mileage, items: parsedItems, total, subtotal }, null, 2), 'utf-8');
         
         // Guardar en base de datos
-        
+        guardarDatosDB(client, date, make, model, plate, mileage, iva, items)
 
         // Guardar el PDF en el servidor
         pdfDoc.getBuffer((buffer) => {
@@ -339,3 +339,7 @@ const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+function guardarDatosDB(client, date, make, model, plate, mileage, iva, items){
+    return;
+}
