@@ -10,7 +10,6 @@ fs.readdirSync(__dirname)
   .forEach(file => {
         const routeName = file.replace(".js", "");
         const route = require(path.join(__dirname, file));
-        console.log(routeName)
         router.use(`/${routeName}`, route); // carga la ruta en el router
   });
 
