@@ -1,872 +1,980 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de facturas</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f9;
-      color: #333;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de facturas</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f9;
+        color: #333;
+      }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+      .container {
+        max-width: 900px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
 
-    h1, h3 {
-      color: #2c3e50;
-    }
+      h1,
+      h3 {
+        color: #2c3e50;
+      }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
 
-    label {
-      display: inline-block;
-      /* width: 150px; */
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+      label {
+        display: inline-block;
+        /* width: 150px; */
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
 
-    input[type="text"],
-    input[type="date"],
-    input[type="number"],
-    textarea {
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 15px;
-      box-sizing: border-box;
-    }
+      input[type="text"],
+      input[type="date"],
+      input[type="number"],
+      textarea {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+      }
 
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    input[type="date"]:focus {
-      border-color: #4CAF50;
-      box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
-      outline: none;
-    }
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      input[type="date"]:focus {
+        border-color: #4caf50;
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+        outline: none;
+      }
 
-    .form-group input:not([type="checkbox"]){
-      width: 100%;
-    }
+      .form-group input:not([type="checkbox"]) {
+        width: 100%;
+      }
 
-    table, th, td {
-      border: 1px solid #ddd;
-    }
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;
+      }
 
+      td {
+        padding: 10px;
+        text-align: center;
+      }
 
-    td {
-      padding: 10px;
-      text-align: center;
-    }
+      .item-input {
+        /* width: 90%; */
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
 
-    .item-input {
-      /* width: 90%; */
-      padding: 5px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
+      .item-input.quantity {
+        width: 55px;
+      }
+      textarea.item-input {
+        max-width: 500px;
+        min-width: 300px;
+        max-height: 200px;
+        min-height: 60px;
+      }
+      .item-input.unit-price {
+        width: 100px;
+      }
 
-    .item-input.quantity{
-      width: 55px;
-    }
-    textarea.item-input {
-      max-width: 500px;
-      min-width: 300px;
-      max-height: 200px;
-      min-height: 60px;
-    }
-    .item-input.unit-price{
-      width:100px;
-    }
+      td.line-total {
+        background: #f8f9fa;
+        font-weight: bold;
+        min-width: 60px;
+      }
 
-    td.line-total {
-      background: #f8f9fa;
-      font-weight: bold;
-      min-width: 60px;
+      .add-row,
+      .generate-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #28a745;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        transition: background-color 0.3s ease;
+      }
+      .add-row {
+        margin-top: 30px;
+      }
 
-    }
+      .add-row:hover {
+        background-color: #218838;
+      }
 
-    .add-row, .generate-button {
-      display: inline-block;
-      padding: 10px 20px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #28a745;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      text-align: center;
-      transition: background-color 0.3s ease;
-    }
-    .add-row{
-      margin-top: 30px;
-    }
+      .generate-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
 
-    .add-row:hover {
-      background-color: #218838;
-    }
+      .total {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: right;
+      }
 
-    .generate-wrapper{
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
+      .delete-row {
+        padding: 5px 10px;
+        font-size: 12px;
+        color: #fff;
+        background-color: #dc3545;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
 
-    .total {
-      font-size: 18px;
-      font-weight: bold;
-      text-align: right;
-    }
+      .delete-row:hover {
+        background-color: #c82333;
+      }
 
-    .delete-row {
-      padding: 5px 10px;
-      font-size: 12px;
-      color: #fff;
-      background-color: #dc3545;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+      .final-price-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
 
-    .delete-row:hover {
-      background-color: #c82333;
-    }
-
-    .final-price-wrapper{
-      display:flex;
-      flex-direction: column;
-      align-items: end;
-      gap: 20px;
-      margin-bottom: 20px;
-    } 
-
-    /* .total-row{
+      /* .total-row{
       margin-bottom: 20px;
     } */
 
-    .error-input {
-      border-color: #dc3545 !important;
-      background-color: #fff8f8;
-    }
+      .error-input {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8;
+      }
 
-    .popup-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-    }
+      .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
 
-    .popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      z-index: 1001;
-    }
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        z-index: 1001;
+      }
 
-    .popup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
-    }
+      .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
 
-    .popup-title {
-      color: #dc3545;
-      margin: 0;
-      font-size: 1.2em;
-    }
+      .popup-title {
+        color: #dc3545;
+        margin: 0;
+        font-size: 1.2em;
+      }
 
-    .close-popup {
-      background: none;
-      border: none;
-      font-size: 1.5em;
-      cursor: pointer;
-      color: #666;
-    }
+      .close-popup {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #666;
+      }
 
-    .error-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
+      .error-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
 
-    .error-list li {
-      color: #dc3545;
-      margin-bottom: 8px;
-      padding-left: 20px;
-      position: relative;
-    }
+      .error-list li {
+        color: #dc3545;
+        margin-bottom: 8px;
+        padding-left: 20px;
+        position: relative;
+      }
 
-    .error-list li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-    }
+      .error-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+      }
 
-    .success-popup {
-      background-color: #28a745 !important;
-    }
+      .success-popup {
+        background-color: #28a745 !important;
+      }
 
-    .success-popup .popup-title {
-      color: white;
-    }
+      .success-popup .popup-title {
+        color: white;
+      }
 
-    .success-popup .close-popup {
-      color: white;
-    }
+      .success-popup .close-popup {
+        color: white;
+      }
 
-    .success-message {
-      color: white;
-      font-size: 1.1em;
-      text-align: center;
-      margin: 20px 0;
-    }
+      .success-message {
+        color: white;
+        font-size: 1.1em;
+        text-align: center;
+        margin: 20px 0;
+      }
 
-    .success-popup .view-invoice-btn {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background-color: white;
-      color: #28a745;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.1em;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: background-color 0.3s;
-    }
+      .success-popup .view-invoice-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: white;
+        color: #28a745;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1em;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s;
+      }
 
-    .success-popup .view-invoice-btn:hover {
-      background-color: #f8f9fa;
-    }
+      .success-popup .view-invoice-btn:hover {
+        background-color: #f8f9fa;
+      }
 
-    hr.custom-hr {
-      border: 0;
-      height: 0;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-      border-bottom: 1p  solid rgba(255, 255, 255, 0.3);
+      hr.custom-hr {
+        border: 0;
+        height: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom: 1p solid rgba(255, 255, 255, 0.3);
+      }
 
-    }
+      /* Tooltip para ayuda */
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        margin-left: 5px;
+        color: #666;
+      }
 
-    /* Tooltip para ayuda */
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      margin-left: 5px;
-      color: #666;
-    }
+      .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
 
-    .tooltip .tooltip-text {
-      visibility: hidden;
-      width: 200px;
-      background-color: #333;
-      color: white;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
+      .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
 
-    .tooltip:hover .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
+      /* Botones más intuitivos */
+      .action-button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
 
-    /* Botones más intuitivos */
-    .action-button {
-      padding: 10px 20px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
+      .add-row-button {
+        background-color: #4caf50;
+        color: white;
+      }
 
-    .add-row-button {
-      background-color: #4CAF50;
-      color: white;
-    }
+      .add-row-button:hover {
+        background-color: #45a049;
+        transform: translateY(-1px);
+      }
 
-    .add-row-button:hover {
-      background-color: #45a049;
-      transform: translateY(-1px);
-    }
+      .remove-row-button {
+        background-color: #ff4444;
+        color: white;
+        padding: 5px 10px;
+      }
 
-    .remove-row-button {
-      background-color: #ff4444;
-      color: white;
-      padding: 5px 10px;
-    }
+      .remove-row-button:hover {
+        background-color: #cc0000;
+      }
 
-    .remove-row-button:hover {
-      background-color: #cc0000;
-    }
+      .generate-button {
+        background-color: #2196f3;
+        color: white;
+        font-size: 1.1em;
+        padding: 12px 24px;
+      }
 
-    .generate-button {
-      background-color: #2196F3;
-      color: white;
-      font-size: 1.1em;
-      padding: 12px 24px;
-    }
+      .generate-button:hover {
+        background-color: #1976d2;
+        transform: translateY(-1px);
+      }
 
-    .generate-button:hover {
-      background-color: #1976D2;
-      transform: translateY(-1px);
-    }
+      /* Tabla más legible */
+      .items-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin: 20px 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+      }
 
-    /* Tabla más legible */
-    .items-table {
-      border-collapse: separate;
-      border-spacing: 0;
-      width: 100%;
-      margin: 20px 0;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      font-size: 14px;
-    }
+      .items-table th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        background-color: #2c3e50;
+        color: #fff;
+      }
 
-    .items-table th {
-      padding: 12px;
-      text-align: left;
-      font-weight: 600;
-      background-color: #2c3e50;
-      color: #fff;
-    }
+      .items-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
 
-    .items-table td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-    }
+      .items-table tr:hover {
+        background-color: #f8f8f8;
+      }
 
-    .items-table tr:hover {
-      background-color: #f8f8f8;
-    }
-
-    /* .items-table .item-input{
+      /* .items-table .item-input{
       width: 100px;
     } */
 
-    /* Sección de totales más destacada */
-    .final-price-wrapper {
-      background-color: #f8f8f8;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .total-row {
-      font-size: 1.1em;
-    }
-
-    .total-row:last-child {
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 2px solid #ddd;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .form-row {
-        flex-direction: column; 
+      /* Sección de totales más destacada */
+      .final-price-wrapper {
+        background-color: #f8f8f8;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
-      
-      .form-group {
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: 15px;
+
+      .total-row {
+        font-size: 1.1em;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Generador de facturas</h1>
-    <button id="test-btn">CARGAR PRUEBA</button>
 
-    <!-- Basic Information -->
-    <h3>Información del cliente y vehículo</h3>
-    <form action="/generate-invoice" method="POST" id="invoice-form">
-      <div class="form-group">
-        <label for="client-name">Nombre del Cliente</label>
-        <span class="tooltip">?<span class="tooltip-text">Ingrese el nombre completo del cliente</span></span>
-        <input type="text" id="client-name" name="client" placeholder="Ingrese nombre del cliente" required><br>
-      </div>
+      .total-row:last-child {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 2px solid #ddd;
+      }
 
-      <div class="form-group">
-        <label for="date">Fecha</label>
-        <span class="tooltip">?<span class="tooltip-text">Seleccione la fecha de la factura</span></span>
-        <input type="date" id="date" name="date" required><br>
-      </div>
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .form-row {
+          flex-direction: column;
+        }
 
-      <div class="form-group">
-        <label for="vehicle-make">Marca del Vehículo</label>
-        <span class="tooltip">?<span class="tooltip-text">Ingrese la marca del vehículo</span></span>
-        <input type="text" id="vehicle-make" name="make" placeholder="ej., Renault" required><br>
-      </div>
+        .form-group {
+          width: 100%;
+          margin-right: 0;
+          margin-bottom: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Generador de facturas</h1>
+      <button id="test-btn">CARGAR PRUEBA</button>
 
-      <div class="form-group">
-        <label for="vehicle-model">Modelo del Vehículo</label>
-        <span class="tooltip">?<span class="tooltip-text">Ingrese el modelo del vehículo</span></span>
-        <input type="text" id="vehicle-model" name="model" placeholder="ej., Oroch" required><br>
-      </div>
+      <!-- Basic Information -->
+      <h3>Información del cliente y vehículo</h3>
+      <form action="/generate-invoice" method="POST" id="invoice-form">
+        <div class="form-group">
+          <label for="client-name">Nombre del Cliente</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Ingrese el nombre completo del cliente</span
+            ></span
+          >
+          <input
+            type="text"
+            id="client-name"
+            name="client"
+            placeholder="Ingrese nombre del cliente"
+            required
+          /><br />
+        </div>
 
-      <div class="form-group">
-        <label for="vehicle-plate">Matrícula</label>
-        <span class="tooltip">?<span class="tooltip-text">Formato: ABC-123 o similar</span></span>
-        <input type="text" id="vehicle-plate" name="plate" placeholder="ej., MAI6778" required><br>
-      </div>
+        <div class="form-group">
+          <label for="date">Fecha</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Seleccione la fecha de la factura</span
+            ></span
+          >
+          <input type="date" id="date" name="date" required /><br />
+        </div>
 
-      <div class="form-group">
-        <label for="mileage">Kilometraje</label>
-        <span class="tooltip">?<span class="tooltip-text">Ingrese el kilometraje actual del vehículo</span></span>
-        <input type="number" id="mileage" name="mileage" placeholder="ej., 95595" required><br>
-      </div>
+        <div class="form-group">
+          <label for="vehicle-make">Marca del Vehículo</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Ingrese la marca del vehículo</span
+            ></span
+          >
+          <input
+            type="text"
+            id="vehicle-make"
+            name="make"
+            placeholder="ej., Renault"
+            required
+          /><br />
+        </div>
 
-      <div class="form-group">
-        <label for="iva-toggle-btn">Incluir IVA</label>
-        <span class="tooltip">?<span class="tooltip-text">Active para incluir IVA en la factura</span></span>
-        <input type="checkbox" checked id="iva-toggle-btn">
-      </div>
+        <div class="form-group">
+          <label for="vehicle-model">Modelo del Vehículo</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Ingrese el modelo del vehículo</span
+            ></span
+          >
+          <input
+            type="text"
+            id="vehicle-model"
+            name="model"
+            placeholder="ej., Oroch"
+            required
+          /><br />
+        </div>
 
-      <!-- Items Table -->
-      <h3>Items</h3>
-      <table id="items-table" class="items-table">
-        <thead>
-          <tr>
-            <th>Cantidad</th>
-            <th>Descripción</th>
-            <th>Precio Unit.</th>
-            <th>Total</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- <tr>
+        <div class="form-group">
+          <label for="vehicle-plate">Matrícula</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text">Formato: ABC-123 o similar</span></span
+          >
+          <input
+            type="text"
+            id="vehicle-plate"
+            name="plate"
+            placeholder="ej., MAI6778"
+            required
+          /><br />
+        </div>
+
+        <div class="form-group">
+          <label for="mileage">Kilometraje</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Ingrese el kilometraje actual del vehículo</span
+            ></span
+          >
+          <input
+            type="number"
+            id="mileage"
+            name="mileage"
+            placeholder="ej., 95595"
+            required
+          /><br />
+        </div>
+
+        <div class="form-group">
+          <label for="iva-toggle-btn">Incluir IVA</label>
+          <span class="tooltip"
+            >?<span class="tooltip-text"
+              >Active para incluir IVA en la factura</span
+            ></span
+          >
+          <input type="checkbox" checked id="iva-toggle-btn" />
+        </div>
+
+        <!-- Items Table -->
+        <h3>Items</h3>
+        <table id="items-table" class="items-table">
+          <thead>
+            <tr>
+              <th>Cantidad</th>
+              <th>Descripción</th>
+              <th>Precio Unit.</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
             <td><input type="number" class="quantity" min="1" value="1" required></td>
             <td><input type="text" class="description" placeholder="Enter description" required></td>
             <td><input type="number" class="unit-price" min="0" step="0.01" placeholder="0.00" required></td>
             <td class="line-total">$0.00</td>
             <td><button type="button" class="delete-row">Delete</button></td>
           </tr> -->
-        </tbody>
-      </table>
-      <button type="button" class="add-row">Agregar Fila</button>
+          </tbody>
+        </table>
+        <button type="button" class="add-row">Agregar Fila</button>
 
-      <div class="final-price-wrapper">
-        <!-- Subtotal -->
-        <div class="total-row">
-          <span class="total">Subtotal:</span>
-          <span id="sub-total">$0.00</span>
+        <div class="final-price-wrapper">
+          <!-- Subtotal -->
+          <div class="total-row">
+            <span class="total">Subtotal:</span>
+            <span id="sub-total">$0.00</span>
+          </div>
+          <!-- IVA -->
+          <div class="total-row">
+            <span class="total">IVA:</span>
+            <span id="tax-iva">$0.00</span>
+          </div>
+          <!-- Total -->
+          <div class="total-row">
+            <span class="total">Total:</span>
+            <span id="total-plus-tax">$0.00</span>
+          </div>
         </div>
-        <!-- IVA -->
-        <div class="total-row">
-          <span class="total">IVA:</span>
-          <span id="tax-iva">$0.00</span>
+        <!-- Generate Button -->
+        <hr class="custom-hr" />
+        <div class="generate-wrapper">
+          <button type="submit" class="generate-button">Generar Factura</button>
         </div>
-        <!-- Total -->
-        <div class="total-row">
-          <span class="total">Total:</span>
-          <span id="total-plus-tax">$0.00</span>
-        </div>
-      </div>
-      <!-- Generate Button -->
-      <hr class="custom-hr">
-      <div class="generate-wrapper">
-         <button type="submit" class="generate-button">Generar Factura</button>
-       </div>
-
-    </form>
-  </div>
-
-  <!-- Agregar el HTML del popup al final del body, antes del script -->
-  <div class="popup-overlay" id="error-popup">
-    <div class="popup">
-      <div class="popup-header">
-        <h3 class="popup-title">Errores de Validación</h3>
-        <button class="close-popup">&times;</button>
-      </div>
-      <ul class="error-list" id="error-list"></ul>
+      </form>
     </div>
-  </div>
 
-  <!-- Agregar el HTML del popup de éxito antes del script -->
-  <div class="popup-overlay" id="success-popup">
-    <div class="popup success-popup">
-      <div class="popup-header">
-        <h3 class="popup-title">¡Éxito!</h3>
-        <button class="close-popup">&times;</button>
+    <!-- Agregar el HTML del popup al final del body, antes del script -->
+    <div class="popup-overlay" id="error-popup">
+      <div class="popup">
+        <div class="popup-header">
+          <h3 class="popup-title">Errores de Validación</h3>
+          <button class="close-popup">&times;</button>
+        </div>
+        <ul class="error-list" id="error-list"></ul>
       </div>
-      <p class="success-message">La factura se ha generado correctamente.</p>
-      <button class="view-invoice-btn" id="view-invoice-btn">Ver Factura</button>
     </div>
-  </div>
 
-  <script>
-    const itemsTable = document.getElementById("items-table").querySelector("tbody");
-    const ivaEl = document.getElementById("tax-iva")
-    const subtotalEl = document.getElementById("sub-total");
-    const grandTotalEl = document.getElementById("total-plus-tax");
-    const ivaToggleBtn = document.getElementById("iva-toggle-btn");
-    let itemIndex = 1;
-    
-    // Factura con o sin IVA
-    let esConIVA = true
+    <!-- Agregar el HTML del popup de éxito antes del script -->
+    <div class="popup-overlay" id="success-popup">
+      <div class="popup success-popup">
+        <div class="popup-header">
+          <h3 class="popup-title">¡Éxito!</h3>
+          <button class="close-popup">&times;</button>
+        </div>
+        <p class="success-message">La factura se ha generado correctamente.</p>
+        <button class="view-invoice-btn" id="view-invoice-btn">
+          Ver Factura
+        </button>
+      </div>
+    </div>
 
-    fetch()
+    <script>
+      const itemsTable = document
+        .getElementById("items-table")
+        .querySelector("tbody");
+      const ivaEl = document.getElementById("tax-iva");
+      const subtotalEl = document.getElementById("sub-total");
+      const grandTotalEl = document.getElementById("total-plus-tax");
+      const ivaToggleBtn = document.getElementById("iva-toggle-btn");
+      let itemIndex = 1;
 
+      // Factura con o sin IVA
+      let esConIVA = true;
 
-    document.querySelector(".add-row").addEventListener("click",addRow);
-    itemsTable.addEventListener("input", (e) => {
-      if (e.target.classList.contains("quantity") || e.target.classList.contains("unit-price")) {
-        const row = e.target.closest("tr");
-        const quantity = parseFloat(row.querySelector(".quantity").value) || 0;
-        const unitPrice = parseFloat(row.querySelector(".unit-price").value) || 0;
-        const lineTotal = (quantity * unitPrice).toFixed(2);
-        row.querySelector(".line-total").textContent = `$${lineTotal}`;
-        updateGrandTotal();
-      }
-    });
+      fetch();
 
-    itemsTable.addEventListener("click", (e) => {
-      if (e.target.classList.contains("delete-row")) {
-        e.target.closest("tr").remove();
-        updateGrandTotal();
-      }
-    });
-
-    ivaToggleBtn.addEventListener("click",(e)=>{
-        // e.preventDefault()
-        esConIVA = !esConIVA
-        updateGrandTotal()
-    })
-
-    function updateGrandTotal() {
-      let subTotal = 0;
-      let ivaPer = 0.22;
-      itemsTable.querySelectorAll(".line-total").forEach((lineTotalEl) => {
-        const lineTotal = parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
-        subTotal += lineTotal;
+      document.querySelector(".add-row").addEventListener("click", addRow);
+      itemsTable.addEventListener("input", (e) => {
+        if (
+          e.target.classList.contains("quantity") ||
+          e.target.classList.contains("unit-price")
+        ) {
+          const row = e.target.closest("tr");
+          const quantity =
+            parseFloat(row.querySelector(".quantity").value) || 0;
+          const unitPrice =
+            parseFloat(row.querySelector(".unit-price").value) || 0;
+          const lineTotal = (quantity * unitPrice).toFixed(2);
+          row.querySelector(".line-total").textContent = `$${lineTotal}`;
+          updateGrandTotal();
+        }
       });
-      subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
-      if(!esConIVA){
-        ivaPer = 0;
+
+      itemsTable.addEventListener("click", (e) => {
+        if (e.target.classList.contains("delete-row")) {
+          e.target.closest("tr").remove();
+          updateGrandTotal();
+        }
+      });
+
+      ivaToggleBtn.addEventListener("click", (e) => {
+        // e.preventDefault()
+        esConIVA = !esConIVA;
+        updateGrandTotal();
+      });
+
+      function updateGrandTotal() {
+        let subTotal = 0;
+        let ivaPer = 0.22;
+        itemsTable.querySelectorAll(".line-total").forEach((lineTotalEl) => {
+          const lineTotal =
+            parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
+          subTotal += lineTotal;
+        });
+        subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
+        if (!esConIVA) {
+          ivaPer = 0;
+        }
+        ivaEl.textContent = `$${(subTotal * ivaPer).toFixed(2)}`;
+        grandTotalEl.textContent = `$${(subTotal + subTotal * ivaPer).toFixed(2)}`;
       }
-      ivaEl.textContent = `$${(subTotal*ivaPer).toFixed(2)}`;
-      grandTotalEl.textContent = `$${(subTotal + subTotal*ivaPer).toFixed(2)}`;
-    }
-    
-    //TODO: usar el parametro data para cargar tests
-    function addRow(data) {
-      const row = document.createElement("tr");
-      // <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
-      row.innerHTML = `
+
+      //TODO: usar el parametro data para cargar tests
+      function addRow(data) {
+        const row = document.createElement("tr");
+        // <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
+        row.innerHTML = `
         <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity item-input" min="1" value="1" required></td>
         <td><textarea name="items[${itemIndex}][description]" type="text" class="description item-input" placeholder="Ingrese descripción" required></textarea></td>
         <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price item-input" min="0" step="0.01" placeholder="0.00" required></td>
         <td class="line-total">$0.00</td>
         <td><button type="button" class="delete-row">Eliminar</button></td>
       `;
-      itemsTable.appendChild(row);
-      itemIndex++;
-    }
-    //DEBUG
-    document.getElementById('test-btn').addEventListener('click', (e) =>{
-      document.getElementById('client-name').value = "Agustin"
-      document.getElementById('date').value = "2025-02-23"
-      document.getElementById('vehicle-make').value = "Marca"
-      document.getElementById('vehicle-model').value = "Modelo"
-      document.getElementById('vehicle-plate').value = "AAA 1234"
-      document.getElementById('mileage').value = "99999"
-      addRow();
-    })
-    
-    function showErrorPopup(errors) {
-      const popup = document.getElementById('error-popup');
-      const errorList = document.getElementById('error-list');
-      errorList.innerHTML = '';
-      
-      errors.forEach(error => {
-        const li = document.createElement('li');
-        li.textContent = error;
-        errorList.appendChild(li);
-      });
-      
-      popup.style.display = 'block';
-    }
-
-    // Cerrar popup
-    document.querySelector('.close-popup').addEventListener('click', () => {
-      document.getElementById('error-popup').style.display = 'none';
-    });
-
-    // Cerrar popup al hacer clic fuera
-    document.querySelector('.popup-overlay').addEventListener('click', (e) => {
-      if (e.target.classList.contains('popup-overlay')) {
-        document.getElementById('error-popup').style.display = 'none';
+        itemsTable.appendChild(row);
+        itemIndex++;
       }
-    });
-
-    function clearErrorStyles() {
-      document.querySelectorAll('.error-input').forEach(input => {
-        input.classList.remove('error-input');
-      });
-    }
-
-    function validateForm() {
-      let isValid = true;
-      const errorMessages = [];
-      clearErrorStyles();
-
-      // Validar campos básicos
-      const fields = [
-        { id: 'client-name', name: 'El nombre del cliente', validate: value => value.trim() !== '' },
-        { id: 'date', name: 'La fecha', validate: value => value !== '' },
-        { id: 'vehicle-make', name: 'La marca del vehículo', validate: value => value.trim() !== '' },
-        { id: 'vehicle-model', name: 'El modelo del vehículo', validate: value => value.trim() !== '' },
-        { id: 'vehicle-plate', name: 'La matrícula', validate: value => value.trim() !== '' },
-        { id: 'mileage', name: 'El kilometraje', validate: value => value > 0 }
-      ];
-
-      fields.forEach(field => {
-        const element = document.getElementById(field.id);
-        const value = element.value;
-        
-        if (!field.validate(value)) {
-          errorMessages.push(`${field.name} es requerido`);
-          element.classList.add('error-input');
-          isValid = false;
-        }
+      //DEBUG
+      document.getElementById("test-btn").addEventListener("click", (e) => {
+        document.getElementById("client-name").value = "Agustin";
+        document.getElementById("date").value = "2025-02-23";
+        document.getElementById("vehicle-make").value = "Marca";
+        document.getElementById("vehicle-model").value = "Modelo";
+        document.getElementById("vehicle-plate").value = "AAA 1234";
+        document.getElementById("mileage").value = "99999";
+        addRow();
       });
 
-      // Validar items de la tabla
-      const rows = itemsTable.querySelectorAll('tr');
-      if (rows.length === 0) {
-        errorMessages.push('Debe agregar al menos un ítem');
-        isValid = false;
-      }
+      function showErrorPopup(errors) {
+        const popup = document.getElementById("error-popup");
+        const errorList = document.getElementById("error-list");
+        errorList.innerHTML = "";
 
-      rows.forEach((row, index) => {
-        const quantityInput = row.querySelector('.quantity');
-        const descriptionInput = row.querySelector('.description');
-        const unitPriceInput = row.querySelector('.unit-price');
-
-        const quantity = quantityInput.value;
-        const description = descriptionInput.value.trim();
-        const unitPrice = unitPriceInput.value;
-
-        if (!quantity || quantity < 1) {
-          errorMessages.push(`Fila ${index + 1}: La cantidad debe ser mayor a 0`);
-          quantityInput.classList.add('error-input');
-          isValid = false;
-        }
-
-        if (!description) {
-          errorMessages.push(`Fila ${index + 1}: La descripción es requerida`);
-          descriptionInput.classList.add('error-input');
-          isValid = false;
-        }
-
-        if (!unitPrice || unitPrice <= 0) {
-          errorMessages.push(`Fila ${index + 1}: El precio unitario debe ser mayor a 0`);
-          unitPriceInput.classList.add('error-input');
-          isValid = false;
-        }
-      });
-
-      if (!isValid) {
-        showErrorPopup(errorMessages);
-      }
-
-      return isValid;
-    }
-
-    function showSuccessPopup(invoiceUrl) {
-      const popup = document.getElementById('success-popup');
-      const viewInvoiceBtn = document.getElementById('view-invoice-btn');
-      
-      viewInvoiceBtn.onclick = () => {
-        window.open(invoiceUrl, '_blank');
-        popup.style.display = 'none';
-      };
-      
-      popup.style.display = 'block';
-    }
-
-    // Submit form
-    document.querySelector(".generate-button").addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!validateForm()) {
-        return;
-      }
-
-      const form = document.getElementById("invoice-form");
-      const formData = new FormData();
-
-      // TODO: borrar el form data, hacerlo directo con un objecto
-      formData.append('client', form.querySelector('#client-name').value);
-      formData.append('date', form.querySelector('#date').value);
-      formData.append('make', form.querySelector('#vehicle-make').value);
-      formData.append('model', form.querySelector('#vehicle-model').value);
-      formData.append('plate', form.querySelector('#vehicle-plate').value);
-      formData.append('mileage', form.querySelector('#mileage').value);
-      formData.append('iva', form.querySelector('#iva-toggle-btn').checked ? 'on' : 'off');
-
-      // Convertir FormData a objeto para poder enviar JSON
-      const data = {};
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
-
-      // Agregar items
-      const items = [];
-      itemsTable.querySelectorAll('tr').forEach(row => {
-        const item = {
-          quantity: row.querySelector('.quantity').value,
-          description: row.querySelector('.description').value,
-          unitPrice: row.querySelector('.unit-price').value
-        };
-        items.push(item);
-      });
-      
-      data.items = items;
-
-      // Enviar como JSON
-      fetch('/generate-invoice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => {
-        const redirectUrl = response.headers.get('X-Redirect-Url');
-        response.json().then(data => {
-          console.log('Respuesta:', data);
-          showSuccessPopup(redirectUrl);
+        errors.forEach((error) => {
+          const li = document.createElement("li");
+          li.textContent = error;
+          errorList.appendChild(li);
         });
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showErrorPopup(['Ocurrió un error al generar la factura. Por favor, intente nuevamente.']);
-      });
-    });
 
-    // Agregar el cierre del popup de éxito
-    document.querySelectorAll('.popup-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target.classList.contains('popup-overlay')) {
-          overlay.style.display = 'none';
+        popup.style.display = "block";
+      }
+
+      // Cerrar popup
+      document.querySelector(".close-popup").addEventListener("click", () => {
+        document.getElementById("error-popup").style.display = "none";
+      });
+
+      // Cerrar popup al hacer clic fuera
+      document
+        .querySelector(".popup-overlay")
+        .addEventListener("click", (e) => {
+          if (e.target.classList.contains("popup-overlay")) {
+            document.getElementById("error-popup").style.display = "none";
+          }
+        });
+
+      function clearErrorStyles() {
+        document.querySelectorAll(".error-input").forEach((input) => {
+          input.classList.remove("error-input");
+        });
+      }
+
+      function validateForm() {
+        let isValid = true;
+        const errorMessages = [];
+        clearErrorStyles();
+
+        // Validar campos básicos
+        const fields = [
+          {
+            id: "client-name",
+            name: "El nombre del cliente",
+            validate: (value) => value.trim() !== "",
+          },
+          { id: "date", name: "La fecha", validate: (value) => value !== "" },
+          {
+            id: "vehicle-make",
+            name: "La marca del vehículo",
+            validate: (value) => value.trim() !== "",
+          },
+          {
+            id: "vehicle-model",
+            name: "El modelo del vehículo",
+            validate: (value) => value.trim() !== "",
+          },
+          {
+            id: "vehicle-plate",
+            name: "La matrícula",
+            validate: (value) => value.trim() !== "",
+          },
+          {
+            id: "mileage",
+            name: "El kilometraje",
+            validate: (value) => value > 0,
+          },
+        ];
+
+        fields.forEach((field) => {
+          const element = document.getElementById(field.id);
+          const value = element.value;
+
+          if (!field.validate(value)) {
+            errorMessages.push(`${field.name} es requerido`);
+            element.classList.add("error-input");
+            isValid = false;
+          }
+        });
+
+        // Validar items de la tabla
+        const rows = itemsTable.querySelectorAll("tr");
+        if (rows.length === 0) {
+          errorMessages.push("Debe agregar al menos un ítem");
+          isValid = false;
         }
-      });
-    });
 
-    document.querySelectorAll('.close-popup').forEach(button => {
-      button.addEventListener('click', () => {
-        button.closest('.popup-overlay').style.display = 'none';
-      });
-    });
+        rows.forEach((row, index) => {
+          const quantityInput = row.querySelector(".quantity");
+          const descriptionInput = row.querySelector(".description");
+          const unitPriceInput = row.querySelector(".unit-price");
 
-    document.getElementById('client-name').addEventListener('keypress',(e)=>{
-      const name = document.getElementById('client-name').value;
-      
-    })
+          const quantity = quantityInput.value;
+          const description = descriptionInput.value.trim();
+          const unitPrice = unitPriceInput.value;
 
-    // function addTooltips() {
-    //   const tooltips = {
-    //     'client-name': 'Ingrese el nombre completo del cliente',
-    //     'vehicle-plate': 'Formato: ABC-123 o similar',
-    //     'mileage': 'Ingrese el kilometraje actual del vehículo',
-    //     'iva-toggle-btn': 'Active para incluir IVA en la factura'
-    //   };
+          if (!quantity || quantity < 1) {
+            errorMessages.push(
+              `Fila ${index + 1}: La cantidad debe ser mayor a 0`,
+            );
+            quantityInput.classList.add("error-input");
+            isValid = false;
+          }
 
-    //   for (const [id, text] of Object.entries(tooltips)) {
-    //     const element = document.getElementById(id);
-    //     if (element) {
-    //       const tooltip = document.createElement('span');
-    //       tooltip.className = 'tooltip';
-    //       tooltip.innerHTML = '?<span class="tooltip-text">' + text + '</span>';
-    //       element.parentNode.insertBefore(tooltip, element.nextSibling);
-    //     }
-    //   }
-    // }
+          if (!description) {
+            errorMessages.push(
+              `Fila ${index + 1}: La descripción es requerida`,
+            );
+            descriptionInput.classList.add("error-input");
+            isValid = false;
+          }
 
-    
-    // Autocompletar campos comunes
-    function setupAutoComplete() {
-      const makes = ['Toyota', 'Honda', 'Nissan', 'Chevrolet', 'Ford', 'Hyundai', 'Kia'];
-      const makeInput = document.getElementById('vehicle-make');
-      
-      const datalist = document.createElement('datalist');
-      datalist.id = 'makes-list';
-      makes.forEach(make => {
-        const option = document.createElement('option');
-        option.value = make;
-        datalist.appendChild(option);
-      });
-      
-      document.body.appendChild(datalist);
-      makeInput.setAttribute('list', 'makes-list');
-    }
+          if (!unitPrice || unitPrice <= 0) {
+            errorMessages.push(
+              `Fila ${index + 1}: El precio unitario debe ser mayor a 0`,
+            );
+            unitPriceInput.classList.add("error-input");
+            isValid = false;
+          }
+        });
 
-    // Atajos de teclado
-    function setupKeyboardShortcuts() {
-      document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'Enter') {
-          // Ctrl + Enter para generar factura
-          document.querySelector('.generate-button').click();
-        } else if (e.ctrlKey && e.key === 'i') {
-          // Ctrl + i para agregar nueva fila
+        if (!isValid) {
+          showErrorPopup(errorMessages);
+        }
+
+        return isValid;
+      }
+
+      function showSuccessPopup(invoiceUrl) {
+        const popup = document.getElementById("success-popup");
+        const viewInvoiceBtn = document.getElementById("view-invoice-btn");
+
+        viewInvoiceBtn.onclick = () => {
+          window.open(invoiceUrl, "_blank");
+          popup.style.display = "none";
+        };
+
+        popup.style.display = "block";
+      }
+
+      // Submit form
+      document
+        .querySelector(".generate-button")
+        .addEventListener("click", (e) => {
           e.preventDefault();
-          addRow();
-        }
-      });
-    }
+          if (!validateForm()) {
+            return;
+          }
 
-    // Inicializar mejoras
-    document.addEventListener('DOMContentLoaded', () => {
-      // addTooltips();
-      setupAutoComplete();
-      setupKeyboardShortcuts();
-      
-      // Establecer fecha actual por defecto
-      document.getElementById('date').valueAsDate = new Date();
-    });
-  </script>
-</body>
+          const form = document.getElementById("invoice-form");
+          const formData = new FormData();
+
+          // TODO: borrar el form data, hacerlo directo con un objecto
+          formData.append("client", form.querySelector("#client-name").value);
+          formData.append("date", form.querySelector("#date").value);
+          formData.append("make", form.querySelector("#vehicle-make").value);
+          formData.append("model", form.querySelector("#vehicle-model").value);
+          formData.append("plate", form.querySelector("#vehicle-plate").value);
+          formData.append("mileage", form.querySelector("#mileage").value);
+          formData.append(
+            "iva",
+            form.querySelector("#iva-toggle-btn").checked ? "on" : "off",
+          );
+
+          // Convertir FormData a objeto para poder enviar JSON
+          const data = {};
+          formData.forEach((value, key) => {
+            data[key] = value;
+          });
+
+          // Agregar items
+          const items = [];
+          itemsTable.querySelectorAll("tr").forEach((row) => {
+            const item = {
+              quantity: row.querySelector(".quantity").value,
+              description: row.querySelector(".description").value,
+              unitPrice: row.querySelector(".unit-price").value,
+            };
+            items.push(item);
+          });
+
+          data.items = items;
+
+          // Enviar como JSON
+          fetch("/generate-invoice", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              const redirectUrl = response.headers.get("X-Redirect-Url");
+              response.json().then((data) => {
+                console.log("Respuesta:", data);
+                showSuccessPopup(redirectUrl);
+              });
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showErrorPopup([
+                "Ocurrió un error al generar la factura. Por favor, intente nuevamente.",
+              ]);
+            });
+        });
+
+      // Agregar el cierre del popup de éxito
+      document.querySelectorAll(".popup-overlay").forEach((overlay) => {
+        overlay.addEventListener("click", (e) => {
+          if (e.target.classList.contains("popup-overlay")) {
+            overlay.style.display = "none";
+          }
+        });
+      });
+
+      document.querySelectorAll(".close-popup").forEach((button) => {
+        button.addEventListener("click", () => {
+          button.closest(".popup-overlay").style.display = "none";
+        });
+      });
+
+      document
+        .getElementById("client-name")
+        .addEventListener("keypress", (e) => {
+          const name = document.getElementById("client-name").value;
+        });
+
+      // function addTooltips() {
+      //   const tooltips = {
+      //     'client-name': 'Ingrese el nombre completo del cliente',
+      //     'vehicle-plate': 'Formato: ABC-123 o similar',
+      //     'mileage': 'Ingrese el kilometraje actual del vehículo',
+      //     'iva-toggle-btn': 'Active para incluir IVA en la factura'
+      //   };
+
+      //   for (const [id, text] of Object.entries(tooltips)) {
+      //     const element = document.getElementById(id);
+      //     if (element) {
+      //       const tooltip = document.createElement('span');
+      //       tooltip.className = 'tooltip';
+      //       tooltip.innerHTML = '?<span class="tooltip-text">' + text + '</span>';
+      //       element.parentNode.insertBefore(tooltip, element.nextSibling);
+      //     }
+      //   }
+      // }
+
+      // Autocompletar campos comunes
+      function setupAutoComplete() {
+        const makes = [
+          "Toyota",
+          "Honda",
+          "Nissan",
+          "Chevrolet",
+          "Ford",
+          "Hyundai",
+          "Kia",
+        ];
+        const makeInput = document.getElementById("vehicle-make");
+
+        const datalist = document.createElement("datalist");
+        datalist.id = "makes-list";
+        makes.forEach((make) => {
+          const option = document.createElement("option");
+          option.value = make;
+          datalist.appendChild(option);
+        });
+
+        document.body.appendChild(datalist);
+        makeInput.setAttribute("list", "makes-list");
+      }
+
+      // Atajos de teclado
+      function setupKeyboardShortcuts() {
+        document.addEventListener("keydown", (e) => {
+          if (e.ctrlKey && e.key === "Enter") {
+            // Ctrl + Enter para generar factura
+            document.querySelector(".generate-button").click();
+          } else if (e.ctrlKey && e.key === "i") {
+            // Ctrl + i para agregar nueva fila
+            e.preventDefault();
+            addRow();
+          }
+        });
+      }
+
+      // Inicializar mejoras
+      document.addEventListener("DOMContentLoaded", () => {
+        // addTooltips();
+        setupAutoComplete();
+        setupKeyboardShortcuts();
+
+        // Establecer fecha actual por defecto
+        document.getElementById("date").valueAsDate = new Date();
+      });
+    </script>
+  </body>
 </html>
