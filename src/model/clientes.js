@@ -1,10 +1,11 @@
 const path = require('path');
-const db = require(path.join(__dirname,'../db/connect_db.js'))
+const {connectDB} = require(path.join(__dirname,'../db/connect_db.js'));
 
 
 async function agregarCliente(nombreCliente) {
   try {
-    const resultado = await db.query('INSERT INTO clientes(nombre) SET ?', [nombreCliente]);
+    const db = await connectDB()
+    const resultado = await db.run('INSERT INTO clientes(nombre) VALUES (?)', [nombreCliente]);
     return resultado;
   } catch (error) {
     throw error;
@@ -13,7 +14,8 @@ async function agregarCliente(nombreCliente) {
 
 async function obtenerClientes() {
   try {
-    const resultado = await db.query('SELECT * FROM clientes');
+    const db = await connectDB()
+    const resultado = await db.all('SELECT * FROM clientes');
     return resultado;
   } catch (error) {
     throw error;
@@ -22,16 +24,19 @@ async function obtenerClientes() {
 
 async function obtenerCliente(id) {
   try {
-    const resultado = await db.query('SELECT * FROM clientes WHERE id = ?', [id]);
-    return resultado[0];
+    const db = await connectDB()
+    const resultado = await db.all('SELECT * FROM clientes WHERE id = ?', [id]);
+    console.log(resultado)
+    return resultado;
   } catch (error) {
     throw error;
   }
 }
 
-async function actualizarCliente(id, cambios) {
+async function actualizarCliente(id, data) {
   try {
-    const resultado = await db.query('UPDATE clientes SET ? WHERE id = ?', [cambios, id]);
+    const db = await connectDB()
+    const resultado = await db.run('UPDATE clientes SET ? WHERE id = ?', [cambios, id]);
     return resultado;
   } catch (error) {
     throw error;
@@ -40,7 +45,8 @@ async function actualizarCliente(id, cambios) {
 
 async function eliminarCliente(id) {
   try {
-    const resultado = await db.query('DELETE FROM clientes WHERE id = ?', [id]);
+    const db = await connectDB()
+    const resultado = await db.run('DELETE FROM clientes WHERE id = ?', [id]);
     return resultado;
   } catch (error) {
     throw error;

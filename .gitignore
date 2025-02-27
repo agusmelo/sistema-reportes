@@ -1,3 +1,4 @@
 node_modules
-output/*
+src/output/*
 public/ultima_factura_generada/*
+src/db/database.db
