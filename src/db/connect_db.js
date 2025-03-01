@@ -35,19 +35,17 @@ async function loadTables() {
   const db = await connectDB();
   const tables = {
     facturas: `CREATE TABLE IF NOT EXISTS facturas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        cliente_id INTEGER NOT NULL,
-        fecha DATE NOT NULL,
-        marca TEXT NOT NULL,
-        modelo TEXT NOT NULL,
-        matricula TEXT NOT NULL,
-        kilometraje INTEGER NOT NULL,
-        iva BOOLEAN NOT NULL,
-        subtotal REAL NOT NULL,
-        total REAL NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
-        );`,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER NOT NULL,
+    vehiculo_id INTEGER NOT NULL,
+    fecha DATE NOT NULL,
+    iva REAL NOT NULL,
+    subtotal REAL NOT NULL,
+    total REAL NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id) ON DELETE CASCADE
+);`,
     items: `
         CREATE TABLE IF NOT EXISTS items_factura (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,15 +53,23 @@ async function loadTables() {
         cantidad INTEGER NOT NULL,
         descripcion TEXT NOT NULL,
         precio_unitario REAL NOT NULL,
-        total REAL NOT NULL,
         FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE CASCADE
-        );`,
+    );`,
     clientes: `
         CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`,
+    vehiculos: `CREATE IF NOT EXISTS TABLE vehiculos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      cliente_id INTEGER NOT NULL,
+      marca TEXT NOT NULL,
+      modelo TEXT NOT NULL,
+      matricula TEXT NOT NULL,
+      kilometraje INTEGER NOT NULL,
+      FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+      );`,
   };
   for (const table in tables) {
     db.run(tables[table], [], (err) => {
