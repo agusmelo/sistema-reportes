@@ -3,50 +3,42 @@ const { connectDB } = require("../db/connect_db.js");
 
 async function agregarFactura(
   cliente_id,
+  vehiculo_id,
   fecha,
-  marca,
-  modelo,
-  matricula,
-  kilometraje,
-  items,
   tieneIva,
   subtotal,
   total
 ) {
-  /*
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cliente_id INTEGER NOT NULL,
-      fecha DATE NOT NULL,
-      marca TEXT NOT NULL,
-      modelo TEXT NOT NULL,
-      matricula TEXT NOT NULL,
-      kilometraje INTEGER NOT NULL,
-      iva BOOLEAN NOT NULL,
-      subtotal REAL NOT NULL,
-      total REAL NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
-  */
+  let db;
   try {
-    const db = connectDB();
-    const factura = {
-      cliente_id,
-      fecha,
-      marca,
-      modelo,
-      matricula,
-      kilometraje,
-      items,
-      iva: tieneIva,
-      subtotal,
-      total,
-    };
-    const resultado = await db.run(
-      "INSERT INTO facturas(cliente_id, fecha, marca, modelo, matricula, kilometraje, iva, subtotal, total) VALUES ?",
-      [factura]
+    db = connectDB();
+    
+  } catch (error) {
+    throw error;
+  }
+  
+  try {
+    const insertFactura = db.prepare(
+      "INSERT INTO facturas(cliente_id, vehiculo_id, fecha, iva, subtotal, total) VALUES ( ?, ?, ?, ?, ?, ?)"
     );
+
+    const insertItem = db.prepare(
+      "INSERT INTO items_factura(factura_id, cantidad, descripcion, precio_unitario) VALUES (?, ?, ?, ?)"
+    );
+
+    db.run("BEGIN TRANSACTION");
+    insertFactura.run(
+      cliente_id,
+      vehiculo_id,
+      fecha,
+      tieneIva,
+      subtotal,
+      total
+    );
+    const facturaId = db.
     return resultado;
   } catch (error) {
+    rollback
     throw error;
   }
 }
@@ -89,6 +81,23 @@ async function eliminarFactura(id) {
     const db = connectDB();
     const resultado = await db.run("DELETE FROM facturas WHERE id = ?", [id]);
     return resultado;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function agregarItemFactura(
+  factura_id,
+  cantidad,
+  descripcion,
+  precio_unitario
+) {
+  try {
+    const db = connectDB();
+    const resultado = await db.run(
+      "INSERT INTO items_factura(factura_id, cantidad, descripcion, precio_unitario) VALUES ?",
+      [factura_id, cantidad, descripcion, precio_unitario]
+    );
   } catch (error) {
     throw error;
   }

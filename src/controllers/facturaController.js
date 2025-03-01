@@ -17,18 +17,10 @@ exports.createFactura = async (req, res) => {
       total,
     } = req.body;
 
-    FacturaModel.agregarFactura(
-      cliente_id,
-      fecha,
-      marca,
-      modelo,
-      matricula,
-      kilometraje,
-      items,
-      tieneIva,
-      subtotal,
-      total
-    );
+    FacturaModel.agregarFactura(cliente_id, fecha, tieneIva, subtotal, total);
+    for (const item of items) {
+      await FacturaModel.agregarItemFactura(item);
+    }
     res.status(201).json(newFactura);
   } catch (error) {
     res.status(400).json({
