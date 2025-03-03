@@ -1,4 +1,4 @@
 node_modules
 src/output/*
 public/ultima_factura_generada/*
-src/db/database.db
+src/db/*.db
