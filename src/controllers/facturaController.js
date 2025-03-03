@@ -4,24 +4,22 @@ const FacturaModel = require("../model/facturas");
 exports.createFactura = async (req, res) => {
   try {
     // add validation for the request body
-    const {
+    const { cliente_id, vehiculo_id, fecha, items, tieneIva, subtotal, total } =
+      req.body;
+
+    const idFactura = await FacturaModel.agregarFactura(
       cliente_id,
+      vehiculo_id,
       fecha,
-      marca,
-      modelo,
-      matricula,
-      kilometraje,
       items,
       tieneIva,
       subtotal,
-      total,
-    } = req.body;
-
-    FacturaModel.agregarFactura(cliente_id, fecha, tieneIva, subtotal, total);
-    for (const item of items) {
-      await FacturaModel.agregarItemFactura(item);
-    }
-    res.status(201).json(newFactura);
+      total
+    );
+    res.status(201).json({
+      message: `Factura ${idFactura} creada correctamente`,
+      error: error.message,
+    });
   } catch (error) {
     res.status(400).json({
       message: "Error al crear la factura",
@@ -33,7 +31,7 @@ exports.createFactura = async (req, res) => {
 // Get all facturas
 exports.getFacturas = async (req, res) => {
   try {
-    const facturas = await FacturaModel.getFacturas();
+    const facturas = await FacturaModel.obtenerFacturas();
     res.status(200).json(facturas);
   } catch (error) {
     res.status(500).json({
