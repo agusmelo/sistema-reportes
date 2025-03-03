@@ -1,4 +1,5 @@
 node_modules
-src/output/*
 public/ultima_factura_generada/*
 src/db/*.db
+src/db/*.sqlite
+src/output/*.pdf
