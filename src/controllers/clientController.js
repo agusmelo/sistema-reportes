@@ -10,6 +10,7 @@ exports.createClient = async (req, res) => {
       nombre: nombre,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Error al crear el usuario",
       error: error.message,
@@ -27,7 +28,7 @@ exports.getAllClients = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al crear el usuario",
+      message: "Error al obtener los usuarios",
       error: error.message,
     });
   }
@@ -37,39 +38,61 @@ exports.getClientById = async (req, res) => {
   const clientId = req.params.id;
   try {
     const dataCliente = await ClientModel.obtenerCliente(clientId);
-    if (dataCliente.length === 1) {
-      res.status(200).json({
-        message: `Cliente ${clientId}`,
-        data: dataCliente,
-      });
-    } else if (dataCliente.length === 0) {
+    if (!dataCliente) {
       res.status(404).json({
         message: `No existe cliente con id = ${clientId}`,
       });
     } else {
-      res.status(500).json({
-        message: `DEV ERROR: Mas de un cliente con id: ${clientId}, algo esta mal.`,
+      res.status(200).json({
+        message: `Cliente ${clientId}`,
+        data: dataCliente,
       });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error obteniendo cliente",
+      message: "Error al obtener el usuario",
+      error: error.message,
     });
   }
 };
 
-// TODO: revisar los parametros
-exports.updateClient = async (req, res) => {
-  const { id: userId, data } = req.params;
+exports.getClientByName = async (req, res) => {
+  const clientName = req.params.name;
   try {
-    const data = await ClientModel.actualizarCliente(clientId, data);
+    const dataCliente = await ClientModel.obtenerClientePorNombre(clientName);
+    if (!dataCliente) {
+      res.status(404).json({
+        message: `No existe cliente con nombre = ${clientName}`,
+      });
+    } else {
+      res.status(200).json({
+        message: `Cliente ${clientName}`,
+        data: dataCliente,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error al obtener el usuario",
+      error: error.message,
+    });
+  }
+};
+
+// TODO: rehacer
+exports.updateClient = async (req, res) => {
+  const { id: clientId, data } = req.params;
+  try {
+    const result = await ClientModel.actualizarCliente(clientId, data);
     res.status(200).json({
       message: `Cliente ${clientId} actualizado correctamente`,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: "Error actualizando cliente",
+      message: "Error al actualizar el usuario",
+      error: error.message,
     });
   }
 };
@@ -78,13 +101,15 @@ exports.deleteClient = async (req, res) => {
   const clientId = req.params.id;
   try {
     await ClientModel.eliminarCliente(clientId);
+    // TODO: revisar el mensaje cuando no existe el cliente
     res.status(200).json({
       message: `Cliente ${clientId} eliminado correctamente`,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: `Cliente ${clientId} no se pudo eliminar`,
+      message: "Error al eliminar el usuario",
+      error: error.message,
     });
   }
 };
