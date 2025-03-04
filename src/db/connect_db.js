@@ -206,4 +206,13 @@ async function loadTestData() {
     }
   });
 }
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
+function shutdown() {
+  console.log("Closing database connection...");
+  closeDB();
+  process.exit(0);
+}
 module.exports = { connectDB, closeDB };
