@@ -61,7 +61,7 @@ async function loadTables() {
     clientes: `
         CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL UNIQUE,
+        nombre TEXT NOT NULL COLLATE NOCASE UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`,
     vehiculos: `CREATE TABLE IF NOT EXISTS vehiculos  (
@@ -69,7 +69,7 @@ async function loadTables() {
       cliente_id INTEGER NOT NULL,
       marca TEXT NOT NULL,
       modelo TEXT NOT NULL,
-      matricula TEXT NOT NULL UNIQUE,
+      matricula TEXT NOT NULL COLLATE NOCASE UNIQUE,
       kilometraje INTEGER NOT NULL,
       FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
       );`,

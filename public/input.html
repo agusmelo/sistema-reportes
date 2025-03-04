@@ -594,8 +594,11 @@
         </button>
       </div>
     </div>
-
-    <script>
+    <searchable-select></searchable-select>
+    <script src="./js/axios/axios.min.js"></script>
+    <script type="module" src="./js/api.js"></script>
+    <script type="module">
+      import api from "./js/api.js";
       const itemsTable = document
         .getElementById("items-table")
         .querySelector("tbody");
@@ -608,7 +611,9 @@
       // Factura con o sin IVA
       let esConIVA = true;
 
-      fetch();
+      api.get("clientes/all").then((response) => {
+        console.log(response.data);
+      });
 
       document.querySelector(".add-row").addEventListener("click", addRow);
       itemsTable.addEventListener("input", (e) => {
