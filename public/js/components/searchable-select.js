@@ -1,4 +1,7 @@
+import api from "../api.js";
+
 class SearchableSelect extends HTMLElement {
+  static observedAttributes = ["placeholder", "entidad"];
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -10,7 +13,7 @@ class SearchableSelect extends HTMLElement {
         <style>
           .combo-box {
             position: relative;
-            width: 200px;
+            width: 100%;
           }
   
           input {
@@ -50,8 +53,9 @@ class SearchableSelect extends HTMLElement {
             background: #f0f0f0;
           }
         </style>
+        
         <div class="combo-box">
-          <input type="text" placeholder="Search..." />
+          <input type="text" />
           <ul></ul>
         </div>
       `;
@@ -108,6 +112,30 @@ class SearchableSelect extends HTMLElement {
   handleClickOutside(e) {
     if (!this.contains(e.target)) {
       this.optionsList.classList.remove("visible");
+    }
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "placeholder") {
+      this.input.placeholder = newValue;
+    } else if (name === "entidad") {
+      this.fetchOptions(newValue);
+    }
+  }
+
+  async fetchOptions(entidad) {
+    if (!entidad || !entidad.trim()) return;
+
+    if (entidad === "clientes") {
+      entidad = "clientes/all";
+    } else if (entidad === "marcas") {
+      entidad = "vehiculos/";
+    }
+    try {
+      const response = await api.get(`/${entidad}`);
+      this.options = response.data;
+    } catch (error) {
+      console.error("Error fetching options:", error);
     }
   }
 }
