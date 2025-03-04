@@ -611,8 +611,10 @@
       // Factura con o sin IVA
       let esConIVA = true;
 
+      const combo = document.querySelector('searchable-select');
+      
       api.get("clientes/all").then((response) => {
-        console.log(response.data);
+        combo.options =response.data.clientes;
       });
 
       document.querySelector(".add-row").addEventListener("click", addRow);
