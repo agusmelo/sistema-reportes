@@ -41,6 +41,16 @@ async function obtenerVehiculo(id) {
   console.log(resultado);
   return resultado[0];
 }
+
+async function obtenerVehiculoPorCliente(cliente_id) {
+  const db = await connectDB();
+  const resultado = await db.all(
+    "SELECT * FROM vehiculos WHERE cliente_id = ?",
+    [cliente_id]
+  );
+  return resultado;
+}
+
 async function actualizarVehiculo(id, cambios) {
   //   const db = await connectDB();
   //   const resultado = await db.run("UPDATE vehiculos VALUES ? WHERE id = ?", [
@@ -64,4 +74,5 @@ module.exports = {
   obtenerVehiculo,
   actualizarVehiculo,
   eliminarVehiculo,
+  obtenerVehiculoPorCliente,
 };

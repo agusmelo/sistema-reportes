@@ -1,222 +1,30 @@
 {
-  "client": "TEST",
-  "date": "1222-02-12",
+  "client": "Agustin",
+  "date": "2025-02-23",
   "make": "Marca",
-  "model": "Modelo",
-  "plate": "AAA 1234",
-  "mileage": "99999",
+  "model": "Modelo Modelin",
+  "plate": "AAA 1231",
+  "mileage": "9222",
   "items": [
     {
       "quantity": 1,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 100
+      "description": "asd",
+      "unitPrice": 12,
+      "lineTotal": 12
     },
     {
-      "quantity": 2,
-      "description": "Descripcion corta con 5 palabras",
-      "unitPrice": 100,
-      "lineTotal": 200
+      "quantity": 1,
+      "description": "12",
+      "unitPrice": 12,
+      "lineTotal": 12
     },
     {
-      "quantity": 3,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 300
-    },
-    {
-      "quantity": 4,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 400
-    },
-    {
-      "quantity": 5,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 500
-    },
-    {
-      "quantity": 6,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 600
-    },
-    {
-      "quantity": 7,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 700
-    },
-    {
-      "quantity": 8,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 800
-    },
-    {
-      "quantity": 9,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 900
-    },
-    {
-      "quantity": 10,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1000
-    },
-    {
-      "quantity": 11,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1100
-    },
-    {
-      "quantity": 12,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1200
-    },
-    {
-      "quantity": 13,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1300
-    },
-    {
-      "quantity": 14,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1400
-    },
-    {
-      "quantity": 15,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1500
-    },
-    {
-      "quantity": 16,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1600
-    },
-    {
-      "quantity": 17,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1700
-    },
-    {
-      "quantity": 18,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1800
-    },
-    {
-      "quantity": 19,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 1900
-    },
-    {
-      "quantity": 20,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2000
-    },
-    {
-      "quantity": 21,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2100
-    },
-    {
-      "quantity": 22,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2200
-    },
-    {
-      "quantity": 23,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2300
-    },
-    {
-      "quantity": 24,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2400
-    },
-    {
-      "quantity": 25,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2500
-    },
-    {
-      "quantity": 26,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2600
-    },
-    {
-      "quantity": 27,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2700
-    },
-    {
-      "quantity": 28,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2800
-    },
-    {
-      "quantity": 29,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 2900
-    },
-    {
-      "quantity": 30,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3000
-    },
-    {
-      "quantity": 31,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3100
-    },
-    {
-      "quantity": 32,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3200
-    },
-    {
-      "quantity": 33,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3300
-    },
-    {
-      "quantity": 34,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3400
-    },
-    {
-      "quantity": 35,
-      "description": "Lorem ipsum Lorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsum",
-      "unitPrice": 100,
-      "lineTotal": 3500
+      "quantity": 1,
+      "description": "123",
+      "unitPrice": 123,
+      "lineTotal": 123
     }
   ],
-  "total": 63000,
-  "subtotal": 63000
+  "total": 179.34,
+  "subtotal": 147
 }

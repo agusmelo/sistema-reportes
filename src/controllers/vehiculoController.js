@@ -30,6 +30,22 @@ exports.getVehiculoById = async (req, res) => {
   }
 };
 
+exports.getVehiculoByClienteId = async (req, res) => {
+  try {
+    const { cliente_id } = req.params;
+    const vehiculo = await VehiculoModel.obtenerVehiculoPorCliente(cliente_id);
+    if (!vehiculo) {
+      return res.status(404).json({ message: "Vehículo no encontrado" });
+    }
+    res.status(200).json(vehiculo);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener el vehículo",
+      error: error.message,
+    });
+  }
+};
+
 // Crear un nuevo vehículo
 exports.createVehiculo = async (req, res) => {
   const { cliente_id, marca, modelo, matricula, kilometraje } = req.body;
