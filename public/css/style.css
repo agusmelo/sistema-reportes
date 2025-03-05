@@ -31,24 +31,6 @@ body {
     margin-bottom: 10px;
   }
 
-  input[type="text"],
-  input[type="date"],
-  input[type="number"],
-  textarea {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    box-sizing: border-box;
-  }
-
-  input[type="text"]:focus,
-  input[type="number"]:focus,
-  input[type="date"]:focus {
-    border-color: #4caf50;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
-    outline: none;
-  }
 
   .form-group input:not([type="checkbox"]) {
     width: 100%;
@@ -66,7 +48,6 @@ body {
   }
 
   .item-input {
-    /* width: 90%; */
     padding: 5px;
     border: 1px solid #ddd;
     border-radius: 5px;

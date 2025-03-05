@@ -5,13 +5,4 @@ const api = axios.create({
   },
 });
 
-// Example GET request
-api
-  .get("/facturas/all")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error("There was an error!", error);
-  });
 export default api;

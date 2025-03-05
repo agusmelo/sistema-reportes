@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generador de facturas</title>
-    <link rel="stylesheet" href="./css/style.css" /></link>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/input.css" />
   </head>
   <body>
     <div class="container">
@@ -23,13 +24,6 @@
           >
           <searchable-select id="client-name" placeholder="Ingrese nombre del cliente"></searchable-select>
           <br />
-          <!-- <input
-            type="text"
-            id="client-name"
-            name="client"
-            placeholder="Ingrese nombre del cliente"
-            required
-          /> -->
         </div>
 
         <div class="form-group">
@@ -53,13 +47,6 @@
           id="vehicle-make"
           placeholder="ej., Renault">
           ></searchable-select>
-          <!-- <input
-            type="text"
-            id="vehicle-make"
-            name="make"
-            placeholder="ej., Renault"
-            required
-          /> -->
           <br />
         </div>
 
@@ -70,13 +57,8 @@
               >Ingrese el modelo del vehículo</span
             ></span
           >
-          <input
-            type="text"
-            id="vehicle-model"
-            name="model"
-            placeholder="ej., Oroch"
-            required
-          /><br />
+          <searchable-select id="vehicle-model" placeholder="ej., Oroch"></searchable-select>
+          <br />
         </div>
 
         <div class="form-group">
@@ -84,13 +66,15 @@
           <span class="tooltip"
             >?<span class="tooltip-text">Formato: ABC-123 o similar</span></span
           >
-          <input
+          <searchable-select id="vehicle-plate" placeholder="ej., MAI6778"></searchable-select>
+          <!-- <input
             type="text"
             id="vehicle-plate"
             name="plate"
             placeholder="ej., MAI6778"
             required
-          /><br />
+          />-->
+          <br /> 
         </div>
 
         <div class="form-group">
@@ -186,399 +170,10 @@
         </button>
       </div>
     </div>
-    <script src="./js/components/searchable-select.js" defer></script>
+    <script sr></script>
     <script src="./js/axios/axios.min.js"></script>
-    <script type="module" src="./js/api.js"></script>
-
-    <script type="module">
-      import api from "./js/api.js";
-      const itemsTable = document
-        .getElementById("items-table")
-        .querySelector("tbody");
-      const ivaEl = document.getElementById("tax-iva");
-      const subtotalEl = document.getElementById("sub-total");
-      const grandTotalEl = document.getElementById("total-plus-tax");
-      const ivaToggleBtn = document.getElementById("iva-toggle-btn");
-      //TODO: pensar una mejor manera de trackear el item index
-      let itemIndex = 1;
-
-      // Factura con o sin IVA
-      let esConIVA = true;
-
-      const clientesSelect = document.querySelector('searchable-select');
-      
-      api.get("clientes/all").then((response) => {
-        console.log(response.data.clientes);
-        console.log(response.data.clientes.filter(cliente => cliente.nombre))
-        clientesSelect.options = response.data.clientes.map(cliente => cliente.nombre)
-
-      });
-
-      document.querySelector(".add-row").addEventListener("click", addRow);
-      itemsTable.addEventListener("input", (e) => {
-        if (
-          e.target.classList.contains("quantity") ||
-          e.target.classList.contains("unit-price")
-        ) {
-          const row = e.target.closest("tr");
-          const quantity =
-            parseFloat(row.querySelector(".quantity").value) || 0;
-          const unitPrice =
-            parseFloat(row.querySelector(".unit-price").value) || 0;
-          const lineTotal = (quantity * unitPrice).toFixed(2);
-          row.querySelector(".line-total").textContent = `$${lineTotal}`;
-          updateGrandTotal();
-        }
-      });
-
-      itemsTable.addEventListener("click", (e) => {
-        if (e.target.classList.contains("delete-row")) {
-          e.target.closest("tr").remove();
-          updateGrandTotal();
-        }
-      });
-
-      ivaToggleBtn.addEventListener("click", (e) => {
-        // e.preventDefault()
-        esConIVA = !esConIVA;
-        updateGrandTotal();
-      });
-
-      function updateGrandTotal() {
-        let subTotal = 0;
-        let ivaPer = 0.22;
-        itemsTable.querySelectorAll(".line-total").forEach((lineTotalEl) => {
-          const lineTotal =
-            parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
-          subTotal += lineTotal;
-        });
-        subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
-        if (!esConIVA) {
-          ivaPer = 0;
-        }
-        ivaEl.textContent = `$${(subTotal * ivaPer).toFixed(2)}`;
-        grandTotalEl.textContent = `$${(subTotal + subTotal * ivaPer).toFixed(2)}`;
-      }
-
-      //TODO: usar el parametro data para cargar tests
-      function addRow(data) {
-        const row = document.createElement("tr");
-        // <td><input name="items[${itemIndex}][description]" type="text" class="description" placeholder="Ingrese descripción" required></td>
-        row.innerHTML = `
-        <td><input name="items[${itemIndex}][quantity]" type="number" class="quantity item-input" min="1" value="1" required></td>
-        <td><textarea name="items[${itemIndex}][description]" type="text" class="description item-input" placeholder="Ingrese descripción" required></textarea></td>
-        <td><input name="items[${itemIndex}][unitPrice]" type="number" class="unit-price item-input" min="0" step="0.01" placeholder="0.00" required></td>
-        <td class="line-total">$0.00</td>
-        <td><button type="button" class="delete-row">Eliminar</button></td>
-      `;
-        itemsTable.appendChild(row);
-        itemIndex++;
-      }
-      //DEBUG
-      document.getElementById("test-btn").addEventListener("click", (e) => {
-        document.getElementById("client-name").value = "Agustin";
-        document.getElementById("date").value = "2025-02-23";
-        document.getElementById("vehicle-make").value = "Marca";
-        document.getElementById("vehicle-model").value = "Modelo";
-        document.getElementById("vehicle-plate").value = "AAA 1234";
-        document.getElementById("mileage").value = "99999";
-        addRow();
-      });
-
-      function showErrorPopup(errors) {
-        const popup = document.getElementById("error-popup");
-        const errorList = document.getElementById("error-list");
-        errorList.innerHTML = "";
-
-        errors.forEach((error) => {
-          const li = document.createElement("li");
-          li.textContent = error;
-          errorList.appendChild(li);
-        });
-
-        popup.style.display = "block";
-      }
-
-      // Cerrar popup
-      document.querySelector(".close-popup").addEventListener("click", () => {
-        document.getElementById("error-popup").style.display = "none";
-      });
-
-      // Cerrar popup al hacer clic fuera
-      document
-        .querySelector(".popup-overlay")
-        .addEventListener("click", (e) => {
-          if (e.target.classList.contains("popup-overlay")) {
-            document.getElementById("error-popup").style.display = "none";
-          }
-        });
-
-      function clearErrorStyles() {
-        document.querySelectorAll(".error-input").forEach((input) => {
-          input.classList.remove("error-input");
-        });
-      }
-
-      function validateForm() {
-        let isValid = true;
-        const errorMessages = [];
-        clearErrorStyles();
-
-        // Validar campos básicos
-        const fields = [
-          {
-            id: "client-name",
-            name: "El nombre del cliente",
-            validate: (value) => value.trim() !== "",
-          },
-          { id: "date", name: "La fecha", validate: (value) => value !== "" },
-          {
-            id: "vehicle-make",
-            name: "La marca del vehículo",
-            validate: (value) => value.trim() !== "",
-          },
-          {
-            id: "vehicle-model",
-            name: "El modelo del vehículo",
-            validate: (value) => value.trim() !== "",
-          },
-          {
-            id: "vehicle-plate",
-            name: "La matrícula",
-            validate: (value) => value.trim() !== "",
-          },
-          {
-            id: "mileage",
-            name: "El kilometraje",
-            validate: (value) => value > 0,
-          },
-        ];
-
-        fields.forEach((field) => {
-          const element = document.getElementById(field.id);
-          const value = element.value;
-
-          if (!field.validate(value)) {
-            errorMessages.push(`${field.name} es requerido`);
-            element.classList.add("error-input");
-            isValid = false;
-          }
-        });
-
-        // Validar items de la tabla
-        const rows = itemsTable.querySelectorAll("tr");
-        if (rows.length === 0) {
-          errorMessages.push("Debe agregar al menos un ítem");
-          isValid = false;
-        }
-
-        rows.forEach((row, index) => {
-          const quantityInput = row.querySelector(".quantity");
-          const descriptionInput = row.querySelector(".description");
-          const unitPriceInput = row.querySelector(".unit-price");
-
-          const quantity = quantityInput.value;
-          const description = descriptionInput.value.trim();
-          const unitPrice = unitPriceInput.value;
-
-          if (!quantity || quantity < 1) {
-            errorMessages.push(
-              `Fila ${index + 1}: La cantidad debe ser mayor a 0`,
-            );
-            quantityInput.classList.add("error-input");
-            isValid = false;
-          }
-
-          if (!description) {
-            errorMessages.push(
-              `Fila ${index + 1}: La descripción es requerida`,
-            );
-            descriptionInput.classList.add("error-input");
-            isValid = false;
-          }
-
-          if (!unitPrice || unitPrice <= 0) {
-            errorMessages.push(
-              `Fila ${index + 1}: El precio unitario debe ser mayor a 0`,
-            );
-            unitPriceInput.classList.add("error-input");
-            isValid = false;
-          }
-        });
-
-        if (!isValid) {
-          showErrorPopup(errorMessages);
-        }
-
-        return isValid;
-      }
-
-      function showSuccessPopup(invoiceUrl) {
-        const popup = document.getElementById("success-popup");
-        const viewInvoiceBtn = document.getElementById("view-invoice-btn");
-
-        viewInvoiceBtn.onclick = () => {
-          window.open(invoiceUrl, "_blank");
-          popup.style.display = "none";
-        };
-
-        popup.style.display = "block";
-      }
-
-      // Submit form
-      document
-        .querySelector(".generate-button")
-        .addEventListener("click", (e) => {
-          e.preventDefault();
-          if (!validateForm()) {
-            return;
-          }
-
-          const form = document.getElementById("invoice-form");
-          const formData = new FormData();
-
-          // TODO: borrar el form data, hacerlo directo con un objecto
-          formData.append("client", form.querySelector("#client-name").value);
-          formData.append("date", form.querySelector("#date").value);
-          formData.append("make", form.querySelector("#vehicle-make").value);
-          formData.append("model", form.querySelector("#vehicle-model").value);
-          formData.append("plate", form.querySelector("#vehicle-plate").value);
-          formData.append("mileage", form.querySelector("#mileage").value);
-          formData.append(
-            "iva",
-            form.querySelector("#iva-toggle-btn").checked ? "on" : "off",
-          );
-
-          // Convertir FormData a objeto para poder enviar JSON
-          const data = {};
-          formData.forEach((value, key) => {
-            data[key] = value;
-          });
-
-          // Agregar items
-          const items = [];
-          itemsTable.querySelectorAll("tr").forEach((row) => {
-            const item = {
-              quantity: row.querySelector(".quantity").value,
-              description: row.querySelector(".description").value,
-              unitPrice: row.querySelector(".unit-price").value,
-            };
-            items.push(item);
-          });
-
-          data.items = items;
-
-          // Enviar como JSON
-          fetch("/generate-invoice", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          })
-            .then((response) => {
-              const redirectUrl = response.headers.get("X-Redirect-Url");
-              response.json().then((data) => {
-                console.log("Respuesta:", data);
-                showSuccessPopup(redirectUrl);
-              });
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              showErrorPopup([
-                "Ocurrió un error al generar la factura. Por favor, intente nuevamente.",
-              ]);
-            });
-        });
-
-      // Agregar el cierre del popup de éxito
-      document.querySelectorAll(".popup-overlay").forEach((overlay) => {
-        overlay.addEventListener("click", (e) => {
-          if (e.target.classList.contains("popup-overlay")) {
-            overlay.style.display = "none";
-          }
-        });
-      });
-
-      document.querySelectorAll(".close-popup").forEach((button) => {
-        button.addEventListener("click", () => {
-          button.closest(".popup-overlay").style.display = "none";
-        });
-      });
-
-      document
-        .getElementById("client-name")
-        .addEventListener("keypress", (e) => {
-          const name = document.getElementById("client-name").value;
-        });
-
-      // function addTooltips() {
-      //   const tooltips = {
-      //     'client-name': 'Ingrese el nombre completo del cliente',
-      //     'vehicle-plate': 'Formato: ABC-123 o similar',
-      //     'mileage': 'Ingrese el kilometraje actual del vehículo',
-      //     'iva-toggle-btn': 'Active para incluir IVA en la factura'
-      //   };
-
-      //   for (const [id, text] of Object.entries(tooltips)) {
-      //     const element = document.getElementById(id);
-      //     if (element) {
-      //       const tooltip = document.createElement('span');
-      //       tooltip.className = 'tooltip';
-      //       tooltip.innerHTML = '?<span class="tooltip-text">' + text + '</span>';
-      //       element.parentNode.insertBefore(tooltip, element.nextSibling);
-      //     }
-      //   }
-      // }
-
-      // Autocompletar campos comunes
-      function setupAutoComplete() {
-        const makes = [
-          "Toyota",
-          "Honda",
-          "Nissan",
-          "Chevrolet",
-          "Ford",
-          "Hyundai",
-          "Kia",
-        ];
-        const makeInput = document.getElementById("vehicle-make");
-
-        const datalist = document.createElement("datalist");
-        datalist.id = "makes-list";
-        makes.forEach((make) => {
-          const option = document.createElement("option");
-          option.value = make;
-          datalist.appendChild(option);
-        });
-
-        document.body.appendChild(datalist);
-        makeInput.setAttribute("list", "makes-list");
-      }
-
-      // Atajos de teclado
-      function setupKeyboardShortcuts() {
-        document.addEventListener("keydown", (e) => {
-          if (e.ctrlKey && e.key === "Enter") {
-            // Ctrl + Enter para generar factura
-            document.querySelector(".generate-button").click();
-          } else if (e.ctrlKey && e.key === "i") {
-            // Ctrl + i para agregar nueva fila
-            e.preventDefault();
-            addRow();
-          }
-        });
-      }
-
-      // Inicializar mejoras
-      document.addEventListener("DOMContentLoaded", () => {
-        // addTooltips();
-        setupAutoComplete();
-        setupKeyboardShortcuts();
-
-        // Establecer fecha actual por defecto
-        document.getElementById("date").valueAsDate = new Date();
-      });
-    </script>
+    <script type="module" src="./js/components/searchable-select.js" defer></script>
+    <script type="module" src="./js/main.js"></script>
+    
   </body>
 </html>

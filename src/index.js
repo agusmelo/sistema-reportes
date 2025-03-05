@@ -56,9 +56,14 @@ app.post("/generate-invoice", async (req, res) => {
     const { client, date, make, model, plate, mileage, iva, items } = req.body;
 
     const logoPath = path.join(__dirname, "../public/logo_prov.png");
-    const logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString("base64")}`;
+    const logoBase64 = `data:image/png;base64,${fs
+      .readFileSync(logoPath)
+      .toString("base64")}`;
     const fechaFactura = new Date(date);
-    const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${MESES[fechaFactura.getMonth()]}_${fechaFactura.getFullYear()}_${make}_${model}`;
+    const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${
+      MESES[fechaFactura.getMonth()]
+    }_${fechaFactura.getFullYear()}_${make}_${model}`;
+    console.log("Nombre de cliente: ", client);
     console.log(items);
     // Calculate line totals and overall total
     const parsedItems = items.map((item) => ({
@@ -345,9 +350,9 @@ app.post("/generate-invoice", async (req, res) => {
           subtotal,
         },
         null,
-        2,
+        2
       ),
-      "utf-8",
+      "utf-8"
     );
 
     // Guardar en base de datos
@@ -358,13 +363,13 @@ app.post("/generate-invoice", async (req, res) => {
       const privateOutputPath = path.join(
         __dirname,
         "output",
-        `${nombreDeArchivo}.pdf`,
+        `${nombreDeArchivo}.pdf`
       );
       const publicOutputPath = path.join(
         __dirname,
         "../public",
         "ultima_factura_generada",
-        `${nombreDeArchivo}.pdf`,
+        `${nombreDeArchivo}.pdf`
       );
 
       fs.writeFileSync(privateOutputPath, buffer);
@@ -378,7 +383,7 @@ app.post("/generate-invoice", async (req, res) => {
       res.setHeader("Content-Type", "application/json");
       res.setHeader(
         "X-Redirect-Url",
-        `/ultima_factura_generada/${nombreDeArchivo}.pdf`,
+        `/ultima_factura_generada/${nombreDeArchivo}.pdf`
       );
       res.json({
         message: "Factura generada exitosamente",

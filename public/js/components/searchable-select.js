@@ -6,6 +6,7 @@ class SearchableSelect extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this.render();
+    this.addStyles();
   }
 
   render() {
@@ -51,7 +52,7 @@ class SearchableSelect extends HTMLElement {
   
           li:hover {
             background: #f0f0f0;
-          }
+}
         </style>
         
         <div class="combo-box">
@@ -121,6 +122,13 @@ class SearchableSelect extends HTMLElement {
     } else if (name === "entidad") {
       this.fetchOptions(newValue);
     }
+  }
+
+  addStyles() {
+    const linkElem = document.createElement("link");
+    linkElem.setAttribute("rel", "stylesheet");
+    linkElem.setAttribute("href", "./css/input.css");
+    this.shadowRoot.appendChild(linkElem);
   }
 
   async fetchOptions(entidad) {
