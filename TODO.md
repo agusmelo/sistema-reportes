@@ -14,3 +14,7 @@
     3. Guardar en la base de datos los datos de la factura
     4. Devolver el id de la factura generada
     5. Generar el pdf con el id de la factura, osea hacer otra request y obterenr los datos de la factura desde la base de datos 
+[-] (low) Front: pasar todos los eventlisteners a un onload 
+[-] Conectar con base de datos de Autos Marca - Modelo
+[-] (low) searchable-select: uso el mousedown event para elegir las opciones, porque si lo hago con click, el evento blur que esconde las opciones gana => cuando llega el click, no hay <li> para cliquear.
+Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown' (gerarquia: mousedown > blur > click). Buscar si hay mejor solucion

@@ -7,6 +7,7 @@ const ivaEl = document.getElementById("tax-iva");
 const subtotalEl = document.getElementById("sub-total");
 const grandTotalEl = document.getElementById("total-plus-tax");
 const ivaToggleBtn = document.getElementById("iva-toggle-btn");
+const loadInfoBtn = document.getElementById("load-info-btn");
 let itemIndex = 1;
 let esConIVA = true;
 
@@ -112,6 +113,11 @@ document.querySelector(".popup-overlay").addEventListener("click", (e) => {
   if (e.target.classList.contains("popup-overlay")) {
     document.getElementById("error-popup").style.display = "none";
   }
+});
+
+loadInfoBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  alert("Carga de datos alternativa, no implementada");
 });
 
 function clearErrorStyles() {

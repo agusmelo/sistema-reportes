@@ -1,5 +1,3 @@
-import api from "../api.js";
-
 class SearchableSelect extends HTMLElement {
   static observedAttributes = ["placeholder", "entidad"];
   constructor() {
@@ -23,6 +21,7 @@ class SearchableSelect extends HTMLElement {
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 5px;
+            margin: 0 !important;
           }
   
           ul {
@@ -66,7 +65,8 @@ class SearchableSelect extends HTMLElement {
 
     this.input.addEventListener("input", () => this.filterOptions());
     this.input.addEventListener("focus", () => this.showOptions());
-    document.addEventListener("click", (e) => this.handleClickOutside(e));
+    // document.addEventListener("click", (e) => this.handleOutFocus(e));
+    this.input.addEventListener("blur", (e) => this.handleOutFocus(e));
   }
 
   set options(values) {
@@ -88,7 +88,7 @@ class SearchableSelect extends HTMLElement {
       .join("");
 
     this.shadowRoot.querySelectorAll("li").forEach((li) => {
-      li.addEventListener("click", () => this.selectOption(li.textContent));
+      li.addEventListener("mousedown", () => this.selectOption(li.textContent));
     });
   }
 
@@ -110,10 +110,8 @@ class SearchableSelect extends HTMLElement {
     this.optionsList.classList.remove("visible");
   }
 
-  handleClickOutside(e) {
-    if (!this.contains(e.target)) {
-      this.optionsList.classList.remove("visible");
-    }
+  handleOutFocus(e) {
+    this.optionsList.classList.remove("visible");
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -129,22 +127,6 @@ class SearchableSelect extends HTMLElement {
     linkElem.setAttribute("rel", "stylesheet");
     linkElem.setAttribute("href", "./css/input.css");
     this.shadowRoot.appendChild(linkElem);
-  }
-
-  async fetchOptions(entidad) {
-    if (!entidad || !entidad.trim()) return;
-
-    if (entidad === "clientes") {
-      entidad = "clientes/all";
-    } else if (entidad === "marcas") {
-      entidad = "vehiculos/";
-    }
-    try {
-      const response = await api.get(`/${entidad}`);
-      this.options = response.data;
-    } catch (error) {
-      console.error("Error fetching options:", error);
-    }
   }
 }
 
