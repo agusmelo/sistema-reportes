@@ -42,6 +42,36 @@ async function obtenerVehiculo(id) {
   return resultado[0];
 }
 
+async function obtenerVehiculoPorMatricula(matricula) {
+  const db = await connectDB();
+  // Return also the name of the client
+  // change the name of the column from .name to client_name
+
+  const resultado = await db.all(
+    "SELECT vehiculos.*, clientes.nombre AS cliente_nombre FROM vehiculos JOIN clientes ON vehiculos.cliente_id = clientes.id WHERE vehiculos.matricula = ?",
+    [matricula]
+  );
+  return resultado[0];
+}
+
+async function obtenerMatriculasPorMarcaYModelo(cliente_id, marca, modelo) {
+  const db = await connectDB();
+  const resultado = await db.all(
+    "SELECT matricula FROM vehiculos WHERE cliente_id = ? AND marca = ? AND modelo = ?",
+    [cliente_id, marca, modelo]
+  );
+  return resultado;
+}
+
+async function getModelosDeMarca(cliente_id, marca) {
+  const db = await connectDB();
+  const resultado = await db.all(
+    "SELECT modelo FROM vehiculos WHERE cliente_id = ? AND marca = ?",
+    [cliente_id, marca]
+  );
+  return resultado;
+}
+
 async function obtenerVehiculoPorCliente(cliente_id) {
   const db = await connectDB();
   const resultado = await db.all(
@@ -68,10 +98,14 @@ async function eliminarVehiculo(id) {
   const { changes } = await db.run("DELETE FROM vehiculos WHERE id = ?", [id]);
   return { id: resultado[0].id, succesful: changes };
 }
+
 module.exports = {
   agregarVehiculo,
   obtenerVehiculos,
   obtenerVehiculo,
+  obtenerVehiculoPorMatricula,
+  obtenerMatriculasPorMarcaYModelo,
+  getModelosDeMarca,
   actualizarVehiculo,
   eliminarVehiculo,
   obtenerVehiculoPorCliente,

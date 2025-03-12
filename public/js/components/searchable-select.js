@@ -1,10 +1,11 @@
 class SearchableSelect extends HTMLElement {
-  static observedAttributes = ["placeholder", "entidad"];
+  static observedAttributes = ["placeholder"];
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     this.render();
     this.addStyles();
+    this.afterSelect = null;
   }
 
   render() {
@@ -49,7 +50,7 @@ class SearchableSelect extends HTMLElement {
             cursor: pointer;
           }
   
-          li:hover {
+          li:hover, li:focus {
             background: #f0f0f0;
 }
         </style>
@@ -63,10 +64,12 @@ class SearchableSelect extends HTMLElement {
     this.input = this.shadowRoot.querySelector("input");
     this.optionsList = this.shadowRoot.querySelector("ul");
 
+    // TODO : #1 Los eventos de change y el mousedown de los li se ejecutan ambos en el caso donde el usuario escribe en el input y luego hace click en un li. Esto provoca que se ejecute el evento change antes de que se ejecute el evento mousedown del li. Solucionar este problema.
     this.input.addEventListener("input", () => this.filterOptions());
-    this.input.addEventListener("focus", () => this.showOptions());
-    // document.addEventListener("click", (e) => this.handleOutFocus(e));
-    this.input.addEventListener("blur", (e) => this.handleOutFocus(e));
+    this.input.addEventListener("mousedown", (event) => this.showOptions());
+    this.input.addEventListener("blur", () => this.handleOutFocus());
+    this.input.addEventListener("change", () => this.handleChangeValue());
+    //TODOD: move between options with arrow keys
   }
 
   set options(values) {
@@ -76,6 +79,10 @@ class SearchableSelect extends HTMLElement {
 
   get options() {
     return this._options || [];
+  }
+
+  setFunctionAfterSelect(func = null) {
+    this.afterSelect = func;
   }
 
   renderOptions() {
@@ -88,7 +95,9 @@ class SearchableSelect extends HTMLElement {
       .join("");
 
     this.shadowRoot.querySelectorAll("li").forEach((li) => {
-      li.addEventListener("mousedown", () => this.selectOption(li.textContent));
+      li.addEventListener("mousedown", (event) => {
+        this.selectOption(event, li.textContent);
+      });
     });
   }
 
@@ -105,13 +114,27 @@ class SearchableSelect extends HTMLElement {
     this.optionsList.classList.add("visible");
   }
 
-  selectOption(value) {
+  selectOption(event, value) {
+    event.preventDefault();
     this.input.value = value;
     this.optionsList.classList.remove("visible");
+    console.log("Event --> click li ");
+    if (this.afterSelect) {
+      this.afterSelect();
+    }
   }
 
-  handleOutFocus(e) {
+  handleChangeValue(e) {
     this.optionsList.classList.remove("visible");
+    console.log("Event --> change");
+    if (this.afterSelect) {
+      this.afterSelect();
+    }
+  }
+
+  handleOutFocus() {
+    this.optionsList.classList.remove("visible");
+    console.log("Event --> focus");
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

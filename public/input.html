@@ -22,7 +22,7 @@
             >?<span class="tooltip-text"
               >Ingrese el nombre completo del cliente</span
             ></span>
-          <searchable-select option-selected="" id="client-name" placeholder="Ingrese nombre del cliente"></searchable-select>
+          <searchable-select id="client-name" placeholder="Ingrese nombre del cliente"></searchable-select>
           <br />
         </div>
 
@@ -67,18 +67,12 @@
             >?<span class="tooltip-text">Formato: ABC-123 o similar</span></span
           >
           <searchable-select id="vehicle-plate" placeholder="ej., MAI6778"></searchable-select>
-          <!-- <input
-            type="text"
-            id="vehicle-plate"
-            name="plate"
-            placeholder="ej., MAI6778"
-            required
-          />-->
+          <button id="buscar-matricula">Buscar</button>
           <br /> 
         </div>
 
         <div class="form-group">
-          <label for="mileage">Kilometraje</label>
+          <label for="vehicle-mileage">Kilometraje</label>
           <span class="tooltip"
             >?<span class="tooltip-text"
               >Ingrese el kilometraje actual del vehículo</span
@@ -86,8 +80,8 @@
           >
           <input
             type="number"
-            id="mileage"
-            name="mileage"
+            id="vehicle-mileage"
+            name="vehicle-mileage"
             placeholder="ej., 95595"
             required
           /><br />
@@ -170,7 +164,10 @@
         </button>
       </div>
     </div>
-    <script sr></script>
+
+    <div id="warning-message" class="warning-message">
+      <span id="warning-text" class="warning-text"></span>
+    </div>
     <script src="./js/axios/axios.min.js"></script>
     <script type="module" src="./js/components/searchable-select.js" defer></script>
     <script type="module" src="./js/main.js"></script>

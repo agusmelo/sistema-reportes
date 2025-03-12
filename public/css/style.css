@@ -375,15 +375,37 @@ body {
     border-top: 2px solid #ddd;
   }
 
+  .warning-message {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 250px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    color: #721c24;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+
   /* Responsive design */
   @media (max-width: 768px) {
     .form-row {
       flex-direction: column;
     }
-
     .form-group {
       width: 100%;
       margin-right: 0;
       margin-bottom: 15px;
+    }
+    .warning-message {
+      top: auto;
+      bottom: 20px;
+      left: 20px;
+      width: calc(100% - 40px);
     }
   }

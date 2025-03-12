@@ -115,3 +115,55 @@ exports.deleteVehiculo = async (req, res) => {
     });
   }
 };
+
+exports.getVehiculoByMatricula = async (req, res) => {
+  try {
+    const { matricula } = req.params;
+    const vehiculo = await VehiculoModel.obtenerVehiculoPorMatricula(matricula);
+    if (!vehiculo) {
+      return res.status(404).json({ message: "Vehículo no encontrado" });
+    }
+    res.status(200).json(vehiculo);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener el vehículo",
+      error: error.message,
+    });
+  }
+};
+
+exports.getMatriculaByMarcaModelo = async (req, res) => {
+  try {
+    const { cliente_id, marca, modelo } = req.params;
+    const matriculas = await VehiculoModel.obtenerMatriculasPorMarcaYModelo(
+      cliente_id,
+      marca,
+      modelo
+    );
+    if (!matriculas) {
+      return res.status(404).json({ message: "Vehículo no encontrado" });
+    }
+    res.status(200).json(matriculas);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener el vehículo",
+      error: error.message,
+    });
+  }
+};
+
+exports.getModelosByMarca = async (req, res) => {
+  try {
+    const { cliente_id, marca } = req.params;
+    const modelos = await VehiculoModel.getModelosDeMarca(cliente_id, marca);
+    if (!modelos) {
+      return res.status(404).json({ message: "Vehículo no encontrado" });
+    }
+    res.status(200).json(modelos);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener el vehículo",
+      error: error.message,
+    });
+  }
+};
