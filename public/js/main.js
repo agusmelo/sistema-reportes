@@ -12,10 +12,17 @@ let esConIVA = true;
 let listaInfoClientes = [];
 let listaInfoVehiculos = [];
 
-let nuevoCliente = null;
-let nuevoVehiculoMarca = null;
-let nuevoVehiculoModelo = null;
-let nuevoVehiculoMatricula = null;
+const STATE = {
+  EXISTING_CLIENT_EXISTING_VEHICLE: "existingClientExistingVehicle",
+  EXISTING_CLIENT_NEW_VEHICLE: "existingClientNewVehicle",
+  NEW_CLIENT_NEW_VEHICLE: "newClientNewVehicle",
+  NEW_CLIENT: "newClient",
+  ERROR: {
+    NEW_CLIENT_EXISTING_VEHICLE: "newClientExistingVehicle",
+    WRONG_MAKE_MODEL: "wrongMakeModel",
+    MISSING_FIELDS: "missingFields",
+  },
+};
 
 const clientesSelect = document.querySelector("#client-name");
 const vehiculoMarcaSelect = document.querySelector("#vehicle-make");
@@ -32,28 +39,45 @@ clientesSelect.afterSelect = (e) => {
   vehiculoMarcaSelect.options = [];
   vehiculoModeloSelect.options = [];
   vehiculoMatriculaSelect.options = [];
+
   const clienteSeleccionado = listaInfoClientes.find(
     (cliente) =>
       cliente.nombre.toUpperCase() === clientesSelect.input.value.toUpperCase()
   );
 
+  getClientByName(clientesSelect.input.value)
+    .then((response) => {
+      if (response) {
+        alert("Cliente encontrado en la base de datos");
+        // Si el cliente no existe en la base de datos, agregarlo
+      } else {
+        alert("Cliente no encontrado en la base de datos");
+        // Si el cliente no existe en la base de datos, agregarlo
+      }
+    })
+    .catch((error) => {
+      console.error("Error al obtener el cliente:", error);
+    });
+
   if (clienteSeleccionado !== undefined) {
     // Si está en la lista, cargar los vehiculos del cliente
-    // console.log("Cliente encontrado en la lista");
-    // console.log(clienteSeleccionado);
-    api.get(`vehiculos/cliente/${clienteSeleccionado.id}`).then((response) => {
-      listaInfoVehiculos = response.data;
-      console.log(listaInfoVehiculos);
-      vehiculoMarcaSelect.options = listaInfoVehiculos.map(
-        (vehiculo) => vehiculo.marca
-      );
-      vehiculoModeloSelect.options = listaInfoVehiculos.map(
-        (vehiculo) => vehiculo.modelo
-      );
-      vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
-        (vehiculo) => vehiculo.matricula
-      );
-    });
+    api
+      .get(`vehiculos/cliente/${clienteSeleccionado.id}`)
+      .then((response) => {
+        listaInfoVehiculos = response.data;
+        vehiculoMarcaSelect.options = listaInfoVehiculos.map(
+          (vehiculo) => vehiculo.marca
+        );
+        vehiculoModeloSelect.options = listaInfoVehiculos.map(
+          (vehiculo) => vehiculo.modelo
+        );
+        vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
+          (vehiculo) => vehiculo.matricula
+        );
+      })
+      .catch((error) => {
+        listaInfoVehiculos = [];
+      });
   } else {
     // Si no está en la lista, indicar al usuario que esta agregando un cliente nuevo
     // TODO: Ver como combinar esto con los states de stateCheck()
@@ -67,35 +91,32 @@ vehiculoMarcaSelect.afterSelect = (e) => {
   vehiculoMatriculaSelect.input.value = "";
   vehiculoKilometrajeInput.value = "";
 
-  if (vehiculoMarcaSelect.input.value === "") {
-    nuevoVehiculoMarca = null;
-    return;
-  }
-
-  const vehiculoSeleccionado = listaInfoVehiculos.find(
-    (vehiculo) =>
-      vehiculo.marca.toUpperCase() ===
-      vehiculoMarcaSelect.input.value.toUpperCase()
-  );
-  if (vehiculoSeleccionado !== undefined) {
-    vehiculoModeloSelect.options = listaInfoVehiculos.map(
-      (vehiculo) => vehiculo.modelo
+  if (vehiculoMarcaSelect.input.value !== "") {
+    const vehiculoSeleccionado = listaInfoVehiculos.find(
+      (vehiculo) =>
+        vehiculo.marca.toUpperCase() ===
+        vehiculoMarcaSelect.input.value.toUpperCase()
     );
-    vehiculoModeloSelect.options = listaInfoVehiculos
-      .filter(
-        (vehiculo) =>
-          vehiculo.marca.toUpperCase() ===
-          vehiculoMarcaSelect.input.value.toUpperCase()
-      )
-      .map((vehiculo) => vehiculo.modelo);
+    if (vehiculoSeleccionado !== undefined) {
+      vehiculoModeloSelect.options = listaInfoVehiculos.map(
+        (vehiculo) => vehiculo.modelo
+      );
+      vehiculoModeloSelect.options = listaInfoVehiculos
+        .filter(
+          (vehiculo) =>
+            vehiculo.marca.toUpperCase() ===
+            vehiculoMarcaSelect.input.value.toUpperCase()
+        )
+        .map((vehiculo) => vehiculo.modelo);
 
-    vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
-      (vehiculo) => vehiculo.matricula
-    );
-  } else {
-    // TODO: indicar al usuario que se esta creando un vehiculo nuevo
-    // TODO: Levantar flag de nuevo vehiculo
-    console.log("Vehiculo no encontrado en la lista");
+      vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
+        (vehiculo) => vehiculo.matricula
+      );
+    } else {
+      // TODO: indicar al usuario que se esta creando un vehiculo nuevo
+      // TODO: Levantar flag de nuevo vehiculo
+      console.log("Vehiculo no encontrado en la lista");
+    }
   }
   stateCheck();
 };
@@ -103,40 +124,38 @@ vehiculoModeloSelect.afterSelect = (e) => {
   vehiculoMatriculaSelect.input.value = "";
   vehiculoKilometrajeInput.value = "";
 
-  const vehiculoSeleccionado = listaInfoVehiculos.find(
-    (vehiculo) =>
-      vehiculo.modelo.toUpperCase() ===
-      vehiculoModeloSelect.input.value.toUpperCase()
-  );
-  if (vehiculoSeleccionado !== undefined) {
-    nuevoVehiculoModelo = false;
-    vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
-      (vehiculo) => vehiculo.matricula
+  if (vehiculoModeloSelect.input.value !== "") {
+    const vehiculoSeleccionado = listaInfoVehiculos.find(
+      (vehiculo) =>
+        vehiculo.modelo.toUpperCase() ===
+        vehiculoModeloSelect.input.value.toUpperCase()
     );
-  } else {
-    nuevoVehiculoModelo = true;
+    if (vehiculoSeleccionado !== undefined) {
+      vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
+        (vehiculo) => vehiculo.matricula
+      );
+    } else {
+    }
   }
+  stateCheck();
 };
 
 vehiculoMatriculaSelect.afterSelect = (e) => {
   vehiculoKilometrajeInput.value = "";
-
-  if (vehiculoMatriculaSelect.input.value === "") {
-    nuevoVehiculoMatricula = null;
-    return;
-  }
-  const vehiculoSeleccionado = listaInfoVehiculos.find(
-    (vehiculo) =>
-      vehiculo.matricula.toUpperCase() ===
-      vehiculoMatriculaSelect.input.value.toUpperCase()
-  );
-  if (vehiculoSeleccionado !== undefined) {
-    vehiculoKilometrajeInput.value = vehiculoSeleccionado.kilometraje;
-    // si la matricula esta en la lista, cargar el kilometraje, y la marca y modelo del vehiculo
-    vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
-    vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
-  } else {
-    // nuevoVehiculoMatricula = true;
+  if (vehiculoMatriculaSelect.input.value !== "") {
+    const vehiculoSeleccionado = listaInfoVehiculos.find(
+      (vehiculo) =>
+        vehiculo.matricula.toUpperCase() ===
+        vehiculoMatriculaSelect.input.value.toUpperCase()
+    );
+    if (vehiculoSeleccionado !== undefined) {
+      vehiculoKilometrajeInput.value = vehiculoSeleccionado.kilometraje;
+      // si la matricula esta en la lista, cargar el kilometraje, y la marca y modelo del vehiculo
+      vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
+      vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
+    } else {
+      // nuevoVehiculoMatricula = true;
+    }
   }
   stateCheck();
 };
@@ -171,6 +190,16 @@ document.getElementById("buscar-matricula").addEventListener("click", (e) => {
         alert("Vehículo no encontrado");
       }
       stateCheck();
+    })
+    .catch((error) => {
+      if (
+        error.response.status === 404 &&
+        error.response.data.message === "Vehículo no encontrado"
+      ) {
+        console.error("No se encontro el vehiculo");
+      } else {
+        console.error("Error al obtener el vehículo:", error);
+      }
     });
 });
 
@@ -273,101 +302,76 @@ function clearErrorStyles() {
     input.classList.remove("error-input");
   });
 }
+
+async function getClientByName(nombreCliente) {
+  try {
+    const response = await api.get(`clientes/nombre/${nombreCliente}`);
+    return response.data;
+  } catch (e) {
+    if (
+      e.response.status === 404 &&
+      e.response.data.message.includes("No existe cliente con nombre")
+    ) {
+      console.log("Cliente no encontrado");
+    } else {
+      console.error("Error al obtener el cliente:", error);
+    }
+  }
+}
 // Function that decides if the user is trying to create a new factura with a client and vehicle that are already on the system, or with new client new vehicle, or with an existing client and new vehicle
 // Case 1, client and vehicle already on the system (you can know because the client is selected from a list of clients and the vehicle is selected from a list of vehicles)
 // Case 2, client and vehicle are new (you can know because the client does not match an item from a list of clients and the vehicle does not match an item from a list of vehicles)
 // Case 3, client is already on the system and vehicle is new (you can know because the client is selected from a list of clients and the vehicle does not match an item from a list of vehicles)
-// TODO: Refactorizar el codigo para usar esta funcion cada vez se cambia el state del formulario
 async function stateCheck() {
   const nombreCliente = clientesSelect.input.value;
   const vehiculoMarca = vehiculoMarcaSelect.input.value;
   const vehiculoModelo = vehiculoModeloSelect.input.value;
   const matriculaVehiculo = vehiculoMatriculaSelect.input.value;
-  const entry = await api.get(`vehiculos/matricula/${matriculaVehiculo}`);
-  const isExistingClient =
-    entry.data.cliente_nombre === nombreCliente &&
-    entry.data.matricula === matriculaVehiculo &&
-    entry.data.marca === vehiculoMarca &&
-    entry.data.modelo === vehiculoModelo;
-  console.log(entry.data);
-  console.log("isExistingClient", isExistingClient);
-  if (nombreCliente === "") {
-    nuevoCliente = null;
-  } else if (
-    clientesSelect.options.some(
-      (option) => option.toUpperCase() === nombreCliente.toUpperCase()
-    )
-  ) {
-    nuevoCliente = false;
-  } else {
-    nuevoCliente = true;
-  }
-
-  if (vehiculoMarca === "") {
-    nuevoVehiculoMarca = null;
-  } else if (
-    vehiculoMarcaSelect.options.some(
-      (option) => option.toUpperCase() === vehiculoMarca.toUpperCase()
-    )
-  ) {
-    nuevoVehiculoMarca = false;
-  } else {
-    nuevoVehiculoMarca = true;
-  }
-
-  if (vehiculoModelo === "") {
-    nuevoVehiculoModelo = null;
-  } else if (
-    vehiculoModeloSelect.options.some(
-      (option) => option.toUpperCase() === vehiculoModelo.toUpperCase()
-    )
-  ) {
-    nuevoVehiculoModelo = false;
-  } else {
-    nuevoVehiculoModelo = true;
-  }
-
-  if (matriculaVehiculo === "") {
-    nuevoVehiculoMatricula = null;
-  } else if (
-    vehiculoMatriculaSelect.options.some(
-      (option) => option.toUpperCase() === matriculaVehiculo.toUpperCase()
-    )
-  ) {
-    nuevoVehiculoMatricula = false;
-  } else {
-    nuevoVehiculoMatricula = true;
-  }
-
-  console.log("Nuevo cliente: ", nuevoCliente);
-  console.log("Nuevo vehiculo marca: ", nuevoVehiculoMarca);
-  console.log("Nuevo vehiculo modelo: ", nuevoVehiculoModelo);
-  console.log("Nuevo vehiculo matricula: ", nuevoVehiculoMatricula);
 
   if (
-    nuevoCliente === null ||
-    nuevoVehiculoMarca === null ||
-    nuevoVehiculoModelo === null ||
-    nuevoVehiculoMatricula === null
+    clientesSelect.input.value === "" ||
+    vehiculoMarcaSelect.input.value === "" ||
+    vehiculoModeloSelect.input.value === "" ||
+    vehiculoMatriculaSelect.input.value === ""
   ) {
-    return "missingValues";
+    console.log(STATE.ERROR.MISSING_FIELDS);
+    return STATE.ERROR.MISSING_FIELDS;
   }
-  // Case 1
-  if (
-    !nuevoCliente &&
-    !nuevoVehiculoMatricula &&
-    !nuevoVehiculoMarca &&
-    !nuevoVehiculoModelo
-  ) {
-    return "existingClientExistingVehicle";
-  }
-  // Case 2
-  else if (nuevoCliente && nuevoVehiculoMatricula) {
-    return "newClientNewVehicle";
-  }
-  // Case 3
-  else if (!nuevoCliente && nuevoVehiculoMatricula) {
-    return "existingClientNewVehicle";
+
+  try {
+    const entry = await api.get(`vehiculos/matricula/${matriculaVehiculo}`);
+    if (
+      entry.data.cliente_nombre === nombreCliente &&
+      entry.data.matricula === matriculaVehiculo &&
+      entry.data.marca === vehiculoMarca &&
+      entry.data.modelo === vehiculoModelo
+    ) {
+      console.log(STATE.EXISTING_CLIENT_EXISTING_VEHICLE);
+      return STATE.EXISTING_CLIENT_EXISTING_VEHICLE;
+    } else if (entry.data.cliente_nombre !== nombreCliente) {
+      console.log(STATE.ERROR.NEW_CLIENT_EXISTING_VEHICLE);
+      return STATE.ERROR.NEW_CLIENT_EXISTING_VEHICLE;
+    } else {
+      console.log(STATE.ERROR.WRONG_MAKE_MODEL);
+      return STATE.ERROR.WRONG_MAKE_MODEL;
+    }
+  } catch (e) {
+    if (
+      e.response.status === 404 &&
+      e.response.data.message === "Vehículo no encontrado"
+    ) {
+      const cliente = await getClientByName(nombreCliente);
+      console.log("-----", cliente);
+      if (cliente?.nombre === undefined) {
+        console.log(STATE.NEW_CLIENT_NEW_VEHICLE);
+        return STATE.NEW_CLIENT_NEW_VEHICLE;
+      } else {
+        console.log(STATE.EXISTING_CLIENT_NEW_VEHICLE);
+        return STATE.EXISTING_CLIENT_NEW_VEHICLE;
+      }
+    } else {
+      console.error("Error al obtener el vehículo:", error);
+    }
   }
 }
 

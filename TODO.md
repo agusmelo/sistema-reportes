@@ -18,3 +18,4 @@
 [-] Conectar con base de datos de Autos Marca - Modelo
 [-] (low) searchable-select: uso el mousedown event para elegir las opciones, porque si lo hago con click, el evento blur que esconde las opciones gana => cuando llega el click, no hay <li> para cliquear.
 Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown' (gerarquia: mousedown > blur > click). Buscar si hay mejor solucion
+[-] Normalizar estructura de las api responses, mensajes de error, datos, etc (modificar todas para que sean iguales en estructura)

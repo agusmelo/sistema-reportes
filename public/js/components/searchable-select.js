@@ -118,7 +118,6 @@ class SearchableSelect extends HTMLElement {
     event.preventDefault();
     this.input.value = value;
     this.optionsList.classList.remove("visible");
-    console.log("Event --> click li ");
     if (this.afterSelect) {
       this.afterSelect();
     }
@@ -134,7 +133,6 @@ class SearchableSelect extends HTMLElement {
 
   handleOutFocus() {
     this.optionsList.classList.remove("visible");
-    console.log("Event --> focus");
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
