@@ -149,6 +149,12 @@ class SearchableSelect extends HTMLElement {
     linkElem.setAttribute("href", "./css/input.css");
     this.shadowRoot.appendChild(linkElem);
   }
+
+  clearField() {
+    this.input.value = "";
+    this.optionsList.classList.remove("visible");
+    this.optionsList.innerHTML = "";
+  }
 }
 
 customElements.define("searchable-select", SearchableSelect);
