@@ -24,7 +24,7 @@ exports.getAllClients = async (req, res) => {
     console.log("clientes: ", clientes);
     res.status(200).json({
       message: "Lista de clientes obtenida con éxito",
-      clientes: clientes,
+      data: clientes,
     });
   } catch (error) {
     res.status(500).json({
