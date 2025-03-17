@@ -1,5 +1,5 @@
 const VehiculoModel = require("../model/vehiculos");
-
+const { responseHandler } = require("../utils/responseHandler");
 // Obtener todos los vehículos
 exports.getVehiculos = async (req, res) => {
   try {
@@ -33,7 +33,21 @@ exports.getVehiculoById = async (req, res) => {
 exports.getVehiculoByClienteId = async (req, res) => {
   try {
     const { cliente_id } = req.params;
-    const vehiculo = await VehiculoModel.obtenerVehiculoPorCliente(cliente_id);
+    // check query params for marca and modelo
+    const { marca, modelo } = req.query;
+    if (marca && modelo) {
+      const vehiculo =
+        await VehiculoModel.obtenerVehiculosClientePorMarcaYModelo(
+          cliente_id,
+          marca,
+          modelo
+        );
+      if (!vehiculo) {
+        return res.status(404).json({ message: "Vehículo no encontrado" });
+      }
+      return res.status(200).json(vehiculo);
+    }
+    const vehiculo = await VehiculoModel.obtenerVehiculoCliente(cliente_id);
     if (!vehiculo) {
       return res.status(404).json({ message: "Vehículo no encontrado" });
     }
@@ -116,14 +130,15 @@ exports.deleteVehiculo = async (req, res) => {
   }
 };
 
+// Devuelve el vehiculo + el nombre del cliente
 exports.getVehiculoByMatricula = async (req, res) => {
   try {
     const { matricula } = req.params;
     const vehiculo = await VehiculoModel.obtenerVehiculoPorMatricula(matricula);
     if (!vehiculo) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return responseHandler.error(res, "Vehículo no encontrado", 404);
     }
-    res.status(200).json(vehiculo);
+    return responseHandler.success(res, vehiculo);
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener el vehículo",
@@ -132,18 +147,29 @@ exports.getVehiculoByMatricula = async (req, res) => {
   }
 };
 
-exports.getMatriculaByMarcaModelo = async (req, res) => {
+//TODO: Implementar la parte de facturas del modelo para buscar por matricula
+// Devuelve el vehiculo + la informacion del cliente + todas las facturas que tiene este vehiculo
+exports.getVehiculoByMatriculaExtended = async (req, res) => {
+  const { matricula } = req.params;
+  try {
+    const vehiculo = await VehiculoModel.obtenerVehiculoPorMatricula(matricula);
+    // const facturas = await VehiculoModel.obtenerFacturasPorMatricula(matricula);
+  } catch (error) {}
+};
+
+exports.getMatriculasByMarcaModelo = async (req, res) => {
   try {
     const { cliente_id, marca, modelo } = req.params;
-    const matriculas = await VehiculoModel.obtenerMatriculasPorMarcaYModelo(
-      cliente_id,
-      marca,
-      modelo
-    );
-    if (!matriculas) {
+    const vehiculos =
+      await VehiculoModel.obtenerVehiculosClientePorMarcaYModelo(
+        cliente_id,
+        marca,
+        modelo
+      );
+    if (!vehiculos) {
       return res.status(404).json({ message: "Vehículo no encontrado" });
     }
-    res.status(200).json(matriculas);
+    res.status(200).json(vehiculos);
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener el vehículo",

@@ -44,9 +44,6 @@ async function obtenerVehiculo(id) {
 
 async function obtenerVehiculoPorMatricula(matricula) {
   const db = await connectDB();
-  // Return also the name of the client
-  // change the name of the column from .name to client_name
-
   const resultado = await db.all(
     "SELECT vehiculos.*, clientes.nombre AS cliente_nombre FROM vehiculos JOIN clientes ON vehiculos.cliente_id = clientes.id WHERE vehiculos.matricula = ?",
     [matricula]
@@ -54,10 +51,14 @@ async function obtenerVehiculoPorMatricula(matricula) {
   return resultado[0];
 }
 
-async function obtenerMatriculasPorMarcaYModelo(cliente_id, marca, modelo) {
+async function obtenerVehiculosClientePorMarcaYModelo(
+  cliente_id,
+  marca,
+  modelo
+) {
   const db = await connectDB();
   const resultado = await db.all(
-    "SELECT matricula FROM vehiculos WHERE cliente_id = ? AND marca = ? AND modelo = ?",
+    "SELECT * FROM vehiculos WHERE cliente_id = ? AND marca = ? AND modelo = ?",
     [cliente_id, marca, modelo]
   );
   return resultado;
@@ -72,7 +73,7 @@ async function getModelosDeMarca(cliente_id, marca) {
   return resultado;
 }
 
-async function obtenerVehiculoPorCliente(cliente_id) {
+async function obtenerVehiculoCliente(cliente_id) {
   const db = await connectDB();
   const resultado = await db.all(
     "SELECT * FROM vehiculos WHERE cliente_id = ?",
@@ -104,9 +105,9 @@ module.exports = {
   obtenerVehiculos,
   obtenerVehiculo,
   obtenerVehiculoPorMatricula,
-  obtenerMatriculasPorMarcaYModelo,
+  obtenerVehiculosClientePorMarcaYModelo,
   getModelosDeMarca,
   actualizarVehiculo,
   eliminarVehiculo,
-  obtenerVehiculoPorCliente,
+  obtenerVehiculoCliente,
 };

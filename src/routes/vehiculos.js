@@ -6,10 +6,6 @@ router.get("/all", vehiculoController.getVehiculos);
 router.get("/:id", vehiculoController.getVehiculoById);
 router.get("/cliente/:cliente_id", vehiculoController.getVehiculoByClienteId);
 router.get("/matricula/:matricula", vehiculoController.getVehiculoByMatricula);
-router.get(
-  "/matriculas/:cliente_id/:marca/:modelo",
-  vehiculoController.getMatriculaByMarcaModelo
-);
 router.get("/modelo/:cliente_id/:marca", vehiculoController.getModelosByMarca);
 router.post("/", vehiculoController.createVehiculo);
 router.put("/:id", vehiculoController.updateVehiculo);
