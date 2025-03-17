@@ -18,4 +18,10 @@
 [-] Conectar con base de datos de Autos Marca - Modelo
 [-] (low) searchable-select: uso el mousedown event para elegir las opciones, porque si lo hago con click, el evento blur que esconde las opciones gana => cuando llega el click, no hay <li> para cliquear.
 Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown' (gerarquia: mousedown > blur > click). Buscar si hay mejor solucion
-[-] Normalizar estructura de las api responses, mensajes de error, datos, etc (modificar todas para que sean iguales en estructura)
+[-] Normalizar estructura de las api responses, mensajes de error, datos, etc (usar utils/responseHandler - va a partir el front)
+[-]! Estructurar las carpetas del front (meter adentro de frontedn/src/, lo mismo con el back backend/)
+[-] Reemplazar muchos . -> .?
+[-] VALIDACION DEL BACKEND
+[-] Separar model y repository
+[-] Agregar JSON schema validation, [documentac ion](https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js), [libreria ajv](https://www.npmjs.com/package/ajv)
+[-]! Usar AJV para validar los datos: https://ajv.js.org/guide/managing-schemas.html https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js#a-powerful-validation-duo
