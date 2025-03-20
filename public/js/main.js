@@ -1,4 +1,8 @@
-import { clientApi, vehicleApi } from "./services/api.js";
+//TODO: pasar a usar api.interceptors.response para handelear los errors
+import { clientApi, vehicleApi, facturaApi } from "./services/api.js";
+import { validateForm } from "./utils/validation.js";
+
+const IVA = 0.22; // 22% IVA
 
 const itemsTable = document
   .getElementById("items-table")
@@ -10,7 +14,6 @@ const ivaToggleBtn = document.getElementById("iva-toggle-btn");
 const loadInfoBtn = document.getElementById("load-info-btn");
 const warningMsgBox = document.getElementById("warning-message");
 let itemIndex = 1;
-let esConIVA = true;
 
 let listaInfoClientes = []; // Lista de todos los clientes de la base de datos
 let listaInfoVehiculos = []; // Lista de vehiculos del cliente cargado
@@ -57,7 +60,6 @@ clientesSelect.afterSelect = async (e) => {
           );
         }
       } catch (error) {
-        //TODO: Eliminar esto el api.interceptors.response ya maneja los errores de status
         if (
           error.response.status === 404 &&
           error.response.data.message === "Vehículo no encontrado"
@@ -80,7 +82,11 @@ clientesSelect.afterSelect = async (e) => {
       console.log("Cliente no encontrado");
     }
   } catch (error) {
-    console.error("Error al obtener el cliente:", error);
+    if (error.response.status === 404) {
+      console.error("No se encontro el cliente");
+    } else {
+      console.error("Error al obtener el cliente:", error);
+    }
   }
 };
 
@@ -111,8 +117,6 @@ vehiculoMarcaSelect.afterSelect = (e) => {
         (vehiculo) => vehiculo.matricula
       );
     } else {
-      // TODO: indicar al usuario que se esta creando un vehiculo nuevo
-      // TODO: Levantar flag de nuevo vehiculo
       console.log("Vehiculo no encontrado en la lista");
     }
   }
@@ -131,7 +135,6 @@ vehiculoModeloSelect.afterSelect = (e) => {
       vehiculoMatriculaSelect.options = listaInfoVehiculos.map(
         (vehiculo) => vehiculo.matricula
       );
-    } else {
     }
   }
 };
@@ -149,8 +152,6 @@ vehiculoMatriculaSelect.afterSelect = (e) => {
       // si la matricula esta en la lista, cargar el kilometraje, y la marca y modelo del vehiculo
       vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
       vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
-    } else {
-      // nuevoVehiculoMatricula = true;
     }
   }
 };
@@ -167,7 +168,7 @@ document
       return;
     }
     try {
-      const vehicleData = await vehicleApi.getVehicleByMatricula(
+      const { data: vehicleData } = await vehicleApi.getVehicleByMatricula(
         vehiculoMatriculaSelect.input.value
       );
       console.log(vehicleData);
@@ -176,8 +177,8 @@ document
         vehiculoMarcaSelect.input.value = vehicleData.marca;
         vehiculoModeloSelect.input.value = vehicleData.modelo;
         vehiculoKilometrajeInput.value = vehicleData.kilometraje;
-        console.log("Vehículo encontrado", vehicleData);
       } else {
+        //TODO: mostrar un mensaje de error en la pagina
         alert("Vehículo no encontrado");
       }
     } catch (error) {
@@ -185,7 +186,8 @@ document
         error.response.status === 404 &&
         error.response.data.message === "Vehículo no encontrado"
       ) {
-        console.error("No se encontro el vehiculo");
+        //TODO: mostrar un mensaje de error en la pagina
+        console.log("No existe vehiculo con esa matrícula");
       } else {
         console.error("Error al obtener el vehículo:", error);
       }
@@ -202,6 +204,7 @@ itemsTable.addEventListener("input", (e) => {
     const quantity = parseFloat(row.querySelector(".quantity").value) || 0;
     const unitPrice = parseFloat(row.querySelector(".unit-price").value) || 0;
     const lineTotal = (quantity * unitPrice).toFixed(2);
+    //TODO (low): add a the total to an attribute of the row
     row.querySelector(".line-total").textContent = `$${lineTotal}`;
     updateGrandTotal();
   }
@@ -215,21 +218,23 @@ itemsTable.addEventListener("click", (e) => {
 });
 
 ivaToggleBtn.addEventListener("click", (e) => {
-  esConIVA = !esConIVA;
   updateGrandTotal();
 });
 
+function hasIVA() {
+  return ivaToggleBtn.checked;
+}
+
 function updateGrandTotal() {
   let subTotal = 0;
-  let ivaPer = 0.22;
+  let ivaPer = hasIVA() ? IVA : 0;
+
   itemsTable.querySelectorAll(".line-total").forEach((lineTotalEl) => {
     const lineTotal = parseFloat(lineTotalEl.textContent.replace("$", "")) || 0;
     subTotal += lineTotal;
   });
   subtotalEl.textContent = `$${subTotal.toFixed(2)}`;
-  if (!esConIVA) {
-    ivaPer = 0;
-  }
+
   ivaEl.textContent = `$${(subTotal * ivaPer).toFixed(2)}`;
   grandTotalEl.textContent = `$${(subTotal + subTotal * ivaPer).toFixed(2)}`;
 }
@@ -292,105 +297,6 @@ function clearErrorStyles() {
   });
 }
 
-function validateForm() {
-  // TODOD: Get the values as parameters of the function
-  let isValid = true;
-  const errorMessages = [];
-  clearErrorStyles();
-
-  const fields = [
-    {
-      id: "client-name",
-      name: "El nombre del cliente",
-      getValue: (elem) => elem.input.value,
-      validate: (value) => value.trim() !== "",
-    },
-    {
-      id: "date",
-      name: "La fecha",
-      getValue: (elem) => elem.value,
-      validate: (value) => value !== "",
-    },
-    {
-      id: "vehicle-make",
-      name: "La marca del vehículo",
-      getValue: (elem) => elem.input.value,
-      validate: (value) => value.trim() !== "",
-    },
-    {
-      id: "vehicle-model",
-      name: "El modelo del vehículo",
-      getValue: (elem) => elem.input.value,
-      validate: (value) => value.trim() !== "",
-    },
-    {
-      id: "vehicle-plate",
-      name: "La matrícula",
-      getValue: (elem) => elem.input.value,
-      validate: (value) => value.trim() !== "",
-    },
-    {
-      id: "vehicle-mileage",
-      name: "El kilometraje",
-      getValue: (elem) => elem.value,
-      validate: (value) => value > 0,
-    },
-  ];
-
-  fields.forEach((field) => {
-    const element = document.getElementById(field.id);
-    const value = field.getValue(element);
-
-    if (!field.validate(value)) {
-      errorMessages.push(`${field.name} es requerido`);
-      element.classList.add("error-input");
-      isValid = false;
-    }
-  });
-
-  const rows = itemsTable.querySelectorAll("tr");
-  if (rows.length === 0) {
-    errorMessages.push("Debe agregar al menos un ítem");
-    isValid = false;
-  }
-
-  rows.forEach((row, index) => {
-    const quantityInput = row.querySelector(".quantity");
-    const descriptionInput = row.querySelector(".description");
-    const unitPriceInput = row.querySelector(".unit-price");
-
-    const quantity = quantityInput.value;
-    const description = descriptionInput.value.trim();
-    const unitPrice = unitPriceInput.value;
-
-    if (!quantity || quantity < 1) {
-      errorMessages.push(`Fila ${index + 1}: La cantidad debe ser mayor a 0`);
-      quantityInput.classList.add("error-input");
-      isValid = false;
-    }
-
-    if (!description) {
-      errorMessages.push(`Fila ${index + 1}: La descripción es requerida`);
-      descriptionInput.classList.add("error-input");
-      isValid = false;
-    }
-
-    if (!unitPrice || unitPrice <= 0) {
-      errorMessages.push(
-        `Fila ${index + 1}: El precio unitario debe ser mayor a 0`
-      );
-      unitPriceInput.classList.add("error-input");
-      isValid = false;
-    }
-  });
-
-  if (!isValid) {
-    showErrorPopup(errorMessages);
-  }
-
-  return isValid;
-}
-
 function showSuccessPopup(invoiceUrl) {
   const popup = document.getElementById("success-popup");
   const viewInvoiceBtn = document.getElementById("view-invoice-btn");
@@ -403,65 +309,77 @@ function showSuccessPopup(invoiceUrl) {
   popup.style.display = "block";
 }
 
-document.querySelector(".generate-button").addEventListener("click", (e) => {
-  e.preventDefault();
-  if (!validateForm()) {
-    return;
-  }
+document
+  .querySelector(".generate-button")
+  .addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+    const form = document.getElementById("invoice-form");
+    const formData = new FormData();
+    formData.append("client", form.querySelector("#client-name").input.value);
+    formData.append("date", form.querySelector("#date").value);
+    formData.append("make", form.querySelector("#vehicle-make").input.value);
+    formData.append("model", form.querySelector("#vehicle-model").input.value);
+    formData.append("plate", form.querySelector("#vehicle-plate").input.value);
+    formData.append("mileage", form.querySelector("#vehicle-mileage").value);
+    formData.append(
+      "iva",
+      form.querySelector("#iva-toggle-btn").checked ? "on" : "off"
+    );
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ", " + pair[1]);
+    }
 
-  const form = document.getElementById("invoice-form");
-  const formData = new FormData();
-  formData.append("client", form.querySelector("#client-name").input.value);
-  formData.append("date", form.querySelector("#date").value);
-  formData.append("make", form.querySelector("#vehicle-make").input.value);
-  formData.append("model", form.querySelector("#vehicle-model").input.value);
-  formData.append("plate", form.querySelector("#vehicle-plate").input.value);
-  formData.append("mileage", form.querySelector("#vehicle-mileage").value);
-  formData.append(
-    "iva",
-    form.querySelector("#iva-toggle-btn").checked ? "on" : "off"
-  );
-  for (let pair of formData.entries()) {
-    console.log(pair[0] + ", " + pair[1]);
-  }
-  return;
-
-  const data = {};
-  formData.forEach((value, key) => {
-    data[key] = value;
-  });
-
-  const items = [];
-  itemsTable.querySelectorAll("tr").forEach((row) => {
-    const item = {
-      quantity: row.querySelector(".quantity").value,
-      description: row.querySelector(".description").value,
-      unitPrice: row.querySelector(".unit-price").value,
-    };
-    items.push(item);
-  });
-
-  data.items = items;
-
-  fetch("/generate-invoice", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  })
-    .then((response) => {
-      const redirectUrl = response.headers.get("X-Redirect-Url");
-      response.json().then((data) => {
-        console.log("Respuesta:", data);
-        showSuccessPopup(redirectUrl);
-      });
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      showErrorPopup([
-        "Ocurrió un error al generar la factura. Por favor, intente nuevamente.",
-      ]);
+    const data = {};
+    formData.forEach((value, key) => {
+      data[key] = value;
     });
-});
+
+    const items = [];
+    itemsTable.querySelectorAll("tr").forEach((row) => {
+      const item = {
+        quantity: row.querySelector(".quantity").value,
+        description: row.querySelector(".description").value,
+        unitPrice: row.querySelector(".unit-price").value,
+      };
+      items.push(item);
+    });
+
+    data.items = items;
+    try {
+      const client = await clientApi.createClient(data.client);
+      console.log("Cliente creado:", response.data);
+      data.client_id = response.data.id;
+    } catch (error) {
+      if (error.response.status === 409) {
+        console.log("El cliente ya existe");
+      } else {
+        console.error("Error al crear el cliente:", error);
+        showErrorPopup([
+          "Ocurrió un error al crear el cliente. Por favor, intente nuevamente.",
+        ]);
+      }
+    }
+
+    facturaApi
+      .generateFactura(data)
+      .then((response) => {
+        //redirect to the invocie using axios
+        console.log("Factura generada:", response.data);
+        const redirectUrl = response.headers.get("X-Redirect-Url");
+        if (redirectUrl) {
+          showSuccessPopup(redirectUrl);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al crear la factura:", error);
+        showErrorPopup([
+          "Ocurrió un error al crear la factura. Por favor, intente nuevamente.",
+        ]);
+      });
+  });
 
 document.querySelectorAll(".popup-overlay").forEach((overlay) => {
   overlay.addEventListener("click", (e) => {
@@ -475,10 +393,6 @@ document.querySelectorAll(".close-popup").forEach((button) => {
   button.addEventListener("click", () => {
     button.closest(".popup-overlay").style.display = "none";
   });
-});
-
-document.getElementById("client-name").addEventListener("keypress", (e) => {
-  const name = document.getElementById("client-name").value;
 });
 
 async function loadClientes() {

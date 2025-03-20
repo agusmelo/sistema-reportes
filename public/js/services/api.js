@@ -63,4 +63,27 @@ const vehicleApi = {
   },
 };
 
-export { clientApi, vehicleApi };
+const facturaApi = {
+  getFacturas: (params) => {
+    return api.get("/facturas/all", { params });
+  },
+
+  getFactura: (facturaId) => {
+    return api.get(`/facturas/${facturaId}`);
+  },
+
+  createFactura: (data) => {
+    return api.post("/", data);
+  },
+  generateFactura: (data) => {
+    return api.post("/generar", data);
+  },
+  updateFactura: (facturaId, data) => {
+    return api.put(`/facturas/${facturaId}`, data);
+  },
+
+  deleteFactura: (facturaId) => {
+    return api.delete(`/facturas/${facturaId}`);
+  },
+};
+export { clientApi, vehicleApi, facturaApi };
