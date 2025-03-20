@@ -52,12 +52,33 @@ class SearchableSelect extends HTMLElement {
   
           li:hover, li:focus {
             background: #f0f0f0;
-}
+          }
+            
+          ::slotted(button) {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 0;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            height: 100%;
+          }
+          .input-container{
+            position: relative;
+            display: inline-block;
+            width: 100%;
+          }
         </style>
         
         <div class="combo-box">
+        <div class="input-container">
+          <slot class="btn" name="button"></slot>
           <input type="text" />
-          <ul></ul>
+        </div>
+        <ul></ul>
         </div>
       `;
 

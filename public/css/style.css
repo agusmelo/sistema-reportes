@@ -390,6 +390,22 @@ body {
     font-size: 16px;
     transition: all 0.3s ease-in-out;
   }
+
+  .btn-search{
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+  .btn-search span.icon {
+    background: url(../assets/search.svg) no-repeat;
+    float: left;
+    width: 24px;
+    height: 24px;
+}
   
 
   /* Responsive design */
