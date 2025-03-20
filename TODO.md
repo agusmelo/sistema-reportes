@@ -1,3 +1,23 @@
+[-]!! Parsear dates
+[-]! Dos botones: 
+-> GENERAR FACTURA: Boton Grande dinamico + actualizar usuario - tiene que ser dinamico para mostrar al usuario que se esta haciendo. 
+4 estados: 
+(1) Verde: Cliente existe + auto existe, solo se actualiza el kilometraje + se genera la factura
+(2) Amarillo: Cliente existe + auto no existe: Se agrega el auto asociado al cliente a al sistema + se genera la factura
+(3) Naranja: Cliente no existe + auto no existe: Se agrega el auto y el cliente al sistema + se genera la factura
+(4) Deshabilitado: El cliente no existe + el auto existe
+-> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
+[-] (provisional) Generar factura: 
+    1. Crear un objeto factura con los datos de la factura
+    2. Generar el pdf de la factura
+    3. Guardar el pdf en una carpeta
+    4. Guardar el objeto en una base de datos sqlite
+[-] (provisional) Generar emergencia: 
+    1. Crear un objeto factura con los datos de la factura
+    2. Guardar el objeto en un archivo json
+    3. Generar el pdf de la factura
+    4. Guardar el pdf en una carpeta
+[-]!! Agregar columna "path" a la tabla de facturas (el path al archivo)
 [-] (provisional) Wipear public/ultima*factura_generada cada vez que se genera una nueva
 [-] Estructura de carpetasde output: AÑO/MES/{cliente}\_{dia(numero)}\_{mes(palara)}\_{año}*{modelo}\_{matricula}.pdf
 [-] agregar base de datos sqlite
@@ -25,3 +45,4 @@ Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown
 [-] Separar model y repository
 [-] Agregar JSON schema validation, [documentac ion](https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js), [libreria ajv](https://www.npmjs.com/package/ajv)
 [-]! Usar AJV para validar los datos: https://ajv.js.org/guide/managing-schemas.html https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js#a-powerful-validation-duo
+[-] Fixear handle errores en la consola (404 cliente, 404 vehiculo, etc) https://i.imgur.com/dssHWfm.png

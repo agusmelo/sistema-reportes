@@ -66,8 +66,11 @@
           <span class="tooltip"
             >?<span class="tooltip-text">Formato: ABC-123 o similar</span></span
           >
-          <searchable-select id="vehicle-plate" placeholder="ej., MAI6778"></searchable-select>
-          <button id="buscar-matricula">Buscar</button>
+          <div>
+            <searchable-select id="vehicle-plate" placeholder="ej., MAI6778">
+              <button slot="button" class="btn-search" id="buscar-matricula"><span class="icon"></span></button>
+            </searchable-select>
+          </div>
           <br /> 
         </div>
 
