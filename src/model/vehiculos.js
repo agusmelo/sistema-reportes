@@ -1,6 +1,6 @@
 const path = require("path");
 const { connectDB } = require(path.join(__dirname, "../db/connect_db.js"));
-
+const handleSQLError = require("../utils/sqliteErrors.js");
 async function agregarVehiculo(
   cliente_id,
   marca,
@@ -17,16 +17,7 @@ async function agregarVehiculo(
     console.log("agregarVehiculo", resultado);
     return { succesful: resultado.changes };
   } catch (error) {
-    if (error.code === "SQLITE_CONSTRAINT") {
-      if (
-        error.message.includes("UNIQUE constraint failed: vehiculos.matricula")
-      ) {
-        throw new Error("Un vehiculo con esa matrícula ya está registrado");
-        //TODO: Mostrar la info del vehiculo que ya existe
-      }
-    }
-    console.error("Database Error:", error.message);
-    throw new Error("Ocurrió un error al insertar el cliente");
+    handleSQLError(error, "vehiculos");
   }
 }
 

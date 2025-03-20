@@ -1,5 +1,6 @@
 const path = require("path");
 const { connectDB } = require("../db/connect_db.js");
+const handleSQLError = require("../utils/sqliteErrors.js");
 
 async function agregarFactura(
   cliente_id,
@@ -41,7 +42,7 @@ async function obtenerFacturas() {
     // });
     return resultado;
   } catch (error) {
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
@@ -56,7 +57,7 @@ async function obtenerFactura(id) {
     resultado[0].items = items;
     return resultado[0];
   } catch (error) {
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
@@ -69,7 +70,7 @@ async function actualizarFactura(id, cambios) {
     ]);
     return resultado;
   } catch (error) {
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
@@ -79,7 +80,7 @@ async function eliminarFactura(id) {
     const resultado = await db.run("DELETE FROM facturas WHERE id = ?", [id]);
     return resultado;
   } catch (error) {
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
@@ -96,7 +97,7 @@ async function agregarItemFactura(
       [factura_id, cantidad, descripcion, precio_unitario]
     );
   } catch (error) {
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
@@ -139,7 +140,7 @@ async function insertarFacturaTransaction(
   } catch (error) {
     db.run("ROLLBACK");
     db.getDatabaseInstance().parallelize();
-    throw error;
+    handleSQLError(error, "facturas");
   }
 }
 
