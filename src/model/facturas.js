@@ -2,22 +2,30 @@ const path = require("path");
 const { connectDB } = require("../db/connect_db.js");
 const handleSQLError = require("../utils/sqliteErrors.js");
 
-async function agregarFactura(
-  cliente_id,
-  vehiculo_id,
-  fecha,
-  items,
-  tieneIva,
-  subtotal,
-  total
-) {
+//TODO: Hay alguna mejor manera de hacer esto? (el pasaje esta solo para abstraer la transaccion)
+// Me refiero a poder chainear varias funciones en una transaccion y luego ejecutarla
+/*
+  Algo como:
+  function (functions[]){
+    db.run("BEGIN");
+    try{
+      for (const func of functions) {
+        func();
+      }
+    } catch(error) {
+      db.run("ROLLBACK");
+      handleSQLError(error);
+    }
+    db.commit();
+  }
+   Tendria que catchear los errores que tiren las funciones en esa funcion para poder hacer el rollback
+*/
+async function agregarFactura(cliente_id, vehiculo_id, fecha, items, tieneIva) {
   const resultado = await insertarFacturaTransaction(
     cliente_id,
     vehiculo_id,
     fecha,
     tieneIva,
-    subtotal,
-    total,
     items
   );
   return resultado;
@@ -107,36 +115,37 @@ async function insertarFacturaTransaction(
   vehiculo_id,
   fecha,
   tieneIva,
-  subtotal,
-  total,
   items
 ) {
   const db = await connectDB();
   db.getDatabaseInstance().serialize();
   db.run("BEGIN");
   try {
-    const insertFactura = db.prepare(
-      "INSERT INTO facturas(cliente_id, vehiculo_id, fecha, iva, subtotal, total) VALUES ( ?, ?, ?, ?, ?, ?)"
-    );
-    const insertItem = db.prepare(
-      "INSERT INTO items_factura(factura_id, cantidad, descripcion, precio_unitario) VALUES (?, ?, ?, ?)"
-    );
-
-    const { lastInsertRowid: facturaId } = await insertFactura.run(
+    const res = await db.run(
+      "INSERT INTO facturas (cliente_id, vehiculo_id, fecha, incluye_iva) VALUES (?, ?, ?, ?)",
       cliente_id,
       vehiculo_id,
       fecha,
-      tieneIva,
-      subtotal,
-      total
+      tieneIva
     );
-
-    for (const item of items) {
-      insertItem.run(facturaId, item.cantidad, item.descripcion, item.precio);
+    if (res.changes === 0) {
+      throw new Error("No se pudo insertar la factura");
     }
-    db.commit();
+
+    const insertItemQuery =
+      "INSERT INTO items_factura(factura_id, cantidad, descripcion, precio_unitario) VALUES (?, ?, ?, ?)";
+    for (const item of items) {
+      await db.run(
+        insertItemQuery,
+        res.lastID,
+        item.quantity,
+        item.description,
+        item.unit_price
+      );
+    }
+    db.run("COMMIT");
     db.getDatabaseInstance().parallelize();
-    return lastInsertRowid;
+    return res.lastID;
   } catch (error) {
     db.run("ROLLBACK");
     db.getDatabaseInstance().parallelize();

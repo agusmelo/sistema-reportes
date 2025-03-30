@@ -1,5 +1,6 @@
 const FacturaModel = require("../model/facturas");
 const ClientModel = require("../model/clientes");
+const VehicleModel = require("../model/vehiculos");
 const responseHandler = require("../utils/responseHandler");
 const Logger = require("../utils/customLog");
 const path = require("path");
@@ -26,10 +27,10 @@ exports.createFactura = async (req, res) => {
     );
     responseHandler.success(res, idFactura, "Factura creada con éxito", 201);
   } catch (error) {
-    responseHandler.error(res, error.message, 400);
-    Logger.error(
+    console.error(
       `Error creating invoice: ${error.message} - ${JSON.stringify(req.body)}`
     );
+    responseHandler.error(res, error.message, 400);
   }
 };
 
@@ -98,6 +99,32 @@ exports.deleteFactura = async (req, res) => {
 // (4) Deshabilitado: El cliente no existe + el auto existe
 // -> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
 //Validation will be implemented with ajv
+//PRE: cliente existe + auto existe
+//POST: cliente existe + auto existe + se actualiza el kilometraje + se genera la factura + (if !emergencia) -> se guarda en la base de datos estructurada
+
+//Example entry
+// {
+//   "client_name": "Cliente 1",
+//   "date": "2023-10-01",
+//   "make": "Marca A",
+//   "model": "Modelo A",
+//   "plate": "ABC123",
+//   "mileage": 10000,
+//   "iva": true,
+//   "items": [
+//     {
+//       "description": "Item 1",
+//       "quantity": 2,
+//       "unit_price": 10
+//     },
+//     {
+//       "description": "Item 2",
+//       "quantity": 1,
+//       "unit_price": 20
+//     }
+//   ]
+// }
+
 exports.generateFactura = async (req, res) => {
   try {
     //TODO : add validation for the request body
@@ -110,16 +137,15 @@ exports.generateFactura = async (req, res) => {
     let client, vehicle;
     try {
       client = await ClientModel.obtenerClientePorNombre(client_name);
-      vehicle = await ClientModel.obtenerVehiculoPorMatricula(plate);
-      console.log("client: ", client);
-      console.log("vehicle: ", vehicle);
-    } catch {
+      vehicle = await VehicleModel.obtenerVehiculoPorMatricula(plate);
+    } catch (err) {
       return responseHandler.error(
         res,
-        `Error al obtener el cliente ${client_name}`,
+        `Error al obtener el cliente o el vehículo: ${err.message}`,
         500
       );
     }
+
     if (!isEmergencia || isEmergencia !== "true") {
       // Si no es emergencia, guardar en la base de datos
 
@@ -127,16 +153,47 @@ exports.generateFactura = async (req, res) => {
       //   return acc + item.precio * item.cantidad;
       // }, 0);
       // const total = iva ? subtotal * 1.21 : subtotal;
-
-      const idFactura = await FacturaModel.agregarFactura(
-        client.id,
-        vehicle.id,
-        date,
-        mileage,
-        items,
-        iva
-      );
-      console.log(`Factura ${idFactura} creada correctamente`);
+      if (!client) {
+        return responseHandler.error(
+          res,
+          `El cliente ${client_name} no existe`,
+          404
+        );
+      }
+      if (!vehicle) {
+        return responseHandler.error(
+          res,
+          `El vehículo ${plate} no existe`,
+          404
+        );
+      }
+      try {
+        await VehicleModel.actualizarKilometraje(plate, mileage);
+      } catch (e) {
+        console.error("Error updating kilometraje:", e);
+        return responseHandler.error(
+          res,
+          `Error al actualizar el kilometraje del vehículo: ${e.message}`,
+          500
+        );
+      }
+      try {
+        const idFactura = await FacturaModel.agregarFactura(
+          client.id,
+          vehicle.id,
+          date,
+          items,
+          iva
+        );
+        console.log(`Factura ${idFactura} creada correctamente`);
+      } catch (e) {
+        console.error("Error creando la factura:", e);
+        return responseHandler.error(
+          res,
+          `Error al crear la factura: ${e.message}`,
+          500
+        );
+      }
     }
     const fechaFactura = new Date(date);
     const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${

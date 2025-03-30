@@ -46,3 +46,5 @@ Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown
 [-] Agregar JSON schema validation, [documentac ion](https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js), [libreria ajv](https://www.npmjs.com/package/ajv)
 [-]! Usar AJV para validar los datos: https://ajv.js.org/guide/managing-schemas.html https://json-schema.org/blog/posts/get-started-with-json-schema-in-node-js#a-powerful-validation-duo
 [-] Fixear handle errores en la consola (404 cliente, 404 vehiculo, etc) https://i.imgur.com/dssHWfm.png
+[-] Cambiar imports a ES6 -> esto arregla el customLogger
+[-] IDEA: Abrstract transaccions: A function that takes n operations and then you can commit them?
