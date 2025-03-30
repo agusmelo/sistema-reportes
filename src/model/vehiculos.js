@@ -91,6 +91,15 @@ async function eliminarVehiculo(id) {
   return { id: resultado[0].id, succesful: changes };
 }
 
+async function actualizarKilometraje(id, kilometraje) {
+  const db = await connectDB();
+  const resultado = db.run(
+    "UPDATE vehiculos SET kilometraje = ? WHERE id = ?",
+    [kilometraje, id]
+  );
+  return resultado;
+}
+
 module.exports = {
   agregarVehiculo,
   obtenerVehiculos,
@@ -101,4 +110,5 @@ module.exports = {
   actualizarVehiculo,
   eliminarVehiculo,
   obtenerVehiculoCliente,
+  actualizarKilometraje,
 };
