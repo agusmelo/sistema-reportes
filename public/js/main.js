@@ -316,44 +316,16 @@ document
     if (!validateForm()) {
       return;
     }
-    const form = document.getElementById("invoice-form");
-    const formData = new FormData();
-    formData.append("client", form.querySelector("#client-name").input.value);
-    formData.append("date", form.querySelector("#date").value);
-    formData.append("make", form.querySelector("#vehicle-make").input.value);
-    formData.append("model", form.querySelector("#vehicle-model").input.value);
-    formData.append("plate", form.querySelector("#vehicle-plate").input.value);
-    formData.append("mileage", form.querySelector("#vehicle-mileage").value);
-    formData.append(
-      "iva",
-      form.querySelector("#iva-toggle-btn").checked ? "on" : "off"
-    );
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ", " + pair[1]);
-    }
 
-    const data = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
+    const data = getInfoForm();
 
-    const items = [];
-    itemsTable.querySelectorAll("tr").forEach((row) => {
-      const item = {
-        quantity: row.querySelector(".quantity").value,
-        description: row.querySelector(".description").value,
-        unitPrice: row.querySelector(".unit-price").value,
-      };
-      items.push(item);
-    });
-
-    data.items = items;
     try {
       const client = await clientApi.createClient(data.client);
-      console.log("Cliente creado:", response.data);
-      data.client_id = response.data.id;
+      // const dataClient = await clientApi.getClientByName(data.client.nombre);
+      console.log("Cliente creado:", client.data);
+      data.client_id = client.data.id;
     } catch (error) {
-      if (error.response.status === 409) {
+      if (error.status === 409) {
         console.log("El cliente ya existe");
       } else {
         console.error("Error al crear el cliente:", error);
@@ -363,22 +335,22 @@ document
       }
     }
 
-    facturaApi
-      .generateFactura(data)
-      .then((response) => {
-        //redirect to the invocie using axios
-        console.log("Factura generada:", response.data);
-        const redirectUrl = response.headers.get("X-Redirect-Url");
-        if (redirectUrl) {
-          showSuccessPopup(redirectUrl);
-        }
-      })
-      .catch((error) => {
-        console.error("Error al crear la factura:", error);
-        showErrorPopup([
-          "Ocurrió un error al crear la factura. Por favor, intente nuevamente.",
-        ]);
+    try {
+      const response = await facturaApi.generateFactura(data, {
+        params: { emergencia: "false" },
       });
+      //redirect to the invocie using axios
+      console.log("Factura generada:", response.data);
+      const redirectUrl = response.headers.get("X-Redirect-Url");
+      if (redirectUrl) {
+        showSuccessPopup(redirectUrl);
+      }
+    } catch (error) {
+      console.error("Error al crear la factura:", error);
+      showErrorPopup([
+        "Ocurrió un error al crear la factura. Por favor, intente nuevamente.",
+      ]);
+    }
   });
 
 document.querySelectorAll(".popup-overlay").forEach((overlay) => {
@@ -428,6 +400,31 @@ function setupAutoComplete() {
 
   document.body.appendChild(datalist);
   makeInput.setAttribute("list", "makes-list");
+}
+
+function getInfoForm() {
+  const form = document.getElementById("invoice-form");
+  const data = {};
+  data.client_name = form.querySelector("#client-name").input.value;
+  data.date = form.querySelector("#date").value;
+  data.make = form.querySelector("#vehicle-make").input.value;
+  data.model = form.querySelector("#vehicle-model").input.value;
+  data.plate = form.querySelector("#vehicle-plate").input.value;
+  data.mileage = form.querySelector("#vehicle-mileage").value;
+  data.iva = form.querySelector("#iva-toggle-btn").checked ? "on" : "off";
+  console.log(data);
+  const items = [];
+  itemsTable.querySelectorAll("tr").forEach((row) => {
+    const item = {
+      quantity: row.querySelector(".quantity").value,
+      description: row.querySelector(".description").value,
+      unitPrice: row.querySelector(".unit-price").value,
+    };
+    items.push(item);
+  });
+
+  data.items = items;
+  return data;
 }
 
 function setupKeyboardShortcuts() {
