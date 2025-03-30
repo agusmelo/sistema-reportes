@@ -7,23 +7,23 @@ function handleSQLError(error, modelName = "", logErrors = true) {
   if (error.code === "SQLITE_CONSTRAINT") {
     if (error.message.includes("UNIQUE constraint failed")) {
       const field = error.message.split(": ")[1]; // Extract the field name
-      return new UniqueConstraintError(field);
+      throw new UniqueConstraintError(field);
     }
-    return new DatabaseError(
+    throw new DatabaseError(
       "Restricción de integridad violada en la base de datos"
     );
   } else if (error.code === "SQLITE_BUSY") {
-    return new DatabaseError(
+    throw new DatabaseError(
       "La base de datos está ocupada, intenta de nuevo más tarde"
     );
   } else if (error.code === "SQLITE_IOERR") {
-    return new DatabaseError(
+    throw new DatabaseError(
       "Error de entrada/salida al acceder a la base de datos"
     );
   }
 
   console.error("Database Error:", error);
-  return new DatabaseError("Error inesperado en la base de datos");
+  throw new DatabaseError("Error inesperado en la base de datos");
 }
 
 module.exports = handleSQLError;
