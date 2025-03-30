@@ -7,5 +7,6 @@ router.get("/:id", facturaController.getFacturaById);
 router.post("/", facturaController.createFactura);
 router.put("/:id", facturaController.updateFactura);
 router.delete("/:id", facturaController.deleteFactura);
+router.post("/generar", facturaController.generateFactura);
 
 module.exports = router;

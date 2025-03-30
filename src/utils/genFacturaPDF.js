@@ -1,6 +1,7 @@
 //? Si hay un error con las fonts, seguro es que no se configuraron (ejecutar install_pdfmake_fonts o leer el README)
 const CUSTOM_FIELDS = {};
 
+const path = require("path");
 const { HORIZONTAL_SPACE } = require("./constants");
 const pdfMake = require("pdfmake/build/pdfmake");
 const vfs_fonts = require("pdfmake/build/vfs_fonts");
@@ -23,6 +24,7 @@ const fonts = {
 
 exports.generateFacturaPDF = async (data) => {
   const { client, date, make, model, plate, mileage, items, iva } = data;
+
   // Calculate line totals and overall total
   const parsedItems = items.map((item) => ({
     quantity: parseFloat(item.quantity),
@@ -45,6 +47,10 @@ exports.generateFacturaPDF = async (data) => {
           { text: "", style: "totalAmount" },
         ];
 
+  const logoPath = path.join(__dirname, "../public/assets/logo_prov.png");
+  const logoBase64 = `data:image/png;base64,${fs
+    .readFileSync(logoPath)
+    .toString("base64")}`;
   const docDefinition = {
     pageMargins: [40, 40, 40, 80], // [left, top, right, bottom]
     footer: function (currentPage, pageCount) {

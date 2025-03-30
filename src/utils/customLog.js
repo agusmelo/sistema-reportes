@@ -1,5 +1,4 @@
 import chalk from "chalk";
-
 class Logger {
   static dev(message) {
     console.log(chalk.cyan(`[D] ${message}`));
