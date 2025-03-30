@@ -42,9 +42,7 @@ async function loadTables() {
     cliente_id INTEGER NOT NULL,
     vehiculo_id INTEGER NOT NULL,
     fecha DATE NOT NULL,
-    iva REAL NOT NULL,
-    subtotal REAL NOT NULL,
-    total REAL NOT NULL,
+    incluye_iva BOOLEAN NOT NULL DEFAULT 1, -- 1 = Include IVA, 0 = No IVA
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
     FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id) ON DELETE CASCADE
@@ -53,9 +51,9 @@ async function loadTables() {
         CREATE TABLE IF NOT EXISTS items_factura (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         factura_id INTEGER NOT NULL,
-        cantidad INTEGER NOT NULL,
+        cantidad INTEGER NOT NULL CHECK (cantidad > 0),
         descripcion TEXT NOT NULL,
-        precio_unitario REAL NOT NULL,
+        precio_unitario REAL NOT NULL CHECK (precio_unitario >= 0),
         FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE CASCADE
     );`,
     clientes: `
@@ -119,25 +117,19 @@ async function loadTestData() {
         cliente_id: 1,
         vehiculo_id: 1,
         fecha: new Date(),
-        iva: 21,
-        subtotal: 100,
-        total: 121,
+        incluye_iva: 1,
       },
       {
         cliente_id: 2,
         vehiculo_id: 2,
         fecha: new Date(),
-        iva: 21,
-        subtotal: 200,
-        total: 242,
+        incluye_iva: 0,
       },
       {
         cliente_id: 3,
         vehiculo_id: 3,
         fecha: new Date(),
-        iva: 21,
-        subtotal: 300,
-        total: 363,
+        incluye_iva: 1,
       },
     ],
     items_factura: [
@@ -187,6 +179,7 @@ async function loadTestData() {
     ],
   };
   db.getDatabaseInstance().serialize(function () {
+    db.run("BEGIN");
     for (const table in testData) {
       const data = testData[table];
       for (const row of data) {
@@ -198,15 +191,27 @@ async function loadTestData() {
             .join(", ")})`,
           Object.values(row),
           (err) => {
-            if (err) console.log(`Error inserting data into ${table} table`);
+            if (err) {
+              console.log(`Error inserting data into ${table} table`);
+              db.run("ROLLBACK", (err) => {
+                if (err)
+                  console.log(`Error rolling back data in ${table} table`);
+              });
+              return;
+            }
             return;
           }
         );
       }
     }
+    db.run("COMMIT", (err) => {
+      if (err) console.log(`Error committing data to ${table} table`);
+      return;
+    });
   });
 }
 
+// loadTestData();
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
