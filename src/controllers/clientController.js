@@ -1,20 +1,33 @@
+const { response } = require("express");
 const ClientModel = require("../model/clientes");
-
+const responseHandler = require("../utils/responseHandler");
 // TODO: agregar error handling y validacion de tipos
+// if the client already exists, return an error code 409
+// if the client does not exist, create a new client
 exports.createClient = async (req, res) => {
   const { nombre } = req.body;
   try {
+    // Check if the client already exists
+    const clienteExistente = await ClientModel.obtenerClientePorNombre(nombre);
+    if (clienteExistente) {
+      console.log(`El cliente ${nombre} ya existe`);
+      return responseHandler.fail(
+        res,
+        { id: clienteExistente.id },
+        `El cliente ${nombre} ya existe`,
+        409
+      );
+    }
     await ClientModel.agregarCliente(nombre);
-    res.status(201).json({
-      message: "Usuario creado con éxito",
-      nombre: nombre,
-    });
+    responseHandler.success(
+      res,
+      null,
+      `Cliente ${nombre} creado con éxito`,
+      201
+    );
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      message: "Error al crear el usuario",
-      error: error.message,
-    });
+    responseHandler.fail(res, null, `Error al crear el cliente ${nombre}`, 500);
   }
 };
 

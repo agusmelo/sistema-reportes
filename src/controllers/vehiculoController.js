@@ -1,5 +1,6 @@
 const VehiculoModel = require("../model/vehiculos");
-const { responseHandler } = require("../utils/responseHandler");
+const responseHandler = require("../utils/responseHandler");
+const Logger = require("../utils/customLog");
 // Obtener todos los vehículos
 exports.getVehiculos = async (req, res) => {
   try {
@@ -134,12 +135,16 @@ exports.deleteVehiculo = async (req, res) => {
 exports.getVehiculoByMatricula = async (req, res) => {
   try {
     const { matricula } = req.params;
+    console.log();
     const vehiculo = await VehiculoModel.obtenerVehiculoPorMatricula(matricula);
     if (!vehiculo) {
       return responseHandler.error(res, "Vehículo no encontrado", 404);
     }
     return responseHandler.success(res, vehiculo);
   } catch (error) {
+    Logger.error(
+      `Error al obtener el vehículo por matrícula: ${error.message}`
+    );
     res.status(500).json({
       message: "Error al obtener el vehículo",
       error: error.message,
