@@ -1,5 +1,6 @@
 //? Si hay un error con las fonts, seguro es que no se configuraron (ejecutar install_pdfmake_fonts o leer el README)
 const CUSTOM_FIELDS = {};
+const fs = require("fs");
 
 const path = require("path");
 const { HORIZONTAL_SPACE } = require("./constants");
@@ -23,7 +24,19 @@ const fonts = {
 };
 
 exports.generateFacturaPDF = async (data) => {
-  const { client, date, make, model, plate, mileage, items, iva } = data;
+  const {
+    client,
+    date,
+    make,
+    model,
+    plate,
+    mileage,
+    items,
+    incluye_iva,
+    ivaSolo,
+    subtotal,
+    total,
+  } = data;
 
   // Calculate line totals and overall total
   const parsedItems = items.map((item) => ({
@@ -32,22 +45,21 @@ exports.generateFacturaPDF = async (data) => {
     unitPrice: parseFloat(item.unitPrice),
     lineTotal: parseFloat(item.quantity) * parseFloat(item.unitPrice),
   }));
-  const subtotal = parsedItems.reduce((sum, item) => sum + item.lineTotal, 0);
-  const total = iva === "on" ? subtotal + subtotal * 0.22 : subtotal;
-  const ivaSolo = iva === "on" ? subtotal * 0.22 : 0;
+  // const subtotal = parsedItems.reduce((sum, item) => sum + item.lineTotal, 0);
+  // const total = iva === "on" ? subtotal + subtotal * 0.22 : subtotal;
+  // const ivaSolo = incluye_iva === "on" ? subtotal * 0.22 : 0;
 
-  CUSTOM_FIELDS.ivaField =
-    iva === "on"
-      ? [
-          { text: "IVA:", style: "totalLabel" },
-          { text: `$${ivaSolo.toFixed(2)}`, style: "totalAmount" },
-        ]
-      : [
-          { text: "", style: "totalLabel" },
-          { text: "", style: "totalAmount" },
-        ];
+  CUSTOM_FIELDS.ivaField = incluye_iva
+    ? [
+        { text: "IVA:", style: "totalLabel" },
+        { text: `$${ivaSolo.toFixed(2)}`, style: "totalAmount" },
+      ]
+    : [
+        { text: "", style: "totalLabel" },
+        { text: "", style: "totalAmount" },
+      ];
 
-  const logoPath = path.join(__dirname, "../public/assets/logo_prov.png");
+  const logoPath = path.join(__dirname, "../../public/assets/logo_prov.png");
   const logoBase64 = `data:image/png;base64,${fs
     .readFileSync(logoPath)
     .toString("base64")}`;
