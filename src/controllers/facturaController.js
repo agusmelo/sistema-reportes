@@ -2,12 +2,11 @@ const FacturaModel = require("../model/facturas");
 const ClientModel = require("../model/clientes");
 const VehicleModel = require("../model/vehiculos");
 const responseHandler = require("../utils/responseHandler");
-const Logger = require("../utils/customLog");
+const { appendToJsonFile } = require("../utils/jsonAppender");
 const path = require("path");
 const fs = require("fs");
 const { generateFacturaPDF } = require("../utils/genFacturaPDF");
 const { MESES } = require("../utils/constants");
-// const { response } = require("express");
 
 // Create a new factura
 exports.createFactura = async (req, res) => {
@@ -128,12 +127,19 @@ exports.deleteFactura = async (req, res) => {
 exports.generateFactura = async (req, res) => {
   try {
     //TODO : add validation for the request body
-    const { client_name, date, make, model, plate, mileage, iva, items } =
-      req.body;
+    const {
+      client_name,
+      date,
+      make,
+      model,
+      plate,
+      mileage,
+      incluye_iva,
+      items,
+    } = req.body;
     const { emergencia: isEmergencia } = req.query;
     // facturaValidation(client_id, date, make, model, plate, mileage, iva, items);
 
-    // get client data form client name
     let client, vehicle;
     try {
       client = await ClientModel.obtenerClientePorNombre(client_name);
@@ -167,7 +173,15 @@ exports.generateFactura = async (req, res) => {
           404
         );
       }
+      if (client.id !== vehicle.cliente_id) {
+        return responseHandler.error(
+          res,
+          `El vehículo ${plate} no pertenece al cliente ${client_name}`,
+          400
+        );
+      }
       try {
+        //TODO: esto deberia actualizarse en otro lado
         await VehicleModel.actualizarKilometraje(plate, mileage);
       } catch (e) {
         console.error("Error updating kilometraje:", e);
@@ -183,9 +197,10 @@ exports.generateFactura = async (req, res) => {
           vehicle.id,
           date,
           items,
-          iva
+          incluye_iva
         );
         console.log(`Factura ${idFactura} creada correctamente`);
+        // Si la factura se crea correctamente, se puede continuar
       } catch (e) {
         console.error("Error creando la factura:", e);
         return responseHandler.error(
@@ -194,14 +209,42 @@ exports.generateFactura = async (req, res) => {
           500
         );
       }
+    } else {
+      // Si es emergencia, no guardar en la base de datos
+      console.log("Emergencia: no se guardará en la base de datos");
+      appendToJsonFile(path.join(__dirname, "../output", "emergencia.json"), {
+        client_name,
+        date,
+        make,
+        model,
+        plate,
+        mileage,
+        incluye_iva,
+        items,
+      });
     }
     const fechaFactura = new Date(date);
-    const nombreDeArchivo = `${client}_${fechaFactura.getDate()}_${
+    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
       MESES[fechaFactura.getMonth()]
     }_${fechaFactura.getFullYear()}_${make}_${model}`;
 
-    // Crear la definición del documento
+    // Crear la definición del document
     const pdfBuffer = await generateFacturaPDF({
+      client_name,
+      date,
+      make,
+      model,
+      plate,
+      mileage,
+      items,
+      incluye_iva,
+      ivaSolo,
+      subtotal,
+      total,
+    });
+    // Guardar JSON
+    const jsonOutputPath = path.join(__dirname, "output/invoice.json");
+    appendToJsonFile(jsonOutputPath, {
       client,
       date,
       make,
@@ -209,10 +252,11 @@ exports.generateFactura = async (req, res) => {
       plate,
       mileage,
       items,
-      iva,
+      incluye_iva,
+      ivaSolo,
+      subtotal,
+      total,
     });
-    // Guardar JSON
-    const jsonOutputPath = path.join(__dirname, "output/invoice.json");
     fs.writeFileSync(
       jsonOutputPath,
       JSON.stringify(
