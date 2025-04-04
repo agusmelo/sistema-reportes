@@ -320,7 +320,7 @@ document
     const data = getInfoForm();
 
     try {
-      const client = await clientApi.createClient(data.client);
+      const client = await clientApi.createClient(data.client_name);
       // const dataClient = await clientApi.getClientByName(data.client.nombre);
       console.log("Cliente creado:", client.data);
       data.client_id = client.data.id;
