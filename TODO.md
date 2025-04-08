@@ -49,3 +49,6 @@ Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown
 [-] Cambiar imports a ES6 -> esto arregla el customLogger
 [-] IDEA: Abrstract transaccions: A function that takes n operations and then you can commit them?
 [-] Add metadata to the pdf files generated for better searchability [pdfmake doc](https://pdfmake.github.io/docs/0.1/document-definition-object/document-medatadata/)
+[-] Standarize body of requests in front 
+[-] Dividir endpoint generar factura en 2, guardar factura y obtener factura
+[-] ! SQL: Agregar a la tabla facturas columna file_path del path de la factura generada 
