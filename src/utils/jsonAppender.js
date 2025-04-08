@@ -1,5 +1,4 @@
 const fs = require("fs").promises;
-const path = require("path");
 
 /**
  * Appends an object to a JSON file safely, with file locking and atomic writes.
@@ -41,8 +40,10 @@ async function appendToJsonFile(filePath, newObject) {
     await fs.rename(tempFilePath, filePath); // Swap files safely
 
     console.log(`Object successfully appended to ${filePath}`);
+    return true;
   } catch (error) {
     console.error("Error updating JSON file:", error);
+    return false;
   } finally {
     await releaseLock(lockFilePath); // 🔓 Unlock the file
   }

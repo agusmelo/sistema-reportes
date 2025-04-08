@@ -140,7 +140,7 @@ async function insertarFacturaTransaction(
         res.lastID,
         item.quantity,
         item.description,
-        item.unit_price
+        item.unitPrice
       );
     }
     db.run("COMMIT");
@@ -153,10 +153,42 @@ async function insertarFacturaTransaction(
   }
 }
 
+async function getInvoiceWithTotal(facturaId) {
+  try {
+    const db = await connectDB();
+    const result = await db.get(
+      `SELECT 
+                f.id,
+                f.cliente_id,
+                f.vehiculo_id,
+                f.fecha,
+                f.incluye_iva,
+                COALESCE(SUM(i.cantidad * i.precio_unitario), 0) AS subtotal,
+                CASE 
+                    WHEN f.incluye_iva = 1 THEN COALESCE(SUM(i.cantidad * i.precio_unitario), 0) * 0.21
+                    ELSE 0
+                END AS iva,
+                CASE 
+                    WHEN f.incluye_iva = 1 THEN COALESCE(SUM(i.cantidad * i.precio_unitario), 0) * 1.21
+                    ELSE COALESCE(SUM(i.cantidad * i.precio_unitario), 0)
+                END AS total
+            FROM facturas f
+            LEFT JOIN items_factura i ON i.factura_id = f.id
+            WHERE f.id = ?
+            GROUP BY f.id`,
+      [facturaId]
+    );
+    return result;
+  } catch (error) {
+    handleSQLError(error, "facturas");
+  }
+}
+
 module.exports = {
   agregarFactura,
   obtenerFactura,
   obtenerFacturas,
   actualizarFactura,
   eliminarFactura,
+  getInvoiceWithTotal,
 };

@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const { generateFacturaPDF } = require("../utils/genFacturaPDF");
 const { MESES } = require("../utils/constants");
+const writeFileAtomicSync = require("write-file-atomic").sync;
 
 // Create a new factura
 exports.createFactura = async (req, res) => {
@@ -139,7 +140,13 @@ exports.generateFactura = async (req, res) => {
     } = req.body;
     const { emergencia: isEmergencia } = req.query;
     // facturaValidation(client_id, date, make, model, plate, mileage, iva, items);
-
+    const actionLog = {
+      pdfCreated: false,
+      jsonCreated: false,
+      pdfStored: false,
+      dbStored: true,
+      kilometrajeUpdated: false,
+    };
     let client, vehicle;
     try {
       client = await ClientModel.obtenerClientePorNombre(client_name);
@@ -183,6 +190,7 @@ exports.generateFactura = async (req, res) => {
       try {
         //TODO: esto deberia actualizarse en otro lado
         await VehicleModel.actualizarKilometraje(plate, mileage);
+        actionLog.kilometrajeUpdated = true;
       } catch (e) {
         console.error("Error updating kilometraje:", e);
         return responseHandler.error(
@@ -199,6 +207,7 @@ exports.generateFactura = async (req, res) => {
           items,
           incluye_iva
         );
+        actionLog.dbStored = true;
         console.log(`Factura ${idFactura} creada correctamente`);
         // Si la factura se crea correctamente, se puede continuar
       } catch (e) {
@@ -210,6 +219,7 @@ exports.generateFactura = async (req, res) => {
         );
       }
     } else {
+      //TODO: Implementar el caso de emergencia
       // Si es emergencia, no guardar en la base de datos
       console.log("Emergencia: no se guardará en la base de datos");
       appendToJsonFile(path.join(__dirname, "../output", "emergencia.json"), {
@@ -228,6 +238,14 @@ exports.generateFactura = async (req, res) => {
       MESES[fechaFactura.getMonth()]
     }_${fechaFactura.getFullYear()}_${make}_${model}`;
 
+    const facturaAgregada = await FacturaModel.getInvoiceWithTotal(
+      client.id,
+      vehicle.id,
+      date,
+      incluye_iva,
+      items
+    );
+
     // Crear la definición del document
     const pdfBuffer = await generateFacturaPDF({
       client_name,
@@ -238,13 +256,14 @@ exports.generateFactura = async (req, res) => {
       mileage,
       items,
       incluye_iva,
-      ivaSolo,
-      subtotal,
-      total,
+      ivaSolo: facturaAgregada.iva,
+      subtotal: facturaAgregada.subtotal,
+      total: facturaAgregada.total,
     });
+    actionLog.pdfCreated = true;
     // Guardar JSON
-    const jsonOutputPath = path.join(__dirname, "output/invoice.json");
-    appendToJsonFile(jsonOutputPath, {
+    const jsonOutputPath = "../output/invoice.json";
+    const jsonCreatedSuccess = appendToJsonFile(jsonOutputPath, {
       client,
       date,
       make,
@@ -253,65 +272,44 @@ exports.generateFactura = async (req, res) => {
       mileage,
       items,
       incluye_iva,
-      ivaSolo,
-      subtotal,
-      total,
+      ivaSolo: facturaAgregada.iva,
+      subtotal: facturaAgregada.subtotal,
+      total: facturaAgregada.total,
     });
-    fs.writeFileSync(
-      jsonOutputPath,
-      JSON.stringify(
-        {
-          client,
-          date,
-          make,
-          model,
-          plate,
-          mileage,
-          items,
-          total,
-          subtotal,
-        },
-        null,
-        2
-      ),
-      "utf-8"
-    );
-
+    if (jsonCreatedSuccess) actionLog.jsonCreated = true;
     // Guardar el PDF en el servidor
-    pdfBuffer.getBuffer((buffer) => {
-      const privateOutputPath = path.join(
-        __dirname,
-        "output",
-        `${nombreDeArchivo}.pdf`
-      );
-      const publicOutputPath = path.join(
-        __dirname,
-        "../public",
-        "ultima_factura_generada",
-        `${nombreDeArchivo}.pdf`
-      );
-
-      fs.writeFileSync(privateOutputPath, buffer);
-      // Crear un enlace simbólico del PDF en la carpeta public
-      if (fs.existsSync(publicOutputPath)) {
-        fs.unlinkSync(publicOutputPath);
-      }
-      fs.symlinkSync(privateOutputPath, publicOutputPath);
-      // fs.writeFileSync(`./public/${nombreDeArvhivo}.pdf`, buffer);
-
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader(
-        "X-Redirect-Url",
-        `/ultima_factura_generada/${nombreDeArchivo}.pdf`
-      );
-      res.json({
-        message: "Factura generada exitosamente",
+    const privateOutputPath = path.join(
+      __dirname,
+      "output",
+      `${nombreDeArchivo}.pdf`
+    );
+    const publicOutputPath = path.join(
+      __dirname,
+      "../public",
+      "ultima_factura_generada",
+      `${nombreDeArchivo}.pdf`
+    );
+    storePDF(pdfBuffer, publicOutputPath, privateOutputPath);
+    return responseHandler.success(
+      res,
+      {
         pdfUrl: `/ultima_factura_generada/${nombreDeArchivo}.pdf`,
         jsonPath: jsonOutputPath,
-      });
-    });
+      },
+      "Factura generada exitosamente",
+      200
+    );
   } catch (err) {
     console.error("Error generating invoice:", err);
     res.status(500).send({ error: "Failed to generate invoice" });
   }
 };
+
+function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
+  // Atomic write to prevent corrpution in case of crash
+  writeFileAtomicSync(privateFilePath, pdfBuffer);
+  if (fs.existsSync(publicFilePath)) {
+    fs.unlinkSync(publicFilePath);
+  }
+  fs.symlinkSync(privateFilePath, privateFilePath);
+}

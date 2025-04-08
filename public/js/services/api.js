@@ -77,7 +77,7 @@ const facturaApi = {
   },
   // TODO: arreglar para generalizar varios options
   generateFactura: (data, config) => {
-    return api.post("/generar", data, config);
+    return api.post("/facturas/generar", data, config);
   },
   updateFactura: (facturaId, data) => {
     return api.put(`/facturas/${facturaId}`, data);

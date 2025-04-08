@@ -320,7 +320,7 @@ document
     const data = getInfoForm();
 
     try {
-      const client = await clientApi.createClient(data.client_name);
+      const client = await clientApi.createClient({ nombre: data.client_name });
       // const dataClient = await clientApi.getClientByName(data.client.nombre);
       console.log("Cliente creado:", client.data);
       data.client_id = client.data.id;
@@ -411,7 +411,7 @@ function getInfoForm() {
   data.model = form.querySelector("#vehicle-model").input.value;
   data.plate = form.querySelector("#vehicle-plate").input.value;
   data.mileage = form.querySelector("#vehicle-mileage").value;
-  data.iva = form.querySelector("#iva-toggle-btn").checked ? "on" : "off";
+  data.incluye_iva = form.querySelector("#iva-toggle-btn").checked;
   console.log(data);
   const items = [];
   itemsTable.querySelectorAll("tr").forEach((row) => {
