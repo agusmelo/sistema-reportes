@@ -91,12 +91,13 @@ async function eliminarVehiculo(id) {
   return { id: resultado[0].id, succesful: changes };
 }
 
-async function actualizarKilometraje(id, kilometraje) {
+async function actualizarKilometraje(matricula, kilometraje) {
   const db = await connectDB();
-  const resultado = db.run(
-    "UPDATE vehiculos SET kilometraje = ? WHERE id = ?",
-    [kilometraje, id]
+  const resultado = await db.run(
+    "UPDATE vehiculos SET kilometraje = ? WHERE matricula = ?",
+    [kilometraje, matricula]
   );
+  console.log("actualizarKilometraje", resultado);
   return resultado;
 }
 
