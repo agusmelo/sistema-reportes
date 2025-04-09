@@ -31,7 +31,7 @@ exports.getVehiculoById = async (req, res) => {
   }
 };
 
-exports.getVehiculoByClienteId = async (req, res) => {
+exports.getVehiculosByClienteId = async (req, res) => {
   try {
     const { cliente_id } = req.params;
     // check query params for marca and modelo

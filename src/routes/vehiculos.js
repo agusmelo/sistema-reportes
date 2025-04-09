@@ -4,7 +4,7 @@ const vehiculoController = require("../controllers/vehiculoController");
 
 router.get("/all", vehiculoController.getVehiculos);
 router.get("/:id", vehiculoController.getVehiculoById);
-router.get("/cliente/:cliente_id", vehiculoController.getVehiculoByClienteId);
+router.get("/cliente/:cliente_id", vehiculoController.getVehiculosByClienteId);
 router.get("/matricula/:matricula", vehiculoController.getVehiculoByMatricula);
 router.get("/modelo/:cliente_id/:marca", vehiculoController.getModelosByMarca);
 router.post("/", vehiculoController.createVehiculo);
