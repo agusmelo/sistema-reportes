@@ -234,10 +234,6 @@ exports.generateFactura = async (req, res) => {
       });
     }
     const fechaFactura = new Date(date);
-    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
-      MESES[fechaFactura.getMonth()]
-    }_${fechaFactura.getFullYear()}_${make}_${model}`;
-
     const facturaAgregada = await FacturaModel.getInvoiceWithTotal(
       client.id,
       vehicle.id,
@@ -245,6 +241,12 @@ exports.generateFactura = async (req, res) => {
       incluye_iva,
       items
     );
+
+    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
+      MESES[fechaFactura.getMonth()]
+    }_${fechaFactura.getFullYear()}_${make}_${model}_${plate}_${
+      facturaAgregada.id
+    }`;
 
     // Crear la definición del document
     const pdfBuffer = await generateFacturaPDF({
@@ -261,9 +263,11 @@ exports.generateFactura = async (req, res) => {
       total: facturaAgregada.total,
     });
     actionLog.pdfCreated = true;
+    console.log(facturaAgregada);
     // Guardar JSON
-    const jsonOutputPath = "../output/invoice.json";
-    const jsonCreatedSuccess = appendToJsonFile(jsonOutputPath, {
+    const jsonOutputPath = path.join(__dirname, "../output/invoice.json");
+    appendToJsonFile(jsonOutputPath, {
+      id: facturaAgregada.id,
       client,
       date,
       make,
@@ -276,16 +280,16 @@ exports.generateFactura = async (req, res) => {
       subtotal: facturaAgregada.subtotal,
       total: facturaAgregada.total,
     });
-    if (jsonCreatedSuccess) actionLog.jsonCreated = true;
+    actionLog.jsonCreated = true;
     // Guardar el PDF en el servidor
     const privateOutputPath = path.join(
       __dirname,
-      "output",
+      "../output",
       `${nombreDeArchivo}.pdf`
     );
     const publicOutputPath = path.join(
       __dirname,
-      "../public",
+      "../../public",
       "ultima_factura_generada",
       `${nombreDeArchivo}.pdf`
     );
@@ -311,5 +315,5 @@ function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
   if (fs.existsSync(publicFilePath)) {
     fs.unlinkSync(publicFilePath);
   }
-  fs.symlinkSync(privateFilePath, privateFilePath);
+  fs.symlinkSync(privateFilePath, publicFilePath);
 }

@@ -25,7 +25,7 @@ const fonts = {
 
 exports.generateFacturaPDF = async (data) => {
   const {
-    client,
+    client_name,
     date,
     make,
     model,
@@ -128,7 +128,7 @@ exports.generateFacturaPDF = async (data) => {
             width: "*",
             text: [
               { text: `Cliente: `, style: "label", lineHeight: 2 },
-              { text: `${client}\n`, style: "value", lineHeight: 2 },
+              { text: `${client_name}\n`, style: "value", lineHeight: 2 },
               { text: `Fecha: `, style: "label", lineHeight: 2 },
               { text: `${date}\n`, style: "value", lineHeight: 2 },
               { text: `Vehículo: `, style: "label", lineHeight: 2 },
