@@ -7,8 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const { generateFacturaPDF } = require("../utils/genFacturaPDF");
 const { MESES } = require("../utils/constants");
-const writeFileAtomicSync = require("write-file-atomic").sync;
-
+const { ensurePathAndFile } = require("../utils/helpers");
 // Create a new factura
 exports.createFactura = async (req, res) => {
   try {
@@ -293,7 +292,7 @@ exports.generateFactura = async (req, res) => {
       "ultima_factura_generada",
       `${nombreDeArchivo}.pdf`
     );
-    storePDF(pdfBuffer, publicOutputPath, privateOutputPath);
+    storePDF(pdfBuffer, publicOutputPath, privateOutputPath, fechaFactura);
     return responseHandler.success(
       res,
       {
@@ -309,9 +308,23 @@ exports.generateFactura = async (req, res) => {
   }
 };
 
-function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
+function storePDF(pdfBuffer, publicFilePath, privateFilePath, fechaFactura) {
   // Atomic write to prevent corrpution in case of crash
-  writeFileAtomicSync(privateFilePath, pdfBuffer);
+  console.log(
+    path.dirname(privateFilePath),
+    fechaFactura.getFullYear().toString(),
+    MESES[fechaFactura.getMonth()]
+  );
+  ensurePathAndFile(
+    path.join(
+      path.dirname(privateFilePath),
+      fechaFactura.getFullYear().toString(),
+      MESES[fechaFactura.getMonth()]
+    ),
+    path.basename(privateFilePath),
+    pdfBuffer
+  );
+  // writeFileAtomicSync(privateFilePath, pdfBuffer);
   if (fs.existsSync(publicFilePath)) {
     fs.unlinkSync(publicFilePath);
   }

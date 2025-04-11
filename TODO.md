@@ -52,3 +52,6 @@ Solucion: cambie le event listerner de las opciones <li> de 'click' a 'mousedown
 [-] Standarize body of requests in front 
 [-] Dividir endpoint generar factura en 2, guardar factura y obtener factura
 [-] ! SQL: Agregar a la tabla facturas columna file_path del path de la factura generada 
+[-] en el front la fecha esta MM/DD/AAAA, cambiar a DD/MM/AAAA
+[-] Si la matricula existe, chequear que el la marca y modelo ingresados coincida con las de la base de datos
+[-] Front: Select, si se sale https://imgur.com/a/eKwzEgn

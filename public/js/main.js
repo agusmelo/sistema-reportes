@@ -24,6 +24,25 @@ const vehiculoModeloSelect = document.querySelector("#vehicle-model");
 const vehiculoMatriculaSelect = document.querySelector("#vehicle-plate");
 const vehiculoKilometrajeInput = document.querySelector("#vehicle-mileage");
 
+// -> GENERAR FACTURA: Boton Grande dinamico + actualizar usuario - tiene que ser dinamico para mostrar al usuario que se esta haciendo.
+// 4 estados:
+// (1) Verde: Cliente existe + auto existe, solo se actualiza el kilometraje + se genera la factura
+// (2) Amarillo: Cliente existe + auto no existe: Se agrega el auto asociado al cliente a al sistema + se genera la factura
+// (3) Naranja: Cliente no existe + auto no existe: Se agrega el auto y el cliente al sistema + se genera la factura
+// (4) Deshabilitado: El cliente no existe + el auto existe
+// -> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
+// generar un objeto que genere los estados arriba
+
+// estadoGenerarFactura.* -> true: el estado se cumplio, false: el estado no se cumplio, null: el input esta vacío o inicializacion
+const estadoGenerarFactura = {
+  clienteExiste: null,
+  vehiculoExiste: null,
+  kilometrajeActualizado: null,
+  facturaGenerada: null,
+  error: null,
+  emergencia: null,
+};
+
 //Setup afterSelect function para los searchable-selects
 clientesSelect.afterSelect = async (e) => {
   [vehiculoMarcaSelect, vehiculoModeloSelect, vehiculoMatriculaSelect].forEach(
@@ -87,6 +106,13 @@ clientesSelect.afterSelect = async (e) => {
     } else {
       console.error("Error al obtener el cliente:", error);
     }
+  } finally {
+    if (clientesSelect.input.value === "") {
+      estadoGenerarFactura.clienteExiste = null;
+    } else {
+      estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
+    }
+    console.log("Estado", estadoGenerarFactura);
   }
 };
 
@@ -139,21 +165,36 @@ vehiculoModeloSelect.afterSelect = (e) => {
   }
 };
 
-vehiculoMatriculaSelect.afterSelect = (e) => {
+vehiculoMatriculaSelect.afterSelect = async (e) => {
   vehiculoKilometrajeInput.value = "";
-  if (vehiculoMatriculaSelect.input.value !== "") {
-    const vehiculoSeleccionado = listaInfoVehiculos.find(
-      (vehiculo) =>
-        vehiculo.matricula.toUpperCase() ===
-        vehiculoMatriculaSelect.input.value.toUpperCase()
-    );
-    if (vehiculoSeleccionado !== undefined) {
-      vehiculoKilometrajeInput.value = vehiculoSeleccionado.kilometraje;
-      // si la matricula esta en la lista, cargar el kilometraje, y la marca y modelo del vehiculo
-      vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
-      vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
-    }
+  //TODO: requestear el vehiculo al backend
+  const vehiculoSeleccionado = listaInfoVehiculos.find(
+    (vehiculo) =>
+      vehiculo.matricula.toUpperCase() ===
+      vehiculoMatriculaSelect.input.value.toUpperCase()
+  );
+  if (
+    vehiculoMatriculaSelect.input.value !== "" &&
+    vehiculoSeleccionado !== undefined
+  ) {
+    vehiculoKilometrajeInput.value = vehiculoSeleccionado.kilometraje;
+    // si la matricula esta en la lista, cargar el kilometraje, y la marca y modelo del vehiculo
+    vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
+    vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
   }
+  if (vehiculoMatriculaSelect.input.value === "") {
+    estadoGenerarFactura.vehiculoExiste = null;
+  } else {
+    // call al backend para preguntar si el la matricula existe
+    estadoGenerarFactura.vehiculoExiste =
+      vehiculoSeleccionado !== undefined &&
+      listaInfoVehiculos.find(
+        (vehiculo) =>
+          vehiculo.matricula.toUpperCase() ===
+          vehiculoMatriculaSelect.input.value.toUpperCase()
+      );
+  }
+  console.log("Estado", estadoGenerarFactura);
 };
 
 //TODO: Parsear la fecha
@@ -262,11 +303,13 @@ document.getElementById("test-btn").addEventListener("click", (e) => {
   addRow();
 });
 
-function showErrorPopup(errors) {
+function showErrorPopup(title, errors = ["Error desconocido"]) {
   const popup = document.getElementById("error-popup");
   const errorList = document.getElementById("error-list");
+  const elemTitle = document.getElementById("error-title");
   errorList.innerHTML = "";
 
+  elemTitle.innerHTML = title;
   errors.forEach((error) => {
     const li = document.createElement("li");
     li.textContent = error;
@@ -329,9 +372,8 @@ document
         console.log("El cliente ya existe");
       } else {
         console.error("Error al crear el cliente:", error);
-        showErrorPopup([
-          "Ocurrió un error al crear el cliente. Por favor, intente nuevamente.",
-        ]);
+        const errMsg = error?.response?.data?.message || "Error desconocido";
+        showErrorPopup("Error al crear el cliente", [errMsg]);
       }
     }
 
@@ -341,15 +383,12 @@ document
       });
       //redirect to the invocie using axios
       console.log("Factura generada:", response.data);
-      const redirectUrl = response.headers.get("X-Redirect-Url");
-      if (redirectUrl) {
-        showSuccessPopup(redirectUrl);
-      }
+      // const redirectUrl = response.headers.get("X-Redirect-Url");
+      showSuccessPopup(response.data.pdfUrl);
     } catch (error) {
       console.error("Error al crear la factura:", error);
-      showErrorPopup([
-        "Ocurrió un error al crear la factura. Por favor, intente nuevamente.",
-      ]);
+      const errMsg = error?.response?.data?.message || "Error desconocido";
+      showErrorPopup("Error al crear la factura", [errMsg]);
     }
   });
 
@@ -376,30 +415,6 @@ async function loadClientes() {
   } catch (error) {
     console.log("Error al cargar los clientes:", error);
   }
-}
-
-function setupAutoComplete() {
-  const makes = [
-    "Toyota",
-    "Honda",
-    "Nissan",
-    "Chevrolet",
-    "Ford",
-    "Hyundai",
-    "Kia",
-  ];
-  const makeInput = document.getElementById("vehicle-make");
-
-  const datalist = document.createElement("datalist");
-  datalist.id = "makes-list";
-  makes.forEach((make) => {
-    const option = document.createElement("option");
-    option.value = make;
-    datalist.appendChild(option);
-  });
-
-  document.body.appendChild(datalist);
-  makeInput.setAttribute("list", "makes-list");
 }
 
 function getInfoForm() {
@@ -444,7 +459,7 @@ function setWarningMsg(msg) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("date").valueAsDate = new Date();
-  setupAutoComplete();
+  // setupAutoComplete();
   setupKeyboardShortcuts();
   await loadClientes();
   //TODO: enable the inputs after the clients are loaded
