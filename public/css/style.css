@@ -406,6 +406,29 @@ body {
     width: 24px;
     height: 24px;
 }
+
+  .btn-green {
+    color: #fff;
+    background-color: #28a745;
+  }
+  .btn-green:hover {
+    background-color: #218838;
+  }
+
+  .btn-red {
+    color: #fff;
+    background-color: #dc3545;
+  }
+  .btn-red:hover {
+    background-color: #c82333;
+  }
+  .btn-yellow{
+    color: #fff;
+    background-color: #ffc107;
+  }
+  .btn-yellow:hover {
+    background-color: #e0a800;
+  }
   
 
   /* Responsive design */
