@@ -33,106 +33,82 @@ const vehiculoKilometrajeInput = document.querySelector("#vehicle-mileage");
 // (4) Deshabilitado: El cliente no existe + el auto existe o matricula no coincide con marca/modelo
 // -> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
 // generar un objeto que genere los estados arriba
-
-// estadoGenerarFactura.* -> true: el estado se cumplio, false: el estado no se cumplio, null: el input esta vacío o inicializacion
-const estadoGenerarFactura = {
-  clienteExiste: null,
-  vehiculoExiste: null,
-  kilometrajeActualizado: null,
-  facturaGenerada: null,
-  relacionados: null,
-  makeModelMatch: null,
-  getEstado: function () {
-    if (this.clienteExiste && this.vehiculoExiste && this.relacionados) {
-      console.log(
-        "Estado: Cliente y vehuiculo existen y son relacionados",
-        "VERDE"
-      );
-      return "verde"; // Cliente y vehiculo existen
-    }
-    if (this.clienteExiste && !this.vehiculoExiste) {
-      console.log("Estado: Cliente existe, vehiculo no existe", "AMARILLO");
-      return "amarillo"; // Cliente existe, vehiculo no existe
-    }
-    if (!this.clienteExiste && !this.vehiculoExiste) {
-      console.log("Estado: Cliente y vehiculo no existen", "NARANJA");
-      return "naranja"; // Cliente y vehiculo no existen
-    }
-    if (!this.clienteExiste && this.vehiculoExiste) {
-      console.log(
-        "Estado: Cliente no existe, vehiculo existe",
-        "DESHABILITADO"
-      );
-      return "deshabilitado"; // Cliente no existe, vehiculo existe
-    }
-    return null;
-  },
-};
-
 // TODO: hacer una funcion que haga el request al backend para obtener la info del cliente y el vehiculo, y lo llame desde el afterSelect de los selects
+
+const REPORT_CASE = {};
 async function updateState() {
-  // Estado Cliente
-  if (clientesSelect.input.value === "") {
-    estadoGenerarFactura.clienteExiste = null;
-    estadoGenerarFactura.relacionados = null;
-  } else {
-    const clienteSeleccionado = listaInfoClientes.find(
-      (cliente) =>
-        cliente.nombre.toUpperCase() ===
-        clientesSelect.input.value.toUpperCase()
-    );
-    estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
-  }
+  /*
+BIEN - Cliente Existente + Matricula Existente Relacionada + Coincide Marca Y modelo 
+MAL - CLiente Existente + Matricula Existente Relacionada + NO Coincide Marca Y modelo
+MAL - Cliente Existente + Matricula Existente NO Relaciondad + Coincide Marca Y modelo 
+MAL - Cliente Existente + Matricula Existente NO Relaciondad + NO Coincide Marca Y modelo 
+BIEN (Se crea nuevo vehiculo) - Cliente Existente + Matricula NO Existente + NO Coincide Marca Y modelo 
+MAL - Cliente NO Existente + Matricula Existente NO Relacionada + Coincide Marca Y Modelo 
+MAL - Cliente NO Existente + Matricula Existente NO Relacionada + NO Coincide Marca Y Modelo 
+BIEN (Se crea nuevo cliente y vehiculo) - Cliente NO Existente + Matricula NO Existente +  NO Coincide Marca Y Modelo 
+*/
 
-  // Estado Vehiculo
-  //TODO: call al backend para preguntar si el la matricula existe
-  if (vehiculoMatriculaSelect.input.value === "") {
-    estadoGenerarFactura.vehiculoExiste = null;
-    estadoGenerarFactura.relacionados = null;
-  } else if (
-    estadoGenerarFactura.clienteExiste != null &&
-    clientesSelect.input.value !== "" &&
-    vehiculoMarcaSelect.input.value !== "" &&
-    vehiculoModeloSelect.input.value !== ""
+  if (
+    clientesSelect.input.value === "" ||
+    vehiculoMatriculaSelect.input.value === "" ||
+    vehiculoMarcaSelect.input.value === "" ||
+    vehiculoModeloSelect.input.value === ""
   ) {
-    try {
-      const vehiculo = await vehicleApi.getVehicleByMatricula(
-        vehiculoMatriculaSelect.input.value
-      );
-      estadoGenerarFactura.vehiculoExiste = true;
-      if (
-        vehiculo.data.marca.toUpperCase() ===
-          vehiculoMarcaSelect.input.value.toUpperCase().trim() &&
-        vehiculo.data.modelo.toUpperCase() ===
-          vehiculoModeloSelect.input.value.toUpperCase().trim()
-      ) {
-        estadoGenerarFactura.makeModelMatch = true;
-        estadoGenerarFactura.relacionados = true;
-      } else {
-        estadoGenerarFactura.relacionados = false;
-      }
-    } catch (error) {
-      // use el interceptor de axios para manejar los errores
-      if (error.code === ERROR_CODES.NOT_FOUND.code) {
-        console.error("No se encontro el vehiculo");
-        estadoGenerarFactura.relacionados = false;
-        estadoGenerarFactura.vehiculoExiste = false;
-      }
-      console.error("Error al obtener el vehículo:", error);
-      estadoGenerarFactura.relacionados = null;
-      estadoGenerarFactura.vehiculoExiste = null;
-    }
-  } else {
-    estadoGenerarFactura.relacionados = null;
-    estadoGenerarFactura.vehiculoExiste = null;
+    console.log("ESTADO: Undefined");
+    return "UNDEFINED";
   }
+  const clienteSeleccionado = listaInfoClientes.find(
+    (cliente) =>
+      cliente.nombre.toUpperCase() === clientesSelect.input.value.toUpperCase()
+  );
 
-  // Estado Kilometraje
-  if (vehiculoKilometrajeInput.value === "") {
-    estadoGenerarFactura.kilometrajeActualizado = null;
-  } else {
-    estadoGenerarFactura.kilometrajeActualizado = true;
+  let vehiculoSeleccionado;
+  let existeVehiculo;
+  let vehiculoEsDeCliente;
+  let clienteExiste = clienteSeleccionado !== undefined;
+  try {
+    vehiculoSeleccionado = await vehicleApi.getVehicleByMatricula(
+      vehiculoMatriculaSelect.input.value
+    );
+    if (clienteExiste) {
+      vehiculoEsDeCliente =
+        vehiculoSeleccionado.data.cliente_id === clienteSeleccionado.id;
+    } else {
+      vehiculoEsDeCliente = false;
+    }
+    existeVehiculo = true;
+  } catch (error) {
+    if (error.code === ERROR_CODES.NOT_FOUND.code) {
+      existeVehiculo = false;
+      vehiculoEsDeCliente = false;
+    } else {
+      console.error("No se pudo concretar estado", error);
+      return "Error";
+    }
   }
+  if (
+    clienteExiste &&
+    existeVehiculo &&
+    vehiculoEsDeCliente &&
+    vehiculoSeleccionado.data.marca.toUpperCase() ===
+      vehiculoMarcaSelect.input.value.toUpperCase() &&
+    vehiculoSeleccionado.data.modelo.toUpperCase() ===
+      vehiculoModeloSelect.input.value.toUpperCase()
+  ) {
+    //BIEN - Cliente Existente + Matricula Existente Relacionada + Coincide Marca Y modelo
+    console.log("ESTADO: Verde");
+    return "VERDE";
+  } else if (clienteExiste && !existeVehiculo) {
+    //BIEN (Se crea nuevo vehiculo) - Cliente Existente + Matricula NO Existente + NO Coincide Marca Y modelo
+    console.log("ESTADO: Amarillo");
+    return "AMARILLO";
+  } else if (!clienteExiste && !existeVehiculo) {
+    //BIEN (Se crea nuevo cliente y vehiculo) - Cliente NO Existente + Matricula NO Existente
+    console.log("ESTADO: Naranja");
+    return "NARANJA";
+  }
+  console.log("ESTADO: Rojo");
+  return "ROJO";
 }
 
 //Setup afterSelect function para los searchable-selects
@@ -142,7 +118,7 @@ clientesSelect.afterSelect = async (e) => {
       select.clearField();
     }
   );
-  vehiculoKilometrajeInput.value = "";
+  // vehiculoKilometrajeInput.value = "";
 
   const clienteSeleccionado = listaInfoClientes.find(
     (cliente) =>
@@ -171,10 +147,7 @@ clientesSelect.afterSelect = async (e) => {
           );
         }
       } catch (error) {
-        if (
-          error.response.status === 404 &&
-          error.response.data.message === "Vehículo no encontrado"
-        ) {
+        if (error.code === 404 && error.message === "Vehículo no encontrado") {
           console.error("No se encontro el vehiculo");
         } else {
           console.error("Error al obtener el vehículo:", error);
@@ -193,26 +166,20 @@ clientesSelect.afterSelect = async (e) => {
       console.log("Cliente no encontrado");
     }
   } catch (error) {
-    if (error.response.status === 404) {
+    if (error.code === 404) {
       console.error("No se encontro el cliente");
     } else {
       console.error("Error al obtener el cliente:", error);
     }
   } finally {
-    // if (clientesSelect.input.value === "") {
-    //   estadoGenerarFactura.clienteExiste = null;
-    // } else {
-    //   estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
-    // }
-    updateState();
-    console.log(estadoGenerarFactura);
+    console.log(updateState());
   }
 };
 
 vehiculoMarcaSelect.afterSelect = (e) => {
-  vehiculoModeloSelect.input.value = "";
-  vehiculoMatriculaSelect.input.value = "";
-  vehiculoKilometrajeInput.value = "";
+  // vehiculoModeloSelect.input.value = "";
+  // vehiculoMatriculaSelect.input.value = "";
+  // vehiculoKilometrajeInput.value = "";
 
   if (vehiculoMarcaSelect.input.value !== "") {
     const vehiculoSeleccionado = listaInfoVehiculos.find(
@@ -239,10 +206,11 @@ vehiculoMarcaSelect.afterSelect = (e) => {
       console.log("Vehiculo no encontrado en la lista");
     }
   }
+  console.log(updateState());
 };
 vehiculoModeloSelect.afterSelect = (e) => {
-  vehiculoMatriculaSelect.input.value = "";
-  vehiculoKilometrajeInput.value = "";
+  // vehiculoMatriculaSelect.input.value = "";
+  // vehiculoKilometrajeInput.value = "";
 
   if (vehiculoModeloSelect.input.value !== "") {
     const vehiculoSeleccionado = listaInfoVehiculos.find(
@@ -256,6 +224,7 @@ vehiculoModeloSelect.afterSelect = (e) => {
       );
     }
   }
+  console.log(updateState());
 };
 
 vehiculoMatriculaSelect.afterSelect = async (e) => {
@@ -275,20 +244,7 @@ vehiculoMatriculaSelect.afterSelect = async (e) => {
     vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
     vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
   }
-  // if (vehiculoMatriculaSelect.input.value === "") {
-  //   estadoGenerarFactura.vehiculoExiste = null;
-  // } else {
-  //   // call al backend para preguntar si el la matricula existe
-  //   estadoGenerarFactura.vehiculoExiste =
-  //     vehiculoSeleccionado !== undefined &&
-  //     listaInfoVehiculos.find(
-  //       (vehiculo) =>
-  //         vehiculo.matricula.toUpperCase() ===
-  //         vehiculoMatriculaSelect.input.value.toUpperCase()
-  //     );
-  // }
-  updateState();
-  console.log(estadoGenerarFactura);
+  console.log(updateState());
 };
 
 //TODO: Parsear la fecha
@@ -317,10 +273,7 @@ document
         alert("Vehículo no encontrado");
       }
     } catch (error) {
-      if (
-        error.response.status === 404 &&
-        error.response.data.message === "Vehículo no encontrado"
-      ) {
+      if (error.code === 404 && error.message === "Vehículo no encontrado") {
         //TODO: mostrar un mensaje de error en la pagina
         console.log("No existe vehiculo con esa matrícula");
       } else {
