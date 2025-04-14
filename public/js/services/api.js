@@ -38,7 +38,7 @@ const vehicleApi = {
   },
 
   getVehicleByClientId: (clientId) => {
-    return api.get(`/vehiculos/cliente/${clientId}`);
+    return api.get(`/vehiculos/cliente/${clientId}`, { params: {} });
   },
 
   getVehicleByMatricula: (matricula) => {
@@ -64,8 +64,8 @@ const vehicleApi = {
 };
 
 const facturaApi = {
-  getFacturas: (params) => {
-    return api.get("/facturas/all", { params });
+  getFacturas: (emergencia) => {
+    return api.get("/facturas/all", { params: { emergencia } });
   },
 
   getFactura: (facturaId) => {

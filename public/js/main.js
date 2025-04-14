@@ -1,4 +1,5 @@
 //TODO: pasar a usar api.interceptors.response para handelear los errors
+import ERROR_CODES from "./utils/errorCodes.js";
 import { clientApi, vehicleApi, facturaApi } from "./services/api.js";
 import { validateForm } from "./utils/validation.js";
 
@@ -29,7 +30,7 @@ const vehiculoKilometrajeInput = document.querySelector("#vehicle-mileage");
 // (1) Verde: Cliente existe + auto existe, solo se actualiza el kilometraje + se genera la factura
 // (2) Amarillo: Cliente existe + auto no existe: Se agrega el auto asociado al cliente a al sistema + se genera la factura
 // (3) Naranja: Cliente no existe + auto no existe: Se agrega el auto y el cliente al sistema + se genera la factura
-// (4) Deshabilitado: El cliente no existe + el auto existe
+// (4) Deshabilitado: El cliente no existe + el auto existe o matricula no coincide con marca/modelo
 // -> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
 // generar un objeto que genere los estados arriba
 
@@ -39,9 +40,100 @@ const estadoGenerarFactura = {
   vehiculoExiste: null,
   kilometrajeActualizado: null,
   facturaGenerada: null,
-  error: null,
-  emergencia: null,
+  relacionados: null,
+  makeModelMatch: null,
+  getEstado: function () {
+    if (this.clienteExiste && this.vehiculoExiste && this.relacionados) {
+      console.log(
+        "Estado: Cliente y vehuiculo existen y son relacionados",
+        "VERDE"
+      );
+      return "verde"; // Cliente y vehiculo existen
+    }
+    if (this.clienteExiste && !this.vehiculoExiste) {
+      console.log("Estado: Cliente existe, vehiculo no existe", "AMARILLO");
+      return "amarillo"; // Cliente existe, vehiculo no existe
+    }
+    if (!this.clienteExiste && !this.vehiculoExiste) {
+      console.log("Estado: Cliente y vehiculo no existen", "NARANJA");
+      return "naranja"; // Cliente y vehiculo no existen
+    }
+    if (!this.clienteExiste && this.vehiculoExiste) {
+      console.log(
+        "Estado: Cliente no existe, vehiculo existe",
+        "DESHABILITADO"
+      );
+      return "deshabilitado"; // Cliente no existe, vehiculo existe
+    }
+    return null;
+  },
 };
+
+// TODO: hacer una funcion que haga el request al backend para obtener la info del cliente y el vehiculo, y lo llame desde el afterSelect de los selects
+async function updateState() {
+  // Estado Cliente
+  if (clientesSelect.input.value === "") {
+    estadoGenerarFactura.clienteExiste = null;
+    estadoGenerarFactura.relacionados = null;
+  } else {
+    const clienteSeleccionado = listaInfoClientes.find(
+      (cliente) =>
+        cliente.nombre.toUpperCase() ===
+        clientesSelect.input.value.toUpperCase()
+    );
+    estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
+  }
+
+  // Estado Vehiculo
+  //TODO: call al backend para preguntar si el la matricula existe
+  if (vehiculoMatriculaSelect.input.value === "") {
+    estadoGenerarFactura.vehiculoExiste = null;
+    estadoGenerarFactura.relacionados = null;
+  } else if (
+    estadoGenerarFactura.clienteExiste != null &&
+    clientesSelect.input.value !== "" &&
+    vehiculoMarcaSelect.input.value !== "" &&
+    vehiculoModeloSelect.input.value !== ""
+  ) {
+    try {
+      const vehiculo = await vehicleApi.getVehicleByMatricula(
+        vehiculoMatriculaSelect.input.value
+      );
+      estadoGenerarFactura.vehiculoExiste = true;
+      if (
+        vehiculo.data.marca.toUpperCase() ===
+          vehiculoMarcaSelect.input.value.toUpperCase().trim() &&
+        vehiculo.data.modelo.toUpperCase() ===
+          vehiculoModeloSelect.input.value.toUpperCase().trim()
+      ) {
+        estadoGenerarFactura.makeModelMatch = true;
+        estadoGenerarFactura.relacionados = true;
+      } else {
+        estadoGenerarFactura.relacionados = false;
+      }
+    } catch (error) {
+      // use el interceptor de axios para manejar los errores
+      if (error.code === ERROR_CODES.NOT_FOUND.code) {
+        console.error("No se encontro el vehiculo");
+        estadoGenerarFactura.relacionados = false;
+        estadoGenerarFactura.vehiculoExiste = false;
+      }
+      console.error("Error al obtener el vehículo:", error);
+      estadoGenerarFactura.relacionados = null;
+      estadoGenerarFactura.vehiculoExiste = null;
+    }
+  } else {
+    estadoGenerarFactura.relacionados = null;
+    estadoGenerarFactura.vehiculoExiste = null;
+  }
+
+  // Estado Kilometraje
+  if (vehiculoKilometrajeInput.value === "") {
+    estadoGenerarFactura.kilometrajeActualizado = null;
+  } else {
+    estadoGenerarFactura.kilometrajeActualizado = true;
+  }
+}
 
 //Setup afterSelect function para los searchable-selects
 clientesSelect.afterSelect = async (e) => {
@@ -107,12 +199,13 @@ clientesSelect.afterSelect = async (e) => {
       console.error("Error al obtener el cliente:", error);
     }
   } finally {
-    if (clientesSelect.input.value === "") {
-      estadoGenerarFactura.clienteExiste = null;
-    } else {
-      estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
-    }
-    console.log("Estado", estadoGenerarFactura);
+    // if (clientesSelect.input.value === "") {
+    //   estadoGenerarFactura.clienteExiste = null;
+    // } else {
+    //   estadoGenerarFactura.clienteExiste = clienteSeleccionado !== undefined;
+    // }
+    updateState();
+    console.log(estadoGenerarFactura);
   }
 };
 
@@ -182,19 +275,20 @@ vehiculoMatriculaSelect.afterSelect = async (e) => {
     vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
     vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
   }
-  if (vehiculoMatriculaSelect.input.value === "") {
-    estadoGenerarFactura.vehiculoExiste = null;
-  } else {
-    // call al backend para preguntar si el la matricula existe
-    estadoGenerarFactura.vehiculoExiste =
-      vehiculoSeleccionado !== undefined &&
-      listaInfoVehiculos.find(
-        (vehiculo) =>
-          vehiculo.matricula.toUpperCase() ===
-          vehiculoMatriculaSelect.input.value.toUpperCase()
-      );
-  }
-  console.log("Estado", estadoGenerarFactura);
+  // if (vehiculoMatriculaSelect.input.value === "") {
+  //   estadoGenerarFactura.vehiculoExiste = null;
+  // } else {
+  //   // call al backend para preguntar si el la matricula existe
+  //   estadoGenerarFactura.vehiculoExiste =
+  //     vehiculoSeleccionado !== undefined &&
+  //     listaInfoVehiculos.find(
+  //       (vehiculo) =>
+  //         vehiculo.matricula.toUpperCase() ===
+  //         vehiculoMatriculaSelect.input.value.toUpperCase()
+  //     );
+  // }
+  updateState();
+  console.log(estadoGenerarFactura);
 };
 
 //TODO: Parsear la fecha
@@ -379,9 +473,9 @@ document
 
     try {
       const response = await facturaApi.generateFactura(data, {
-        params: { emergencia: "false" },
+        emergencia: "false",
       });
-      //redirect to the invocie using axios
+      //redirect to the invoice using axios
       console.log("Factura generada:", response.data);
       // const redirectUrl = response.headers.get("X-Redirect-Url");
       showSuccessPopup(response.data.pdfUrl);

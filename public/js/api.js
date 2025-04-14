@@ -1,3 +1,4 @@
+import ERROR_CODES from "./utils/errorCodes.js";
 const api = axios.create({
   baseURL: "http://localhost:3000/api", // Your backend URL
   headers: {
@@ -10,35 +11,73 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
-
       switch (status) {
-        case 400:
+        case ERROR_CODES.BAD_REQUEST.code:
           console.warn("Bad Request:", data.message);
+          return Promise.reject({
+            type: ERROR_CODES.BAD_REQUEST,
+            message: data.message,
+            code: ERROR_CODES.BAD_REQUEST.code,
+          });
           break;
-        case 401:
+        case ERROR_CODES.UNAUTHORIZED.code:
           console.warn("Unauthorized!");
           // localStorage.removeItem("token");
           // window.location.href = "/login";
+
+          return Promise.reject({
+            type: ERROR_CODES.UNAUTHORIZED,
+            message: "You are not authorized.",
+            code: ERROR_CODES.UNAUTHORIZED.code,
+          });
           break;
-        case 403:
+        case ERROR_CODES.FORBIDDEN.code:
           console.warn("Forbidden: You do not have permission.");
+          return Promise.reject({
+            type: ERROR_CODES.FORBIDDEN,
+            message: "You do not have permission.",
+            code: ERROR_CODES.FORBIDDEN.code,
+          });
           break;
-        case 404:
+        case ERROR_CODES.NOT_FOUND.code:
           console.warn("Resource Not Found:", data.message);
+          return Promise.reject({
+            type: ERROR_CODES.NOT_FOUND,
+            message: data.message,
+            code: ERROR_CODES.NOT_FOUND.code,
+          });
           break;
-        case 500:
+        case ERROR_CODES.INTERNAL_SERVER_ERROR.code:
           console.error("Server Error:", data.message);
+          return Promise.reject({
+            type: ERROR_CODES.INTERNAL_SERVER_ERROR,
+            message: data.message,
+            code: ERROR_CODES.INTERNAL_SERVER_ERROR.code,
+          });
           break;
         default:
           console.error("Unexpected Error:", data.message);
+          return Promise.reject({
+            type: ERROR_CODES.UNEXPECTED_ERROR,
+            message: data.message,
+            code: status,
+          });
       }
     } else if (error.request) {
-      console.error("No response received. Check your network.");
+      // The request was made but no response was received
+      console.error("Network Error:", error.message);
+      return Promise.reject({
+        type: "network",
+        message: "Network error. Please check your internet connection.",
+      });
     } else {
-      console.error("Request Error:", error.message);
+      // Something happened in setting up the request that triggered an Error
+      console.error("Request Setup Error:", error.message);
+      return Promise.reject({
+        type: "client",
+        message: "An unexpected client-side error occurred.",
+      });
     }
-
-    return Promise.reject(error);
   }
 );
 
