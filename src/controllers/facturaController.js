@@ -4,11 +4,15 @@ import VehicleModel from "../model/vehiculos.js";
 import responseHandler from "../utils/responseHandler.js";
 import { appendToJsonFile } from "../utils/jsonAppender.js";
 import path from "path";
+import { fileURLToPath } from "url";
 import fs from "fs";
 import { generateFacturaPDF } from "../utils/genFacturaPDF.js";
 import { MESES } from "../utils/constants.js";
 import { ensurePathAndFile } from "../utils/helpers.js";
 import { validateFactura } from "../utils/validation.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const createFactura = async (req, res) => {
   try {

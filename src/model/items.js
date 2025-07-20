@@ -1,6 +1,10 @@
-const path = require("path");
-const { connectDB } = require(path.join(__dirname, "../db/connect_db.js"));
-const handleSQLError = require("../utils/sqliteErrors.js");
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import { connectDB } from "../db/connect_db.js";
+import handleSQLError from "../utils/sqliteErrors.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function agregarItem(item) {
   try {
@@ -60,10 +64,4 @@ async function eliminarItem(id) {
   }
 }
 
-module.exports = {
-  agregarItem,
-  obtenerItem,
-  obtenerItems,
-  actualizarItem,
-  eliminarItem,
-};
+export { agregarItem, obtenerItem, obtenerItems, actualizarItem, eliminarItem };
