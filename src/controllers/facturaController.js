@@ -1,16 +1,16 @@
-const FacturaModel = require("../model/facturas");
-const ClientModel = require("../model/clientes");
-const VehicleModel = require("../model/vehiculos");
-const responseHandler = require("../utils/responseHandler");
-const { appendToJsonFile } = require("../utils/jsonAppender");
-const path = require("path");
-const fs = require("fs");
-const { generateFacturaPDF } = require("../utils/genFacturaPDF");
-const { MESES } = require("../utils/constants");
-const { ensurePathAndFile } = require("../utils/helpers");
-const { validateFactura } = require("../utils/validation");
+import FacturaModel from "../model/facturas.js";
+import ClientModel from "../model/clientes.js";
+import VehicleModel from "../model/vehiculos.js";
+import responseHandler from "../utils/responseHandler.js";
+import { appendToJsonFile } from "../utils/jsonAppender.js";
+import path from "path";
+import fs from "fs";
+import { generateFacturaPDF } from "../utils/genFacturaPDF.js";
+import { MESES } from "../utils/constants.js";
+import { ensurePathAndFile } from "../utils/helpers.js";
+import { validateFactura } from "../utils/validation.js";
 
-exports.createFactura = async (req, res) => {
+export const createFactura = async (req, res) => {
   try {
     const valid = validateFactura(req.body);
     if (!valid) {
@@ -261,7 +261,7 @@ exports.createFactura = async (req, res) => {
 ("");
 
 // Get all facturas
-exports.getFacturas = async (req, res) => {
+export const getFacturas = async (req, res) => {
   try {
     const facturas = await FacturaModel.obtenerFacturas();
     res.status(200).json(facturas);
@@ -274,7 +274,7 @@ exports.getFacturas = async (req, res) => {
 };
 
 // Get a single factura by ID
-exports.getFacturaById = async (req, res) => {
+export const getFacturaById = async (req, res) => {
   try {
     const { id } = req.params;
     const factura = await FacturaModel.obtenerFactura(id);
@@ -288,7 +288,7 @@ exports.getFacturaById = async (req, res) => {
 };
 
 // Update a factura by ID
-exports.updateFactura = async (req, res) => {
+export const updateFactura = async (req, res) => {
   try {
     const updatedFactura = await FacturaModel.findByIdAndUpdate(
       req.params.id,
@@ -305,7 +305,7 @@ exports.updateFactura = async (req, res) => {
 };
 
 // Delete a factura by ID
-exports.deleteFactura = async (req, res) => {
+export const deleteFactura = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedFactura = await FacturaModel.eliminarFactura(id);

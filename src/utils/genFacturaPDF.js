@@ -1,11 +1,11 @@
 //? Si hay un error con las fonts, seguro es que no se configuraron (ejecutar install_pdfmake_fonts o leer el README)
 const CUSTOM_FIELDS = {};
-const fs = require("fs");
+import fs from "fs";
 
-const path = require("path");
-const { HORIZONTAL_SPACE } = require("./constants");
-const pdfMake = require("pdfmake/build/pdfmake");
-const vfs_fonts = require("pdfmake/build/vfs_fonts");
+import path from "path";
+import { HORIZONTAL_SPACE } from "./constants.js";
+import pdfMake from "pdfmake/build/pdfmake.js";
+import vfs_fonts from "pdfmake/build/vfs_fonts.js";
 pdfMake.addVirtualFileSystem(vfs_fonts);
 
 const fonts = {
@@ -23,7 +23,7 @@ const fonts = {
   },
 };
 
-exports.generateFacturaPDF = async (data) => {
+export const generateFacturaPDF = async (data) => {
   const {
     client_name,
     date,

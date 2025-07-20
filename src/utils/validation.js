@@ -1,5 +1,8 @@
-const Ajv = require("ajv");
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+
 const ajv = new Ajv();
+addFormats(ajv);
 
 const facturaSchema = {
   type: "object",
@@ -38,4 +41,4 @@ const facturaSchema = {
 
 const validateFactura = ajv.compile(facturaSchema);
 
-module.exports = { validateFactura };
+export { validateFactura };

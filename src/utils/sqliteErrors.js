@@ -1,4 +1,4 @@
-const { DatabaseError, UniqueConstraintError } = require("./errors");
+import { DatabaseError, UniqueConstraintError } from "./errors.js";
 
 function handleSQLError(error, modelName = "", logErrors = true) {
   if (logErrors) {
@@ -26,4 +26,4 @@ function handleSQLError(error, modelName = "", logErrors = true) {
   throw new DatabaseError("Error inesperado en la base de datos");
 }
 
-module.exports = handleSQLError;
+export default handleSQLError;

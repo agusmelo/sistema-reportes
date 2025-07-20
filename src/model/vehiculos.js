@@ -1,6 +1,6 @@
-const path = require("path");
-const { connectDB } = require(path.join(__dirname, "../db/connect_db.js"));
-const handleSQLError = require("../utils/sqliteErrors.js");
+import path from "path";
+import { connectDB } from "../db/connect_db.js";
+import handleSQLError from "../utils/sqliteErrors.js";
 async function agregarVehiculo(
   cliente_id,
   marca,
@@ -101,7 +101,7 @@ async function actualizarKilometraje(matricula, kilometraje) {
   return resultado;
 }
 
-module.exports = {
+export default {
   agregarVehiculo,
   obtenerVehiculos,
   obtenerVehiculo,

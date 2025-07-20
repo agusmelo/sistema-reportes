@@ -16,7 +16,4 @@ const MESES = [
 
 const HORIZONTAL_SPACE = "    ";
 
-module.exports = {
-  MESES,
-  HORIZONTAL_SPACE,
-};
+export { MESES, HORIZONTAL_SPACE };

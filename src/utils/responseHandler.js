@@ -13,4 +13,4 @@ const responseHandler = {
   },
 };
 
-module.exports = responseHandler;
+export default responseHandler;

@@ -1,7 +1,11 @@
-const path = require("path");
-const sqlite3 = require("sqlite3");
+import path from "path";
+import sqlite3 from "sqlite3";
 const sql3 = sqlite3.verbose();
-const { open } = require("sqlite");
+import { open } from "sqlite";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let db = null;
 
@@ -19,7 +23,7 @@ async function connectDB() {
       });
       console.log("Database connected.");
     } catch (error) {
-      console.error("Error connecting to the database:", err.message);
+      console.error("Error connecting to the database:", error.message);
       throw new Error("Database connection failed");
     }
   }
@@ -221,4 +225,4 @@ function shutdown() {
   closeDB();
   process.exit(0);
 }
-module.exports = { connectDB, closeDB };
+export { connectDB, closeDB };

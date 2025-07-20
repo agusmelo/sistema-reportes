@@ -1,8 +1,8 @@
-const VehiculoModel = require("../model/vehiculos");
-const responseHandler = require("../utils/responseHandler");
-const Logger = require("../utils/customLog");
+import VehiculoModel from "../model/vehiculos.js";
+import responseHandler from "../utils/responseHandler.js";
+import Logger from "../utils/customLog.js";
 // Obtener todos los vehículos
-exports.getVehiculos = async (req, res) => {
+export const getVehiculos = async (req, res) => {
   try {
     const vehiculos = await VehiculoModel.obtenerVehiculos();
     res.status(200).json(vehiculos);
@@ -15,7 +15,7 @@ exports.getVehiculos = async (req, res) => {
 };
 
 // Obtener un vehículo por ID
-exports.getVehiculoById = async (req, res) => {
+export const getVehiculoById = async (req, res) => {
   try {
     const { id } = req.params;
     const vehiculo = await VehiculoModel.obtenerVehiculo(id);
@@ -31,7 +31,7 @@ exports.getVehiculoById = async (req, res) => {
   }
 };
 
-exports.getVehiculosByClienteId = async (req, res) => {
+export const getVehiculosByClienteId = async (req, res) => {
   try {
     const { cliente_id } = req.params;
     // check query params for marca and modelo
@@ -62,7 +62,7 @@ exports.getVehiculosByClienteId = async (req, res) => {
 };
 
 // Crear un nuevo vehículo
-exports.createVehiculo = async (req, res) => {
+export const createVehiculo = async (req, res) => {
   const { cliente_id, marca, modelo, matricula, kilometraje } = req.body;
   try {
     await VehiculoModel.agregarVehiculo(
@@ -92,7 +92,7 @@ exports.createVehiculo = async (req, res) => {
 
 // Actualizar un vehículo existente
 // TODO: probar
-exports.updateVehiculo = async (req, res) => {
+export const updateVehiculo = async (req, res) => {
   // try {
   //   const vehiculo = await VehiculoModel.actualizarVehiculo(
   //     req.params.id,
@@ -114,7 +114,7 @@ exports.updateVehiculo = async (req, res) => {
 };
 
 // Eliminar un vehículo
-exports.deleteVehiculo = async (req, res) => {
+export const deleteVehiculo = async (req, res) => {
   try {
     const { id, succesful } = await VehiculoModel.eliminarVehiculo(
       req.params.id
@@ -132,7 +132,7 @@ exports.deleteVehiculo = async (req, res) => {
 };
 
 // Devuelve el vehiculo + el nombre del cliente
-exports.getVehiculoByMatricula = async (req, res) => {
+export const getVehiculoByMatricula = async (req, res) => {
   try {
     const { matricula } = req.params;
     console.log();
@@ -154,7 +154,7 @@ exports.getVehiculoByMatricula = async (req, res) => {
 
 //TODO: Implementar la parte de facturas del modelo para buscar por matricula
 // Devuelve el vehiculo + la informacion del cliente + todas las facturas que tiene este vehiculo
-exports.getVehiculoByMatriculaExtended = async (req, res) => {
+export const getVehiculoByMatriculaExtended = async (req, res) => {
   const { matricula } = req.params;
   try {
     const vehiculo = await VehiculoModel.obtenerVehiculoPorMatricula(matricula);
@@ -162,7 +162,7 @@ exports.getVehiculoByMatriculaExtended = async (req, res) => {
   } catch (error) {}
 };
 
-exports.getMatriculasByMarcaModelo = async (req, res) => {
+export const getMatriculasByMarcaModelo = async (req, res) => {
   try {
     const { cliente_id, marca, modelo } = req.params;
     const vehiculos =
@@ -183,7 +183,7 @@ exports.getMatriculasByMarcaModelo = async (req, res) => {
   }
 };
 
-exports.getModelosByMarca = async (req, res) => {
+export const getModelosByMarca = async (req, res) => {
   try {
     const { cliente_id, marca } = req.params;
     const modelos = await VehiculoModel.getModelosDeMarca(cliente_id, marca);

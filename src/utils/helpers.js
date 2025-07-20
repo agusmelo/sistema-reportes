@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const writeFileAtomicSync = require("write-file-atomic").sync;
+import fs from "fs";
+import path from "path";
+import { sync as writeFileAtomicSync } from "write-file-atomic";
 /**
  * Ensures that a directory exists and creates a file with the specified content.
  * Handles errors gracefully and logs them.
@@ -27,4 +27,4 @@ function ensurePathAndFile(dirPath, fileName, content) {
   }
 }
 
-module.exports = { ensurePathAndFile };
+export { ensurePathAndFile };

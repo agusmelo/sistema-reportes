@@ -1,6 +1,6 @@
-const path = require("path");
-const handleSQLError = require("../utils/sqliteErrors.js");
-const { connectDB } = require("../db/connect_db.js");
+import path from "path";
+import handleSQLError from "../utils/sqliteErrors.js";
+import { connectDB } from "../db/connect_db.js";
 async function agregarCliente(nombreCliente) {
   try {
     const db = await connectDB();
@@ -75,7 +75,7 @@ async function eliminarCliente(id) {
   }
 }
 
-module.exports = {
+export default {
   agregarCliente,
   obtenerCliente,
   obtenerClientes,

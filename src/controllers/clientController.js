@@ -1,10 +1,10 @@
-const { response } = require("express");
-const ClientModel = require("../model/clientes");
-const responseHandler = require("../utils/responseHandler");
+import { response } from "express";
+import ClientModel from "../model/clientes.js";
+import responseHandler from "../utils/responseHandler.js";
 // TODO: agregar error handling y validacion de tipos
 // if the client already exists, return an error code 409
 // if the client does not exist, create a new client
-exports.createClient = async (req, res) => {
+export const createClient = async (req, res) => {
   const { nombre } = req.body;
   try {
     // Check if the client already exists
@@ -31,7 +31,7 @@ exports.createClient = async (req, res) => {
   }
 };
 
-exports.getAllClients = async (req, res) => {
+export const getAllClients = async (req, res) => {
   try {
     const clientes = await ClientModel.obtenerClientes();
     console.log("clientes: ", clientes);
@@ -47,7 +47,7 @@ exports.getAllClients = async (req, res) => {
   }
 };
 
-exports.getClientById = async (req, res) => {
+export const getClientById = async (req, res) => {
   const clientId = req.params.id;
   try {
     const dataCliente = await ClientModel.obtenerCliente(clientId);
@@ -70,7 +70,7 @@ exports.getClientById = async (req, res) => {
   }
 };
 
-exports.getClientByName = async (req, res) => {
+export const getClientByName = async (req, res) => {
   const clientName = req.params.name;
   try {
     const dataCliente = await ClientModel.obtenerClientePorNombre(clientName);
@@ -94,7 +94,7 @@ exports.getClientByName = async (req, res) => {
 };
 
 // TODO: rehacer
-exports.updateClient = async (req, res) => {
+export const updateClient = async (req, res) => {
   const { id: clientId, data } = req.params;
   try {
     const result = await ClientModel.actualizarCliente(clientId, data);
@@ -110,7 +110,7 @@ exports.updateClient = async (req, res) => {
   }
 };
 
-exports.deleteClient = async (req, res) => {
+export const deleteClient = async (req, res) => {
   const clientId = req.params.id;
   try {
     await ClientModel.eliminarCliente(clientId);

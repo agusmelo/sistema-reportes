@@ -1,5 +1,5 @@
-const fs = require("fs").promises;
-const path = require("path");
+import fs from "fs/promises";
+import path from "path";
 
 /**
  * Appends an object to a JSON file safely, with file locking and atomic writes.
@@ -84,4 +84,4 @@ async function releaseLock(lockFilePath) {
 }
 
 // Export the function to be used in other files
-module.exports = { appendToJsonFile };
+export { appendToJsonFile };

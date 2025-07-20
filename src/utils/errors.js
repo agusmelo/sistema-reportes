@@ -54,9 +54,4 @@ class ValidationError extends Error {
 //   }
 // }
 
-module.exports = {
-  DatabaseError,
-  UniqueConstraintError,
-  NotFoundError,
-  ValidationError,
-};
+export { DatabaseError, UniqueConstraintError, NotFoundError, ValidationError };

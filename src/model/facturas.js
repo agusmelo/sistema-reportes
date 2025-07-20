@@ -1,6 +1,6 @@
-const path = require("path");
-const { connectDB } = require("../db/connect_db.js");
-const handleSQLError = require("../utils/sqliteErrors.js");
+import path from "path";
+import { connectDB } from "../db/connect_db.js";
+import handleSQLError from "../utils/sqliteErrors.js";
 
 //TODO: Hay alguna mejor manera de hacer esto? (el pasaje esta solo para abstraer la transaccion)
 // Me refiero a poder chainear varias funciones en una transaccion y luego ejecutarla
@@ -44,7 +44,6 @@ async function obtenerFacturas() {
       resultado[index].items = items;
     }
 
-    
     return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");
@@ -181,7 +180,7 @@ async function getInvoiceWithTotal(facturaId) {
   }
 }
 
-module.exports = {
+export default {
   agregarFactura,
   obtenerFactura,
   obtenerFacturas,
