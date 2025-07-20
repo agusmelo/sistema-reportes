@@ -15,7 +15,7 @@ async function agregarVehiculo(
       [cliente_id, marca, modelo, matricula, kilometraje]
     );
     console.log("agregarVehiculo", resultado);
-    return { succesful: resultado.changes };
+    return { lastID: resultado.lastID };
   } catch (error) {
     handleSQLError(error, "vehiculos");
   }

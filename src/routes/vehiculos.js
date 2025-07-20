@@ -1,6 +1,7 @@
-const express = require("express"); // TODO: import only Router
-const router = express.Router();
-const vehiculoController = require("../controllers/vehiculoController");
+import { Router } from "express";
+import * as vehiculoController from "../controllers/vehiculoController.js";
+
+const router = Router();
 
 router.get("/all", vehiculoController.getVehiculos);
 router.get("/:id", vehiculoController.getVehiculoById);
@@ -11,4 +12,4 @@ router.post("/", vehiculoController.createVehiculo);
 router.put("/:id", vehiculoController.updateVehiculo);
 router.delete("/:id", vehiculoController.deleteVehiculo);
 
-module.exports = router;
+export default router;

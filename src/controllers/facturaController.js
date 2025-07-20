@@ -9,12 +9,17 @@ const { generateFacturaPDF } = require("../utils/genFacturaPDF");
 const { MESES } = require("../utils/constants");
 const { ensurePathAndFile } = require("../utils/helpers");
 const { validateFactura } = require("../utils/validation");
-"""// Create a new factura
+
 exports.createFactura = async (req, res) => {
   try {
     const valid = validateFactura(req.body);
     if (!valid) {
-      return responseHandler.error(res, "Invalid request body", 400, validateFactura.errors);
+      return responseHandler.error(
+        res,
+        "Invalid request body",
+        400,
+        validateFactura.errors
+      );
     }
     const {
       client_name,
@@ -41,11 +46,26 @@ exports.createFactura = async (req, res) => {
     let client, vehicle;
     try {
       client = await ClientModel.obtenerClientePorNombre(client_name);
+      if (!client) {
+        const newClient = await ClientModel.agregarCliente(client_name);
+        client = await ClientModel.obtenerCliente(newClient.lastID);
+      }
+
       vehicle = await VehicleModel.obtenerVehiculoPorMatricula(plate);
+      if (!vehicle) {
+        const newVehicle = await VehicleModel.agregarVehiculo(
+          client.id,
+          make,
+          model,
+          plate,
+          mileage
+        );
+        vehicle = await VehicleModel.obtenerVehiculo(newVehicle.lastID);
+      }
     } catch (err) {
       return responseHandler.error(
         res,
-        `Error al obtener el cliente o el vehículo: ${err.message}`,
+        `Error al obtener o crear el cliente o el vehículo: ${err.message}`,
         500
       );
     }
@@ -130,15 +150,17 @@ exports.createFactura = async (req, res) => {
 
     // 2. Generate file path and name
     const fechaFactura = new Date(date);
-    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
-      MESES[fechaFactura.getMonth()]
-    }_${fechaFactura.getFullYear()}_${make}_${model}_${plate}_${idFactura}.pdf`;
+    const year = fechaFactura.getUTCFullYear();
+    const month = fechaFactura.getUTCMonth();
+    const day = fechaFactura.getUTCDate();
+
+    const nombreDeArchivo = `${client_name}_${day}_${MESES[month]}_${year}*${model}_${plate}.pdf`;
 
     const privateOutputPath = path.join(
       __dirname,
       "../output",
-      fechaFactura.getFullYear().toString(),
-      MESES[fechaFactura.getMonth()],
+      year.toString(),
+      MESES[month],
       nombreDeArchivo
     );
 
@@ -168,7 +190,10 @@ exports.createFactura = async (req, res) => {
     }
 
     // Calculate totals
-    const subtotal = items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
+    const subtotal = items.reduce(
+      (acc, item) => acc + item.quantity * item.unitPrice,
+      0
+    );
     const iva = incluye_iva ? subtotal * 0.21 : 0;
     const total = subtotal + iva;
 
@@ -232,7 +257,8 @@ exports.createFactura = async (req, res) => {
     console.error("Error generating invoice:", err);
     res.status(500).send({ error: "Failed to generate invoice" });
   }
-};""
+};
+("");
 
 // Get all facturas
 exports.getFacturas = async (req, res) => {
@@ -325,9 +351,17 @@ exports.deleteFactura = async (req, res) => {
 //   ]
 // }
 
-
-
 function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
+  const publicDir = path.dirname(publicFilePath);
+
+  // Wipe the public directory
+  if (fs.existsSync(publicDir)) {
+    fs.readdirSync(publicDir).forEach((file) => {
+      const curPath = path.join(publicDir, file);
+      fs.unlinkSync(curPath);
+    });
+  }
+
   // Atomic write to prevent corrpution in case of crash
   ensurePathAndFile(
     path.dirname(privateFilePath),

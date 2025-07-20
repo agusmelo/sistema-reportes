@@ -44,10 +44,7 @@ async function obtenerFacturas() {
       resultado[index].items = items;
     }
 
-    //TODO: revisar el fromato como llegan las fechas y como guardarlas
-    // resultado.forEach((factura) => {
-    //   factura.fecha = new Date(factura.fecha);
-    // });
+    
     return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");

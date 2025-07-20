@@ -8,7 +8,7 @@ async function agregarCliente(nombreCliente) {
       nombreCliente,
     ]);
     console.log("Cliente agregado:", resultado);
-    return resultado;
+    return { lastID: resultado.lastID };
   } catch (error) {
     handleSQLError(error, "clientes");
   }
@@ -41,7 +41,7 @@ async function obtenerClientePorNombre(nombre) {
     const resultado = await db.all("SELECT * FROM clientes WHERE nombre = ?", [
       nombre,
     ]);
-    return resultado[0];
+    return resultado;
   } catch (error) {
     handleSQLError(error, "clientes");
   }

@@ -1,5 +1,12 @@
 ## 2025-07-19
 
+- **Feature:** The application now fetches and displays client information when a client is selected.
+- **Refactor:** Updated the output directory structure and filename format for generated invoices to a more standardized convention.
+- **Chore:** The `public/ultima_factura_generada` directory is now wiped clean before a new invoice is generated.
+- **Feature:** Implemented a dynamic "Generate Invoice" button that changes its state based on the form data.
+- **Feature:** Added an "Emergency Generate" button to generate invoices without saving them to the database.
+- **Refactor:** Updated the backend to handle the creation of new clients and vehicles when generating an invoice.
+- **Fix:** Resolved a critical bug related to date parsing that could cause off-by-one-day errors due to timezone differences. Standardized on `YYYY-MM-DD` for all date handling between the frontend and backend, and ensured all date manipulations on the backend are done in UTC.
 - **Refactor:** Modified the invoice creation process to ensure the PDF file path is correctly stored in the database.
 - **Fix:** Corrected a logical flaw where the file path was being generated before the invoice ID was available.
 - **Refactor:** Streamlined the `createFactura` controller and removed the redundant `generateFactura` function.

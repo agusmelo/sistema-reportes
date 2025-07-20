@@ -208,6 +208,8 @@ const REPORT_STATE = [
     buttonColor: "red",
   },
 ];
+const generateButton = document.querySelector(".generate-button");
+
 async function updateState() {
   const clienteSeleccionado = listaInfoClientes.find(
     (cliente) =>
@@ -256,6 +258,11 @@ async function updateState() {
     vehiculoMarcaMatchModelo,
   };
   const estado = REPORT_STATE.find((estado) => estado.cond(conditions));
+
+  generateButton.textContent = estado.buttonText || "Generar Factura";
+  generateButton.disabled = estado.buttonDisabled;
+  generateButton.style.backgroundColor = estado.buttonColor;
+
   return estado;
 }
 
@@ -268,20 +275,19 @@ clientesSelect.afterSelect = async (e) => {
   );
   // vehiculoKilometrajeInput.value = "";
 
-  const clienteSeleccionado = listaInfoClientes.find(
-    (cliente) =>
-      cliente.nombre.toUpperCase() === clientesSelect.input.value.toUpperCase()
-  );
-
   try {
     const { data: clientData } = await clientApi.getClientByName(
       clientesSelect.input.value
     );
-    if (clientData) {
-      console.log("Cliente encontrado", clientData);
+    if (clientData && clientData.length > 0) {
+      if (clientData.length > 1) {
+        console.warn("Multiple clients found with the same name. Please implement a selection UI.");
+      }
+      const client = clientData[0];
+      console.log("Cliente encontrado", client);
       try {
         listaInfoVehiculos = await vehicleApi.getVehicleByClientId(
-          clientData.id
+          client.id
         );
         if (listaInfoVehiculos) {
           vehiculoMarcaSelect.options = listaInfoVehiculos.map(
@@ -320,7 +326,7 @@ clientesSelect.afterSelect = async (e) => {
       console.error("Error al obtener el cliente:", error);
     }
   } finally {
-    console.log(await updateState());
+    await updateState();
   }
 };
 
@@ -354,7 +360,7 @@ vehiculoMarcaSelect.afterSelect = async (e) => {
       console.log("Vehiculo no encontrado en la lista");
     }
   }
-  console.log(await updateState());
+  await updateState();
 };
 vehiculoModeloSelect.afterSelect = async (e) => {
   // vehiculoMatriculaSelect.input.value = "";
@@ -372,7 +378,7 @@ vehiculoModeloSelect.afterSelect = async (e) => {
       );
     }
   }
-  console.log(await updateState());
+  await updateState();
 };
 
 vehiculoMatriculaSelect.afterSelect = async (e) => {
@@ -392,11 +398,10 @@ vehiculoMatriculaSelect.afterSelect = async (e) => {
     vehiculoMarcaSelect.input.value = vehiculoSeleccionado.marca;
     vehiculoModeloSelect.input.value = vehiculoSeleccionado.modelo;
   }
-  console.log(await updateState());
+  await updateState();
 };
 
-//TODO: Parsear la fecha
-// document.getElementById("date").value = new Date().toISOString().split("T")[0];
+
 
 document
   .getElementById("buscar-matricula")
@@ -488,15 +493,16 @@ function addRow(data) {
   itemIndex++;
 }
 
-document.getElementById("test-btn").addEventListener("click", (e) => {
-  document.getElementById("client-name").input.value = "Agustin";
-  document.getElementById("date").value = "2025-02-23";
-  document.getElementById("vehicle-make").input.value = "Marca";
-  document.getElementById("vehicle-model").input.value = "Modelo";
-  document.getElementById("vehicle-plate").input.value = "AAA 1234";
-  document.getElementById("vehicle-mileage").value = "99999";
-  addRow();
-});
+document
+  .getElementById("test-btn")
+  .addEventListener("click", (e) => {
+    document.getElementById("client-name").input.value = "Agustin";
+    document.getElementById("vehicle-make").input.value = "Marca";
+    document.getElementById("vehicle-model").input.value = "Modelo";
+    document.getElementById("vehicle-plate").input.value = "AAA 1234";
+    document.getElementById("vehicle-mileage").value = "99999";
+    addRow();
+  });
 
 function showErrorPopup(title, errors = ["Error desconocido"]) {
   const popup = document.getElementById("error-popup");
@@ -556,20 +562,10 @@ document
     }
 
     const data = getInfoForm();
+    const state = await updateState();
 
-    try {
-      const client = await clientApi.createClient({ nombre: data.client_name });
-      // const dataClient = await clientApi.getClientByName(data.client.nombre);
-      console.log("Cliente creado:", client.data);
-      data.client_id = client.data.id;
-    } catch (error) {
-      if (error.status === 409) {
-        console.log("El cliente ya existe");
-      } else {
-        console.error("Error al crear el cliente:", error);
-        const errMsg = error?.response?.data?.message || "Error desconocido";
-        showErrorPopup("Error al crear el cliente", [errMsg]);
-      }
+    if (state.buttonDisabled) {
+      return;
     }
 
     try {
@@ -584,6 +580,31 @@ document
       console.error("Error al crear la factura:", error);
       const errMsg = error?.response?.data?.message || "Error desconocido";
       showErrorPopup("Error al crear la factura", [errMsg]);
+    }
+  });
+
+document
+  .querySelector(".emergency-button")
+  .addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    const data = getInfoForm();
+
+    try {
+      const response = await facturaApi.generateFactura(data, {
+        emergencia: "true",
+      });
+      //redirect to the invoice using axios
+      console.log("Factura de emergencia generada:", response.data);
+      // const redirectUrl = response.headers.get("X-Redirect-Url");
+      showSuccessPopup(response.data.pdfUrl);
+    } catch (error) {
+      console.error("Error al crear la factura de emergencia:", error);
+      const errMsg = error?.response?.data?.message || "Error desconocido";
+      showErrorPopup("Error al crear la factura de emergencia", [errMsg]);
     }
   });
 
@@ -657,5 +678,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // setupAutoComplete();
   setupKeyboardShortcuts();
   await loadClientes();
-  //TODO: enable the inputs after the clients are loaded
+  await updateState();
+
+  vehiculoKilometrajeInput.addEventListener("input", updateState);
+  clientesSelect.input.addEventListener("input", updateState);
+  vehiculoMarcaSelect.input.addEventListener("input", updateState);
+  vehiculoModeloSelect.input.addEventListener("input", updateState);
+  vehiculoMatriculaSelect.input.addEventListener("input", updateState);
 });

@@ -1,7 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const clientController = require("../controllers/clientController");
+import { Router } from "express";
+import * as clientController from "../controllers/clientController.js";
 // const { auth } = require("../middlewares/authMiddleware");
+
+const router = Router();
 
 // TODO: a;adir parametros a getAllClientes (ej ?vehicleOwned=Toyota)
 router.get("/all", clientController.getAllClients);
@@ -11,4 +12,4 @@ router.post("/", clientController.createClient);
 router.put("/:id", clientController.updateClient);
 router.delete("/:id", clientController.deleteClient);
 
-module.exports = router;
+export default router;
