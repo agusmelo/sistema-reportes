@@ -1,0 +1,30 @@
+<div class="searchable-select">
+  <div class="input-container">
+    <input
+      type="text"
+      [(ngModel)]="value"
+      [placeholder]="placeholder"
+      (input)="onInputChange()"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      class="search-input"
+    />
+    <button
+      type="button"
+      (click)="clearField()"
+      class="clear-button"
+      *ngIf="value"
+    >
+      ✕
+    </button>
+  </div>
+  <ul class="options-list" *ngIf="isOpen && filteredOptions.length > 0">
+    <li
+      *ngFor="let option of filteredOptions"
+      (mousedown)="selectOption(option)"
+      class="option-item"
+    >
+      {{ option }}
+    </li>
+  </ul>
+</div>
