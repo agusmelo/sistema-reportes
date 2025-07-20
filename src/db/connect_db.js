@@ -43,6 +43,7 @@ async function loadTables() {
     vehiculo_id INTEGER NOT NULL,
     fecha DATE NOT NULL,
     incluye_iva BOOLEAN NOT NULL DEFAULT 1, -- 1 = Include IVA, 0 = No IVA
+    file_path TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
     FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(id) ON DELETE CASCADE

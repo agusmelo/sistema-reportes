@@ -1,16 +1,19 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const router = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Carga todas las rutas definidas en los archivos adentro de routes (menos index.js)
 fs.readdirSync(__dirname)
   .filter((file) => file !== "index.js")
-  .forEach((file) => {
+  .forEach(async (file) => {
     const routeName = file.replace(".js", "");
-    const route = require(path.join(__dirname, file));
+    const { default: route } = await import(path.join(__dirname, file));
     router.use(`/${routeName}`, route); // carga la ruta en el router
   });
 
-module.exports = router;
+export default router;

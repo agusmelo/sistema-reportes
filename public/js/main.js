@@ -124,13 +124,6 @@ const REPORT_STATE = [
     buttonColor: "green",
     buttonText: "Generar Factura",
     buttonDisabled: false,
-    action: (btn) => {
-      //change the button style:
-      btn.classList.remove("btn-green");
-      btn.classList.add("btn-yellow");
-      // applyy buttonDisabled
-      btn.disabled = false;
-    },
   },
 
   {
@@ -216,17 +209,6 @@ const REPORT_STATE = [
   },
 ];
 async function updateState() {
-  /*
-BIEN - Cliente Existente + Matricula Existente Relacionada + Coincide Marca Y modelo 
-MAL - CLiente Existente + Matricula Existente Relacionada + NO Coincide Marca Y modelo
-MAL - Cliente Existente + Matricula Existente NO Relaciondad + Coincide Marca Y modelo 
-MAL - Cliente Existente + Matricula Existente NO Relaciondad + NO Coincide Marca Y modelo 
-BIEN (Se crea nuevo vehiculo) - Cliente Existente + Matricula NO Existente + NO Coincide Marca Y modelo 
-MAL - Cliente NO Existente + Matricula Existente NO Relacionada + Coincide Marca Y Modelo 
-MAL - Cliente NO Existente + Matricula Existente NO Relacionada + NO Coincide Marca Y Modelo 
-BIEN (Se crea nuevo cliente y vehiculo) - Cliente NO Existente + Matricula NO Existente +  NO Coincide Marca Y Modelo 
-*/
-
   const clienteSeleccionado = listaInfoClientes.find(
     (cliente) =>
       cliente.nombre.toUpperCase() === clientesSelect.input.value.toUpperCase()
@@ -263,91 +245,6 @@ BIEN (Se crea nuevo cliente y vehiculo) - Cliente NO Existente + Matricula NO Ex
       return "Error";
     }
   }
-  // const estadosPosibles = [
-  //   // Casos invalido temprano:
-  //   {
-  //     cond: () =>
-  //       clientesSelect.input.value !== "" &&
-  //       vehiculoMatriculaSelect.input.value !== "" &&
-  //       clienteExiste &&
-  //       existeVehiculo &&
-  //       !vehiculoEsDeCliente,
-  //     estado: "ROJO",
-  //     descripcion:
-  //       "Cliente Existente + Matricula Existente NO Relacionada + SI/NO Coincide Marca Y modelo",
-  //   },
-  //   {
-  //     cond: () =>
-  //       clientesSelect.input.value !== "" &&
-  //       vehiculoMatriculaSelect.input.value !== "" &&
-  //       !clienteExiste &&
-  //       existeVehiculo,
-  //     estado: "ROJO",
-  //     descripcion:
-  //       "Cliente NO Existente + Matricula Existente NO Relacionada + SI/NO Coincide Marca Y Modelo ",
-  //   },
-  //   //UNDEFINED
-  //   {
-  //     cond: () =>
-  //       vehiculoModeloSelect.input.value === "" ||
-  //       vehiculoMarcaSelect.input.value === "" ||
-  //       vehiculoMatriculaSelect.input.value === "" ||
-  //       clientesSelect.input.value === "",
-  //     estado: "UNDEFINED",
-  //     descripcion: "Faltan datos",
-  //   },
-
-  //   //* Casos Validos:
-  //   //BIEN - Cliente Existente + Matricula Existente Relacionada + Coincide Marca Y modelo
-  //   {
-  //     cond: () =>
-  //       clienteExiste &&
-  //       existeVehiculo &&
-  //       vehiculoEsDeCliente &&
-  //       vehiculoMarcaMatchModelo,
-  //     estado: "VERDE",
-  //     descripcion:
-  //       "Cliente Existente + Matricula Existente Relacionada + Coincide Marca Y modelo",
-  //   },
-  //   //BIEN (Se crea nuevo vehiculo) - Cliente Existente + Matricula NO Existente + SI/NO Coincide Marca Y modelo
-  //   {
-  //     cond: () => clienteExiste && !existeVehiculo,
-  //     estado: "AMARILLO",
-  //     descripcion:
-  //       "Cliente Existente + Matricula NO Existente + SI/NO Coincide Marca Y modelo",
-  //   },
-  //   {
-  //     cond: () => !clienteExiste && !existeVehiculo,
-  //     estado: "NARANJA",
-  //     descripcion:
-  //       "Cliente NO Existente + Matricula NO Existente + SI/NO Coincide Marca Y modelo",
-  //   },
-  //   //! Casos invalidos
-  //   {
-  //     cond: () =>
-  //       clienteExiste &&
-  //       existeVehiculo &&
-  //       vehiculoEsDeCliente &&
-  //       !vehiculoMarcaMatchModelo,
-  //     estado: "ROJO",
-  //     descripcion:
-  //       "Cliente Existente + Matricula Existente Relacionada + NO Coincide Marca Y modelo",
-  //   },
-  //   {
-  //     cond: () => clienteExiste && existeVehiculo && !vehiculoEsDeCliente,
-  //     estado: "ROJO",
-  //     descripcion:
-  //       "Cliente Existente + Matricula Existente NO Relacionada + SI/NO Coincide Marca Y modelo",
-  //   },
-  //   {
-  //     cond: () => !clienteExiste && existeVehiculo && !vehiculoEsDeCliente,
-  //     estado: "ROJO",
-  //     descripcion:
-  //       "Cliente NO Existente + Matricula Existente NO Relacionada + SI/NO Coincide Marca Y Modelo",
-  //   },
-  // ];
-  // const estado = estadosPosibles.find((estado) => estado.cond());
-  // console.log(estado);
   const conditions = {
     clientesSelect,
     vehiculoMatriculaSelect,
@@ -359,9 +256,6 @@ BIEN (Se crea nuevo cliente y vehiculo) - Cliente NO Existente + Matricula NO Ex
     vehiculoMarcaMatchModelo,
   };
   const estado = REPORT_STATE.find((estado) => estado.cond(conditions));
-
-  // console.log(estado);
-
   return estado;
 }
 

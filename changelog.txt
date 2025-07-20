@@ -1,0 +1,8 @@
+## 2025-07-19
+
+- **Refactor:** Modified the invoice creation process to ensure the PDF file path is correctly stored in the database.
+- **Fix:** Corrected a logical flaw where the file path was being generated before the invoice ID was available.
+- **Refactor:** Streamlined the `createFactura` controller and removed the redundant `generateFactura` function.
+- **Refactor:** Updated the `storePDF` function to remove unused parameters.
+- **Security:** Moved the calculation of invoice totals from the frontend to the backend to prevent manipulation and ensure data consistency.
+- **Feature:** Added backend validation for the invoice creation endpoint using JSON schemas.

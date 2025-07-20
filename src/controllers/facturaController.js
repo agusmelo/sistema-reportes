@@ -8,30 +8,231 @@ const fs = require("fs");
 const { generateFacturaPDF } = require("../utils/genFacturaPDF");
 const { MESES } = require("../utils/constants");
 const { ensurePathAndFile } = require("../utils/helpers");
-// Create a new factura
+const { validateFactura } = require("../utils/validation");
+"""// Create a new factura
 exports.createFactura = async (req, res) => {
   try {
-    // add validation for the request body
-    const { cliente_id, vehiculo_id, fecha, items, tieneIva, subtotal, total } =
-      req.body;
-
-    const idFactura = await FacturaModel.agregarFactura(
-      cliente_id,
-      vehiculo_id,
-      fecha,
+    const valid = validateFactura(req.body);
+    if (!valid) {
+      return responseHandler.error(res, "Invalid request body", 400, validateFactura.errors);
+    }
+    const {
+      client_name,
+      date,
+      make,
+      model,
+      plate,
+      mileage,
+      incluye_iva,
       items,
-      tieneIva,
-      subtotal,
-      total
+    } = req.body;
+    const { emergencia: isEmergencia } = req.query;
+
+    // Accion log
+    const actionLog = {
+      pdfCreated: false,
+      jsonCreated: false,
+      pdfStored: false,
+      dbStored: false,
+      kilometrajeUpdated: false,
+    };
+
+    // Get client and vehicle
+    let client, vehicle;
+    try {
+      client = await ClientModel.obtenerClientePorNombre(client_name);
+      vehicle = await VehicleModel.obtenerVehiculoPorMatricula(plate);
+    } catch (err) {
+      return responseHandler.error(
+        res,
+        `Error al obtener el cliente o el vehículo: ${err.message}`,
+        500
+      );
+    }
+
+    // Handle emergency case
+    if (isEmergencia && isEmergencia === "true") {
+      //TODO: Implementar el caso de emergencia
+      // Si es emergencia, no guardar en la base de datos
+      console.log("Emergencia: no se guardará en la base de datos");
+      appendToJsonFile(path.join(__dirname, "../output", "emergencia.json"), {
+        client_name,
+        date,
+        make,
+        model,
+        plate,
+        mileage,
+        incluye_iva,
+        items,
+      });
+      return responseHandler.success(
+        res,
+        {},
+        "Factura de emergencia generada (parcialmente).",
+        200
+      );
+    }
+
+    // --- Normal flow ---
+
+    // Validations
+    if (!client) {
+      return responseHandler.error(
+        res,
+        `El cliente ${client_name} no existe`,
+        404
+      );
+    }
+    if (!vehicle) {
+      return responseHandler.error(res, `El vehículo ${plate} no existe`, 404);
+    }
+    if (client.id !== vehicle.cliente_id) {
+      return responseHandler.error(
+        res,
+        `El vehículo ${plate} no pertenece al cliente ${client_name}`,
+        400
+      );
+    }
+
+    // Update mileage
+    try {
+      await VehicleModel.actualizarKilometraje(plate, mileage);
+      actionLog.kilometrajeUpdated = true;
+    } catch (e) {
+      console.error("Error updating kilometraje:", e);
+      return responseHandler.error(
+        res,
+        `Error al actualizar el kilometraje del vehículo: ${e.message}`,
+        500
+      );
+    }
+
+    let idFactura;
+    try {
+      // 1. Create invoice to get the ID
+      idFactura = await FacturaModel.agregarFactura(
+        client.id,
+        vehicle.id,
+        date,
+        items,
+        incluye_iva
+      );
+      actionLog.dbStored = true;
+      console.log(`Factura ${idFactura} creada correctamente en la BD.`);
+    } catch (e) {
+      console.error("Error creando la factura:", e);
+      return responseHandler.error(
+        res,
+        `Error al crear la factura: ${e.message}`,
+        500
+      );
+    }
+
+    // 2. Generate file path and name
+    const fechaFactura = new Date(date);
+    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
+      MESES[fechaFactura.getMonth()]
+    }_${fechaFactura.getFullYear()}_${make}_${model}_${plate}_${idFactura}.pdf`;
+
+    const privateOutputPath = path.join(
+      __dirname,
+      "../output",
+      fechaFactura.getFullYear().toString(),
+      MESES[fechaFactura.getMonth()],
+      nombreDeArchivo
     );
-    responseHandler.success(res, idFactura, "Factura creada con éxito", 201);
-  } catch (error) {
-    console.error(
-      `Error creating invoice: ${error.message} - ${JSON.stringify(req.body)}`
+
+    // 3. Update invoice with file_path
+    try {
+      await FacturaModel.actualizarFactura(idFactura, {
+        file_path: privateOutputPath,
+      });
+      console.log(`Factura ${idFactura} actualizada con file_path.`);
+    } catch (e) {
+      console.error("Error updating factura with file_path:", e);
+      return responseHandler.error(
+        res,
+        `Error al actualizar la factura con el path: ${e.message}`,
+        500
+      );
+    }
+
+    // 4. Get full invoice data for PDF generation
+    const facturaCompleta = await FacturaModel.getInvoiceWithTotal(idFactura);
+    if (!facturaCompleta) {
+      return responseHandler.error(
+        res,
+        "No se pudo obtener la factura completa para generar el PDF.",
+        500
+      );
+    }
+
+    // Calculate totals
+    const subtotal = items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
+    const iva = incluye_iva ? subtotal * 0.21 : 0;
+    const total = subtotal + iva;
+
+    // 5. Generate PDF
+    const pdfBuffer = await generateFacturaPDF({
+      client_name,
+      date,
+      make,
+      model,
+      plate,
+      mileage,
+      items,
+      incluye_iva,
+      ivaSolo: iva,
+      subtotal: subtotal,
+      total: total,
+    });
+    actionLog.pdfCreated = true;
+
+    // 6. Store PDF (private and public link)
+    const publicOutputPath = path.join(
+      __dirname,
+      "../../public",
+      "ultima_factura_generada",
+      nombreDeArchivo
     );
-    responseHandler.error(res, error.message, 400);
+    storePDF(pdfBuffer, publicOutputPath, privateOutputPath);
+    actionLog.pdfStored = true;
+
+    // 7. Save JSON representation
+    const jsonOutputPath = path.join(__dirname, "../output/invoice.json");
+    appendToJsonFile(jsonOutputPath, {
+      id: idFactura,
+      client,
+      date,
+      make,
+      model,
+      plate,
+      mileage,
+      items,
+      incluye_iva,
+      ivaSolo: iva,
+      subtotal: subtotal,
+      total: total,
+      file_path: privateOutputPath,
+    });
+    actionLog.jsonCreated = true;
+
+    // 8. Send success response
+    return responseHandler.success(
+      res,
+      {
+        pdfUrl: `/ultima_factura_generada/${nombreDeArchivo}`,
+        jsonPath: jsonOutputPath,
+        invoiceId: idFactura,
+      },
+      "Factura generada exitosamente",
+      201 // Use 201 for resource creation
+    );
+  } catch (err) {
+    console.error("Error generating invoice:", err);
+    res.status(500).send({ error: "Failed to generate invoice" });
   }
-};
+};""
 
 // Get all facturas
 exports.getFacturas = async (req, res) => {
@@ -124,203 +325,12 @@ exports.deleteFactura = async (req, res) => {
 //   ]
 // }
 
-exports.generateFactura = async (req, res) => {
-  try {
-    //TODO : add validation for the request body
-    const {
-      client_name,
-      date,
-      make,
-      model,
-      plate,
-      mileage,
-      incluye_iva,
-      items,
-    } = req.body;
-    const { emergencia: isEmergencia } = req.query;
-    // facturaValidation(client_id, date, make, model, plate, mileage, iva, items);
-    const actionLog = {
-      pdfCreated: false,
-      jsonCreated: false,
-      pdfStored: false,
-      dbStored: true,
-      kilometrajeUpdated: false,
-    };
-    let client, vehicle;
-    try {
-      client = await ClientModel.obtenerClientePorNombre(client_name);
-      vehicle = await VehicleModel.obtenerVehiculoPorMatricula(plate);
-    } catch (err) {
-      return responseHandler.error(
-        res,
-        `Error al obtener el cliente o el vehículo: ${err.message}`,
-        500
-      );
-    }
 
-    if (!isEmergencia || isEmergencia !== "true") {
-      // Si no es emergencia, guardar en la base de datos
 
-      // const subtotal = items.reduce((acc, item) => {
-      //   return acc + item.precio * item.cantidad;
-      // }, 0);
-      // const total = iva ? subtotal * 1.21 : subtotal;
-      if (!client) {
-        return responseHandler.error(
-          res,
-          `El cliente ${client_name} no existe`,
-          404
-        );
-      }
-      if (!vehicle) {
-        return responseHandler.error(
-          res,
-          `El vehículo ${plate} no existe`,
-          404
-        );
-      }
-      if (client.id !== vehicle.cliente_id) {
-        return responseHandler.error(
-          res,
-          `El vehículo ${plate} no pertenece al cliente ${client_name}`,
-          400
-        );
-      }
-      try {
-        //TODO: esto deberia actualizarse en otro lado
-        await VehicleModel.actualizarKilometraje(plate, mileage);
-        actionLog.kilometrajeUpdated = true;
-      } catch (e) {
-        console.error("Error updating kilometraje:", e);
-        return responseHandler.error(
-          res,
-          `Error al actualizar el kilometraje del vehículo: ${e.message}`,
-          500
-        );
-      }
-      try {
-        const idFactura = await FacturaModel.agregarFactura(
-          client.id,
-          vehicle.id,
-          date,
-          items,
-          incluye_iva
-        );
-        actionLog.dbStored = true;
-        console.log(`Factura ${idFactura} creada correctamente`);
-        // Si la factura se crea correctamente, se puede continuar
-      } catch (e) {
-        console.error("Error creando la factura:", e);
-        return responseHandler.error(
-          res,
-          `Error al crear la factura: ${e.message}`,
-          500
-        );
-      }
-    } else {
-      //TODO: Implementar el caso de emergencia
-      // Si es emergencia, no guardar en la base de datos
-      console.log("Emergencia: no se guardará en la base de datos");
-      appendToJsonFile(path.join(__dirname, "../output", "emergencia.json"), {
-        client_name,
-        date,
-        make,
-        model,
-        plate,
-        mileage,
-        incluye_iva,
-        items,
-      });
-    }
-    const fechaFactura = new Date(date);
-    const facturaAgregada = await FacturaModel.getInvoiceWithTotal(
-      client.id,
-      vehicle.id,
-      date,
-      incluye_iva,
-      items
-    );
-
-    const nombreDeArchivo = `${client_name}_${fechaFactura.getDate()}_${
-      MESES[fechaFactura.getMonth()]
-    }_${fechaFactura.getFullYear()}_${make}_${model}_${plate}_${
-      facturaAgregada.id
-    }`;
-
-    // Crear la definición del document
-    const pdfBuffer = await generateFacturaPDF({
-      client_name,
-      date,
-      make,
-      model,
-      plate,
-      mileage,
-      items,
-      incluye_iva,
-      ivaSolo: facturaAgregada.iva,
-      subtotal: facturaAgregada.subtotal,
-      total: facturaAgregada.total,
-    });
-    actionLog.pdfCreated = true;
-    console.log(facturaAgregada);
-    // Guardar JSON
-    const jsonOutputPath = path.join(__dirname, "../output/invoice.json");
-    appendToJsonFile(jsonOutputPath, {
-      id: facturaAgregada.id,
-      client,
-      date,
-      make,
-      model,
-      plate,
-      mileage,
-      items,
-      incluye_iva,
-      ivaSolo: facturaAgregada.iva,
-      subtotal: facturaAgregada.subtotal,
-      total: facturaAgregada.total,
-    });
-    actionLog.jsonCreated = true;
-    // Guardar el PDF en el servidor
-    const privateOutputPath = path.join(
-      __dirname,
-      "../output",
-      `${nombreDeArchivo}.pdf`
-    );
-    const publicOutputPath = path.join(
-      __dirname,
-      "../../public",
-      "ultima_factura_generada",
-      `${nombreDeArchivo}.pdf`
-    );
-    storePDF(pdfBuffer, publicOutputPath, privateOutputPath, fechaFactura);
-    return responseHandler.success(
-      res,
-      {
-        pdfUrl: `/ultima_factura_generada/${nombreDeArchivo}.pdf`,
-        jsonPath: jsonOutputPath,
-      },
-      "Factura generada exitosamente",
-      200
-    );
-  } catch (err) {
-    console.error("Error generating invoice:", err);
-    res.status(500).send({ error: "Failed to generate invoice" });
-  }
-};
-
-function storePDF(pdfBuffer, publicFilePath, privateFilePath, fechaFactura) {
+function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
   // Atomic write to prevent corrpution in case of crash
-  console.log(
-    path.dirname(privateFilePath),
-    fechaFactura.getFullYear().toString(),
-    MESES[fechaFactura.getMonth()]
-  );
   ensurePathAndFile(
-    path.join(
-      path.dirname(privateFilePath),
-      fechaFactura.getFullYear().toString(),
-      MESES[fechaFactura.getMonth()]
-    ),
+    path.dirname(privateFilePath),
     path.basename(privateFilePath),
     pdfBuffer
   );
