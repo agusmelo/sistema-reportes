@@ -254,7 +254,11 @@ export const createFactura = async (req, res) => {
     );
   } catch (err) {
     console.error("Error generating invoice:", err);
-    res.status(500).send({ error: "Failed to generate invoice" });
+    res.status(500).json({
+      message: "Failed to generate invoice",
+      error: err.message,
+      data: null,
+    });
   }
 };
 
@@ -262,11 +266,15 @@ export const createFactura = async (req, res) => {
 export const getFacturas = async (req, res) => {
   try {
     const facturas = await FacturaModel.obtenerFacturas();
-    res.status(200).json(facturas);
+    res.status(200).json({
+      message: "Lista de facturas obtenida con éxito",
+      data: facturas,
+    });
   } catch (error) {
     res.status(500).json({
-      message: "Error al botener las facturas",
+      message: "Error al obtener las facturas",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -277,11 +285,20 @@ export const getFacturaById = async (req, res) => {
     const { id } = req.params;
     const factura = await FacturaModel.obtenerFactura(id);
     if (!factura) {
-      return res.status(404).json({ message: "Factura not found" });
+      return res.status(404).json({
+        message: "Factura not found",
+        data: null,
+      });
     }
-    res.status(200).json(factura);
+    res.status(200).json({
+      message: "Factura obtenida con éxito",
+      data: factura,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+      data: null,
+    });
   }
 };
 
@@ -294,11 +311,20 @@ export const updateFactura = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!updatedFactura) {
-      return res.status(404).json({ message: "Factura not found" });
+      return res.status(404).json({
+        message: "Factura not found",
+        data: null,
+      });
     }
-    res.status(200).json(updatedFactura);
+    res.status(200).json({
+      message: "Factura actualizada con éxito",
+      data: updatedFactura,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({
+      message: error.message,
+      data: null,
+    });
   }
 };
 
@@ -308,11 +334,20 @@ export const deleteFactura = async (req, res) => {
     const { id } = req.params;
     const deletedFactura = await FacturaModel.eliminarFactura(id);
     if (!deletedFactura) {
-      return res.status(404).json({ message: "Factura not found" });
+      return res.status(404).json({
+        message: "Factura not found",
+        data: null,
+      });
     }
-    res.status(200).json({ message: "Factura deleted successfully" });
+    res.status(200).json({
+      message: "Factura deleted successfully",
+      data: null,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+      data: null,
+    });
   }
 };
 // -> GENERAR FACTURA: Boton Grande dinamico + actualizar usuario - tiene que ser dinamico para mostrar al usuario que se esta haciendo.

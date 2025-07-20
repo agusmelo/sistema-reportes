@@ -5,11 +5,15 @@ import Logger from "../utils/customLog.js";
 export const getVehiculos = async (req, res) => {
   try {
     const vehiculos = await VehiculoModel.obtenerVehiculos();
-    res.status(200).json(vehiculos);
+    res.status(200).json({
+      message: "Lista de vehículos obtenida con éxito",
+      data: vehiculos,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener los vehículos",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -20,13 +24,20 @@ export const getVehiculoById = async (req, res) => {
     const { id } = req.params;
     const vehiculo = await VehiculoModel.obtenerVehiculo(id);
     if (!vehiculo) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+        data: null,
+      });
     }
-    res.status(200).json(vehiculo);
+    res.status(200).json({
+      message: "Vehículo obtenido con éxito",
+      data: vehiculo,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -44,19 +55,32 @@ export const getVehiculosByClienteId = async (req, res) => {
           modelo
         );
       if (!vehiculo) {
-        return res.status(404).json({ message: "Vehículo no encontrado" });
+        return res.status(404).json({
+          message: "Vehículo no encontrado",
+          data: null,
+        });
       }
-      return res.status(200).json(vehiculo);
+      return res.status(200).json({
+        message: "Vehículo encontrado con éxito",
+        data: vehiculo,
+      });
     }
     const vehiculo = await VehiculoModel.obtenerVehiculoCliente(cliente_id);
     if (!vehiculo) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+        data: null,
+      });
     }
-    res.status(200).json(vehiculo);
+    res.status(200).json({
+      message: "Vehículos del cliente obtenidos con éxito",
+      data: vehiculo,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -73,8 +97,8 @@ export const createVehiculo = async (req, res) => {
       kilometraje
     );
     res.status(201).json({
-      message: "Vehículo creado",
-      vehiculo: {
+      message: "Vehículo creado con éxito",
+      data: {
         cliente_id,
         marca,
         modelo,
@@ -86,6 +110,7 @@ export const createVehiculo = async (req, res) => {
     res.status(400).json({
       message: "Error al crear el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -110,6 +135,7 @@ export const updateVehiculo = async (req, res) => {
   // }
   res.status(200).json({
     message: "Para esta funcion hace falta creatividad :D, se aceptan PRs",
+    data: null,
   });
 };
 
@@ -120,13 +146,20 @@ export const deleteVehiculo = async (req, res) => {
       req.params.id
     );
     if (!succesful) {
-      return res.status(404).json({ message: `Vehículo ${id} no encontrado` });
+      return res.status(404).json({
+        message: `Vehículo ${id} no encontrado`,
+        data: null,
+      });
     }
-    res.status(200).json({ message: `Vehículo ${id} eliminado` });
+    res.status(200).json({
+      message: `Vehículo ${id} eliminado`,
+      data: null,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al eliminar el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -148,6 +181,7 @@ export const getVehiculoByMatricula = async (req, res) => {
     res.status(500).json({
       message: "Error al obtener el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -172,13 +206,20 @@ export const getMatriculasByMarcaModelo = async (req, res) => {
         modelo
       );
     if (!vehiculos) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+        data: null,
+      });
     }
-    res.status(200).json(vehiculos);
+    res.status(200).json({
+      message: "Vehículos obtenidos con éxito",
+      data: vehiculos,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener el vehículo",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -188,13 +229,20 @@ export const getModelosByMarca = async (req, res) => {
     const { cliente_id, marca } = req.params;
     const modelos = await VehiculoModel.getModelosDeMarca(cliente_id, marca);
     if (!modelos) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Modelos no encontrados",
+        data: null,
+      });
     }
-    res.status(200).json(modelos);
+    res.status(200).json({
+      message: "Modelos obtenidos con éxito",
+      data: modelos,
+    });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener el vehículo",
+      message: "Error al obtener los modelos",
       error: error.message,
+      data: null,
     });
   }
 };

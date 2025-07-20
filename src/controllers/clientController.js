@@ -4,7 +4,7 @@ import responseHandler from "../utils/responseHandler.js";
 // TODO: agregar error handling y validacion de tipos
 // if the client already exists, return an error code 409
 // if the client does not exist, create a new client
-export const createClient = async (req, res) => {
+export const createClient = async (req, xres) => {
   const { nombre } = req.body;
   try {
     // Check if the client already exists
@@ -43,6 +43,7 @@ export const getAllClients = async (req, res) => {
     res.status(500).json({
       message: "Error al obtener los usuarios",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -54,6 +55,7 @@ export const getClientById = async (req, res) => {
     if (!dataCliente) {
       res.status(404).json({
         message: `No existe cliente con id = ${clientId}`,
+        data: null,
       });
     } else {
       res.status(200).json({
@@ -66,6 +68,7 @@ export const getClientById = async (req, res) => {
     res.status(500).json({
       message: "Error al obtener el usuario",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -77,6 +80,7 @@ export const getClientByName = async (req, res) => {
     if (!dataCliente) {
       res.status(404).json({
         message: `No existe cliente con nombre = ${clientName}`,
+        data: null,
       });
     } else {
       res.status(200).json({
@@ -89,6 +93,7 @@ export const getClientByName = async (req, res) => {
     res.status(500).json({
       message: "Error al obtener el usuario",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -100,12 +105,14 @@ export const updateClient = async (req, res) => {
     const result = await ClientModel.actualizarCliente(clientId, data);
     res.status(200).json({
       message: `Cliente ${clientId} actualizado correctamente`,
+      data: null,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       message: "Error al actualizar el usuario",
       error: error.message,
+      data: null,
     });
   }
 };
@@ -117,12 +124,14 @@ export const deleteClient = async (req, res) => {
     // TODO: revisar el mensaje cuando no existe el cliente
     res.status(200).json({
       message: `Cliente ${clientId} eliminado correctamente`,
+      data: null,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       message: "Error al eliminar el usuario",
       error: error.message,
+      data: null,
     });
   }
 };
