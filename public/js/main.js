@@ -281,14 +281,14 @@ clientesSelect.afterSelect = async (e) => {
     );
     if (clientData && clientData.length > 0) {
       if (clientData.length > 1) {
-        console.warn("Multiple clients found with the same name. Please implement a selection UI.");
+        console.warn(
+          "Multiple clients found with the same name. Please implement a selection UI."
+        );
       }
       const client = clientData[0];
       console.log("Cliente encontrado", client);
       try {
-        listaInfoVehiculos = await vehicleApi.getVehicleByClientId(
-          client.id
-        );
+        listaInfoVehiculos = await vehicleApi.getVehicleByClientId(client.id);
         if (listaInfoVehiculos) {
           vehiculoMarcaSelect.options = listaInfoVehiculos.map(
             (vehiculo) => vehiculo.marca
@@ -401,8 +401,6 @@ vehiculoMatriculaSelect.afterSelect = async (e) => {
   await updateState();
 };
 
-
-
 document
   .getElementById("buscar-matricula")
   .addEventListener("click", async (e) => {
@@ -493,16 +491,14 @@ function addRow(data) {
   itemIndex++;
 }
 
-document
-  .getElementById("test-btn")
-  .addEventListener("click", (e) => {
-    document.getElementById("client-name").input.value = "Agustin";
-    document.getElementById("vehicle-make").input.value = "Marca";
-    document.getElementById("vehicle-model").input.value = "Modelo";
-    document.getElementById("vehicle-plate").input.value = "AAA 1234";
-    document.getElementById("vehicle-mileage").value = "99999";
-    addRow();
-  });
+document.getElementById("test-btn").addEventListener("click", (e) => {
+  document.getElementById("client-name").input.value = "Agustin";
+  document.getElementById("vehicle-make").input.value = "Marca";
+  document.getElementById("vehicle-model").input.value = "Modelo";
+  document.getElementById("vehicle-plate").input.value = "AAA 1234";
+  document.getElementById("vehicle-mileage").value = "99999";
+  addRow();
+});
 
 function showErrorPopup(title, errors = ["Error desconocido"]) {
   const popup = document.getElementById("error-popup");
@@ -569,7 +565,7 @@ document
     }
 
     try {
-      const response = await facturaApi.generateFactura(data, {
+      const response = await facturaApi.createFactura(data, {
         emergencia: "false",
       });
       //redirect to the invoice using axios
@@ -594,7 +590,7 @@ document
     const data = getInfoForm();
 
     try {
-      const response = await facturaApi.generateFactura(data, {
+      const response = await facturaApi.createFactura(data, {
         emergencia: "true",
       });
       //redirect to the invoice using axios

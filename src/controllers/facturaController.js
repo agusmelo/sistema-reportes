@@ -15,10 +15,9 @@ export const createFactura = async (req, res) => {
     const valid = validateFactura(req.body);
     if (!valid) {
       return responseHandler.error(
-        res,
+        validateFactura.errors,
         "Invalid request body",
-        400,
-        validateFactura.errors
+        400
       );
     }
     const {
@@ -258,7 +257,6 @@ export const createFactura = async (req, res) => {
     res.status(500).send({ error: "Failed to generate invoice" });
   }
 };
-("");
 
 // Get all facturas
 export const getFacturas = async (req, res) => {

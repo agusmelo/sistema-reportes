@@ -38,6 +38,7 @@ const vehicleApi = {
   },
 
   getVehicleByClientId: (clientId) => {
+    console.log("getVehicleByClientId", clientId);
     return api.get(`/vehiculos/cliente/${clientId}`, { params: {} });
   },
 
@@ -45,11 +46,12 @@ const vehicleApi = {
     return api.get(`/vehiculos/matricula/${matricula}`);
   },
 
-  getVehiculoByMatricula: (clientId, marca, modelo) => {
+  getVehicleByClientMarcaModelo: (clientId, marca, modelo) => {
     return api.get(`/vehiculos/matriculas/${clientId}`, {
       params: { marca, modelo },
     });
   },
+
   createVehicle: (data) => {
     return api.post("/vehiculos", data);
   },
@@ -72,13 +74,13 @@ const facturaApi = {
     return api.get(`/facturas/${facturaId}`);
   },
 
-  createFactura: (data) => {
-    return api.post("/", data);
+  createFactura: (data, config) => {
+    return api.post("/facturas", data, config);
   },
   // TODO: arreglar para generalizar varios options
-  generateFactura: (data, config) => {
-    return api.post("/facturas/generar", data, config);
-  },
+  // generateFactura: (data, config) => {
+  //   return api.post("/facturas/generar", data, config);
+  // },
   updateFactura: (facturaId, data) => {
     return api.put(`/facturas/${facturaId}`, data);
   },
