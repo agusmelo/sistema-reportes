@@ -16,6 +16,7 @@ export class InvoiceFormComponent implements OnInit {
   invoiceForm: FormGroup;
   clients: Client[] = [];
   clientNames: string[] = [];
+  client_id:string = '';
   vehicleBrands: string[] = [];
   vehicleModels: string[] = [];
   vehiclePlates: string[] = [];
@@ -40,6 +41,7 @@ export class InvoiceFormComponent implements OnInit {
   private createForm(): FormGroup {
     return this.fb.group({
       client_name: ['', Validators.required],
+      client_id:[''],
       date: ['', Validators.required],
       make: ['', Validators.required],
       model: ['', Validators.required],
@@ -118,8 +120,10 @@ export class InvoiceFormComponent implements OnInit {
     this.currentClient = this.clients.find(c => c.nombre === clientName) || null;
 
     if (this.currentClient) {
+      this.invoiceForm.patchValue({ client_id: this.currentClient.id });
       this.loadVehiclesForClient(this.currentClient.id);
     } else {
+      this.invoiceForm.patchValue({ client_id: '' });
       this.clearVehicleOptions();
     }
   }

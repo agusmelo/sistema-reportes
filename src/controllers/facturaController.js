@@ -26,6 +26,7 @@ export const createFactura = async (req, res) => {
     }
     const {
       client_name,
+      client_id,
       date,
       make,
       model,
@@ -44,34 +45,16 @@ export const createFactura = async (req, res) => {
       dbStored: false,
       kilometrajeUpdated: false,
     };
-
     // Get client and vehicle
     let client, vehicle;
     try {
-      client = await ClientModel.obtenerClientePorNombre(client_name);
-      if (!client) {
-        const newClient = await ClientModel.agregarCliente(client_name);
-        client = await ClientModel.obtenerCliente(newClient.lastID);
-      }
-
+      console.log("clientID: ", client_id);
+      client = await ClientModel.obtenerCliente(client_id);
       vehicle = await VehicleModel.obtenerVehiculoPorMatricula(plate);
-      if (!vehicle) {
-        const newVehicle = await VehicleModel.agregarVehiculo(
-          client.id,
-          make,
-          model,
-          plate,
-          mileage
-        );
-        vehicle = await VehicleModel.obtenerVehiculo(newVehicle.lastID);
-      }
     } catch (err) {
-      return responseHandler.error(
-        res,
-        `Error al obtener o crear el cliente o el vehículo: ${err.message}`,
-        500
-      );
+      return responseHandler.error(res, err.message, 404);
     }
+    console.log(client);
 
     // Handle emergency case
     if (isEmergencia && isEmergencia === "true") {
@@ -109,6 +92,7 @@ export const createFactura = async (req, res) => {
     if (!vehicle) {
       return responseHandler.error(res, `El vehículo ${plate} no existe`, 404);
     }
+    console.log("---", client);
     if (client.id !== vehicle.cliente_id) {
       return responseHandler.error(
         res,
@@ -157,7 +141,11 @@ export const createFactura = async (req, res) => {
     const month = fechaFactura.getUTCMonth();
     const day = fechaFactura.getUTCDate();
 
-    const nombreDeArchivo = `${client_name}_${day}_${MESES[month]}_${year}*${model}_${plate}.pdf`;
+    const trimmedClientName = client_name.trim().split(" ").join("-");
+    const modelTrimmed = model.trim().split(" ").join("-");
+    const plateTrimmed = plate.trim().split(" ").join("-");
+
+    const nombreDeArchivo = `${trimmedClientName}_${day}_${MESES[month]}_${year}_${modelTrimmed}_${plateTrimmed}_id${idFactura}.pdf`;
 
     const privateOutputPath = path.join(
       __dirname,
@@ -223,7 +211,16 @@ export const createFactura = async (req, res) => {
       "ultima_factura_generada",
       nombreDeArchivo
     );
-    storePDF(pdfBuffer, publicOutputPath, privateOutputPath);
+    try {
+      storePDF(pdfBuffer, publicOutputPath, privateOutputPath);
+    } catch (err) {
+      console.error("Error storing PDF:", err);
+      return responseHandler.error(
+        res,
+        `Error al almacenar el PDF: ${err.message}`,
+        500
+      );
+    }
     actionLog.pdfStored = true;
 
     // 7. Save JSON representation
@@ -390,7 +387,7 @@ export const deleteFactura = async (req, res) => {
 
 function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
   const publicDir = path.dirname(publicFilePath);
-
+  //TODO: Repensar esta funcionalidad
   // Wipe the public directory
   if (fs.existsSync(publicDir)) {
     fs.readdirSync(publicDir).forEach((file) => {
@@ -409,5 +406,6 @@ function storePDF(pdfBuffer, publicFilePath, privateFilePath) {
   if (fs.existsSync(publicFilePath)) {
     fs.unlinkSync(publicFilePath);
   }
-  fs.symlinkSync(privateFilePath, publicFilePath);
+  //TODO: Buscar una alternativa a usar systemlinks - devolver el archivo desde el backend
+  // fs.symlinkSync(privateFilePath, publicFilePath);
 }

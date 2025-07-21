@@ -19,6 +19,10 @@ function ensurePathAndFile(dirPath, fileName, content) {
     }
 
     const filePath = path.join(targetPath, fileName);
+    if (fs.existsSync(filePath)) {
+      console.log(`File already exists: ${filePath}`);
+      throw new Error(`File already exists: ${filePath}`);
+    }
     writeFileAtomicSync(filePath, content);
     console.log(`File created: ${filePath}`);
   } catch (error) {
@@ -27,4 +31,23 @@ function ensurePathAndFile(dirPath, fileName, content) {
   }
 }
 
-export { ensurePathAndFile };
+/**
+ * Builds a dynamic UPDATE SQL query and returns the query string and values array
+ *
+ * @param {string} tableName - The name of the table to update
+ * @param {Object} changes - Object containing the fields to update
+ * @param {string|number} id - The ID of the record to update
+ * @returns {Object} Object containing {query: string, values: Array}
+ */
+function buildUpdateQuery(tableName, changes, id) {
+  const keys = Object.keys(changes);
+  const setClause = keys.map((key) => `${key} = ?`).join(", ");
+  const values = keys.map((key) => changes[key]);
+
+  const query = `UPDATE ${tableName} SET ${setClause} WHERE id = ?`;
+  const allValues = [...values, id];
+
+  return { query, values: allValues };
+}
+
+export { ensurePathAndFile, buildUpdateQuery };

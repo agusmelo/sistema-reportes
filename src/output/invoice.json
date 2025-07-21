@@ -1005,5 +1005,280 @@
     "ivaSolo": 12.6,
     "subtotal": 60,
     "total": 72.6
+  },
+  {
+    "id": 87,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 89,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 90,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 91,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 93,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 94,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 95,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123.pdf"
+  },
+  {
+    "id": 101,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123_101.pdf"
+  },
+  {
+    "id": 102,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123_102.pdf"
+  },
+  {
+    "id": 103,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123_103.pdf"
+  },
+  {
+    "id": 104,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-21",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 6666,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 25.83,
+    "subtotal": 123,
+    "total": 148.82999999999998,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_21_Julio_2025_Modelo-A_ABC123_id104.pdf"
   }
 ]

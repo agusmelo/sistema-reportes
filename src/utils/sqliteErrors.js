@@ -1,9 +1,9 @@
 import { DatabaseError, UniqueConstraintError } from "./errors.js";
 
 function handleSQLError(error, modelName = "", logErrors = true) {
-  if (logErrors) {
-    console.error(`Model (${modelName}) - Database Error: `, error);
-  }
+  // if (logErrors) {
+  console.log(`Model (${modelName}) - Database Error: `, error);
+  // }
   if (error.code === "SQLITE_CONSTRAINT") {
     if (error.message.includes("UNIQUE constraint failed")) {
       const field = error.message.split(": ")[1]; // Extract the field name

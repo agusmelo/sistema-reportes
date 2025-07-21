@@ -1,3 +1,5 @@
+[-] Para el selector, si hay mas de un cliente con el mismo nombre, mostrar los dos y que elija cual, hay que guardar el id del cliente seleccionado en el form
+[-] Validar el fromato de la matricula
 [X]!! Parsear dates
 ---
 **Justification:** Standardized date handling to prevent timezone-related bugs. The frontend now correctly sets the current date on load, and the backend consistently parses dates in `YYYY-MM-DD` format using UTC methods. This ensures that dates are handled accurately across the application.

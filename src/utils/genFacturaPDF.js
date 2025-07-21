@@ -3,10 +3,14 @@ const CUSTOM_FIELDS = {};
 import fs from "fs";
 
 import path from "path";
+import { fileURLToPath } from "url";
 import { HORIZONTAL_SPACE } from "./constants.js";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import vfs_fonts from "pdfmake/build/vfs_fonts.js";
 pdfMake.addVirtualFileSystem(vfs_fonts);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const fonts = {
   Courier: {

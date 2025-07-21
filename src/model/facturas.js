@@ -1,6 +1,7 @@
 import path from "path";
 import { connectDB } from "../db/connect_db.js";
 import handleSQLError from "../utils/sqliteErrors.js";
+import { buildUpdateQuery } from "../utils/helpers.js";
 
 //TODO: Hay alguna mejor manera de hacer esto? (el pasaje esta solo para abstraer la transaccion)
 // Me refiero a poder chainear varias funciones en una transaccion y luego ejecutarla
@@ -53,13 +54,15 @@ async function obtenerFacturas() {
 async function obtenerFactura(id) {
   try {
     const db = await connectDB();
-    const resultado = await db.all("SELECT * FROM facturas WHERE id = ?", [id]);
-    const items = await db.all(
-      "SELECT * FROM items_factura WHERE factura_id = ?",
-      [id]
-    );
-    resultado[0].items = items;
-    return resultado[0];
+    const resultado = await db.get("SELECT * FROM facturas WHERE id = ?", [id]);
+    if (resultado) {
+      const items = await db.all(
+        "SELECT * FROM items_factura WHERE factura_id = ?",
+        [id]
+      );
+      resultado.items = items;
+    }
+    return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");
   }
@@ -68,10 +71,8 @@ async function obtenerFactura(id) {
 async function actualizarFactura(id, cambios) {
   try {
     const db = await connectDB();
-    const resultado = await db.run("UPDATE facturas SET ? WHERE id = ?", [
-      cambios,
-      id,
-    ]);
+    const { query, values } = buildUpdateQuery("facturas", cambios, id);
+    const resultado = await db.run(query, values);
     return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");
