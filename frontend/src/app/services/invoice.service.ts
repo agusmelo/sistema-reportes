@@ -27,6 +27,20 @@ export interface InvoiceResponse {
   message: string;
 }
 
+export interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedInvoicesResponse {
+  data: Invoice[];
+  pagination: PaginationInfo;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,6 +50,10 @@ export class InvoiceService {
 
   getAllInvoices(): Promise<ApiResponse<Invoice[]>> {
     return firstValueFrom(this.api.get<ApiResponse<Invoice[]>>('/facturas/all'));
+  }
+
+  getPaginatedInvoices(page: number = 1, limit: number = 10): Promise<{data: Invoice[], pagination: PaginationInfo, message: string}> {
+    return firstValueFrom(this.api.get<{data: Invoice[], pagination: PaginationInfo, message: string}>(`/facturas/paginated?page=${page}&limit=${limit}`));
   }
 
   getInvoiceById(id: number): Promise<ApiResponse<Invoice>> {

@@ -14,17 +14,17 @@
     Cargando facturas...
   </div>
 
-  <div *ngIf="!loading && !error && invoices.length === 0" class="no-invoices">
+  <div *ngIf="!loading && !error && invoices && invoices.length === 0" class="no-invoices">
     No hay facturas generadas aún.
   </div>
 
-  <div *ngIf="!loading && !error && invoices.length > 0" class="summary-section">
+  <div *ngIf="!loading && !error && invoices && invoices.length > 0" class="summary-section">
     <div class="summary-card">
       <h3>Resumen</h3>
       <div class="summary-stats">
         <div class="stat-item">
           <span class="stat-label">Total Facturas:</span>
-          <span class="stat-value">{{ invoices.length }}</span>
+          <span class="stat-value">{{ allInvoices?.length || 0 }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Monto Total:</span>
@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <div *ngIf="!loading && !error && invoices.length > 0" class="table-container">
+  <div *ngIf="!loading && !error && invoices && invoices.length > 0" class="table-container">
     <table class="invoices-table">
       <thead>
         <tr>
@@ -165,5 +165,51 @@
         </ng-container>
       </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container" *ngIf="paginationInfo && paginationInfo.totalPages > 1">
+      <div class="pagination-info">
+        <span>Mostrando {{ getStartRecord() }} - {{ getEndRecord() }} de {{ getTotalRecords() }} facturas</span>
+      </div>
+
+      <div class="pagination-controls">
+        <div class="items-per-page">
+          <label for="itemsPerPage">Mostrar:</label>
+          <select id="itemsPerPage" (change)="onItemsPerPageChange($event)" [value]="itemsPerPage">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span>por página</span>
+        </div>
+
+        <div class="page-navigation">
+          <button
+            class="btn-page"
+            (click)="previousPage()"
+            [disabled]="!paginationInfo?.hasPrevPage"
+            title="Página anterior">
+            &#8249;
+          </button>
+
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="btn-page"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+
+          <button
+            class="btn-page"
+            (click)="nextPage()"
+            [disabled]="!paginationInfo?.hasNextPage"
+            title="Página siguiente">
+            &#8250;
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

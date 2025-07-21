@@ -280,6 +280,37 @@ export const getFacturas = async (req, res) => {
   }
 };
 
+// Get paginated facturas
+export const getFacturasPaginated = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Validate pagination parameters
+    if (page < 1 || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        message:
+          "Parámetros de paginación inválidos. Page debe ser >= 1, limit debe ser entre 1 y 100",
+        data: null,
+      });
+    }
+
+    const result = await FacturaModel.obtenerFacturasPaginadas(page, limit);
+
+    res.status(200).json({
+      message: "Lista de facturas paginadas obtenida con éxito",
+      data: result.data,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener las facturas paginadas",
+      error: error.message,
+      data: null,
+    });
+  }
+};
+
 // Get a single factura by ID
 export const getFacturaById = async (req, res) => {
   try {
