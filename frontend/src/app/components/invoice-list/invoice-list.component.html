@@ -1,0 +1,87 @@
+<div class="invoice-list-container">
+  <div class="header">
+    <h1>Lista de Facturas</h1>
+    <button (click)="refreshInvoices()" class="btn-refresh" [disabled]="loading">
+      {{ loading ? 'Cargando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="loading-message">
+    Cargando facturas...
+  </div>
+
+  <div *ngIf="!loading && !error && invoices.length === 0" class="no-invoices">
+    No hay facturas generadas aún.
+  </div>
+
+  <div *ngIf="!loading && !error && invoices.length > 0" class="summary-section">
+    <div class="summary-card">
+      <h3>Resumen</h3>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total Facturas:</span>
+          <span class="stat-value">{{ invoices.length }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Monto Total:</span>
+          <span class="stat-value">${{ getTotalAllInvoices().toFixed(2) }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Con IVA:</span>
+          <span class="stat-value">{{ getInvoicesWithIVA() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !error && invoices.length > 0" class="table-container">
+    <table class="invoices-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>Vehículo</th>
+          <th>Matrícula</th>
+          <th>Items</th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of invoices" class="invoice-row">
+          <td>{{ invoice.id }}</td>
+          <td>{{ invoice.cliente_nombre }}</td>
+          <td>{{ formatDate(invoice.fecha) }}</td>
+          <td>{{ invoice.marca }} {{ invoice.modelo }}</td>
+          <td>{{ invoice.matricula }}</td>
+          <td class="items-cell">
+            <div *ngFor="let item of invoice.items" class="item-line">
+              {{ item.cantidad }}x {{ item.descripcion }} - ${{ item.precio_unitario.toFixed(2) }}
+            </div>
+          </td>
+          <td>${{ getSubtotal(invoice).toFixed(2) }}</td>
+          <td>
+            <span *ngIf="invoice.incluye_iva" class="iva-yes">Sí</span>
+            <span *ngIf="!invoice.incluye_iva" class="iva-no">No</span>
+          </td>
+          <td class="total-cell">${{ getTotalAmount(invoice).toFixed(2) }}</td>
+          <td class="actions-cell">
+            <button class="btn-view" title="Ver detalles" (click)="onViewInvoice(invoice)">
+              👁️ Ver
+            </button>
+            <button class="btn-download" title="Descargar PDF" (click)="onDownloadPDF(invoice)">
+              📄 PDF
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

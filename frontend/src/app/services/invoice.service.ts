@@ -4,18 +4,18 @@ import { ApiService } from './api.service';
 import { ApiResponse } from './client.service';
 
 export interface InvoiceItem {
-  quantity: number;
-  description: string;
-  unitPrice: number;
+  cantidad: number;
+  descripcion: string;
+  precio_unitario: number;
 }
 
 export interface Invoice {
   id?: number;
-  client_name: string;
-  date: string;
-  make: string;
-  model: string;
-  plate: string;
+  cliente_nombre: string;
+  fecha: string;
+  marca: string;
+  modelo: string;
+  matricula: string;
   mileage: number;
   incluye_iva: boolean;
   items: InvoiceItem[];
