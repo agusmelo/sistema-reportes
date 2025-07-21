@@ -29,7 +29,6 @@ async function obtenerCliente(id) {
   try {
     const db = await connectDB();
     const resultado = await db.get("SELECT * FROM clientes WHERE id = ?", [id]);
-    console.log("cliente -> ", resultado);
     return resultado;
   } catch (error) {
     handleSQLError(error, "clientes");

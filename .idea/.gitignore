@@ -9,3 +9,5 @@
 /dataSources/
 /dataSources.local.xml
 .env
+*/output/*
+*.db

@@ -55,32 +55,114 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let invoice of invoices" class="invoice-row">
-          <td>{{ invoice.id }}</td>
-          <td>{{ invoice.cliente_nombre }}</td>
-          <td>{{ formatDate(invoice.fecha) }}</td>
-          <td>{{ invoice.marca }} {{ invoice.modelo }}</td>
-          <td>{{ invoice.matricula }}</td>
-          <td class="items-cell">
-            <div *ngFor="let item of invoice.items" class="item-line">
-              {{ item.cantidad }}x {{ item.descripcion }} - ${{ item.precio_unitario.toFixed(2) }}
-            </div>
-          </td>
-          <td>${{ getSubtotal(invoice).toFixed(2) }}</td>
-          <td>
-            <span *ngIf="invoice.incluye_iva" class="iva-yes">Sí</span>
-            <span *ngIf="!invoice.incluye_iva" class="iva-no">No</span>
-          </td>
-          <td class="total-cell">${{ getTotalAmount(invoice).toFixed(2) }}</td>
-          <td class="actions-cell">
-            <button class="btn-view" title="Ver detalles" (click)="onViewInvoice(invoice)">
-              👁️ Ver
-            </button>
-            <button class="btn-download" title="Descargar PDF" (click)="onDownloadPDF(invoice)">
-              📄 PDF
-            </button>
-          </td>
-        </tr>
+        <ng-container *ngFor="let invoice of invoices">
+          <!-- Main invoice row -->
+          <tr class="invoice-row" [class.expanded]="isInvoiceExpanded(invoice.id || 0)">
+            <td>{{ invoice.id }}</td>
+            <td>{{ invoice.cliente_nombre }}</td>
+            <td>{{ formatDate(invoice.fecha) }}</td>
+            <td>{{ invoice.marca }} {{ invoice.modelo }}</td>
+            <td>{{ invoice.matricula }}</td>
+            <td class="items-cell">
+              <div class="items-summary">
+                {{ invoice.items.length }} item(s)
+              </div>
+            </td>
+            <td>${{ getSubtotal(invoice).toFixed(2) }}</td>
+            <td>
+              <span *ngIf="invoice.incluye_iva" class="iva-yes">Sí</span>
+              <span *ngIf="!invoice.incluye_iva" class="iva-no">No</span>
+            </td>
+            <td class="total-cell">${{ getTotalAmount(invoice).toFixed(2) }}</td>
+            <td class="actions-cell">
+              <button
+                class="btn-view"
+                [class.active]="isInvoiceExpanded(invoice.id || 0)"
+                title="Ver detalles"
+                (click)="onViewInvoice(invoice)">
+                {{ isInvoiceExpanded(invoice.id || 0) ? '�' : '🔽' }} Ver
+              </button>
+              <button class="btn-download" title="Descargar PDF" (click)="onDownloadPDF(invoice)">
+                📄 PDF
+              </button>
+            </td>
+          </tr>
+
+          <!-- Collapsible detail row -->
+          <tr *ngIf="isInvoiceExpanded(invoice.id || 0)" class="detail-row">
+            <td colspan="10" class="detail-cell">
+              <div class="invoice-details">
+                <div class="detail-section">
+                  <h4>Información del Cliente</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-label">Nombre:</span>
+                      <span class="detail-value">{{ invoice.cliente_nombre }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Fecha:</span>
+                      <span class="detail-value">{{ formatDate(invoice.fecha) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Información del Vehículo</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-label">Marca:</span>
+                      <span class="detail-value">{{ invoice.marca }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Modelo:</span>
+                      <span class="detail-value">{{ invoice.modelo }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Matrícula:</span>
+                      <span class="detail-value">{{ invoice.matricula }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Kilometraje:</span>
+                      <span class="detail-value">{{ invoice.mileage }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Items</h4>
+                  <div class="items-detail">
+                    <div *ngFor="let item of invoice.items" class="item-detail">
+                      <div class="item-description">{{ item.descripcion }}</div>
+                      <div class="item-specs">
+                        <span class="item-quantity">Cantidad: {{ item.cantidad }}</span>
+                        <span class="item-price">Precio unitario: ${{ item.precio_unitario.toFixed(2) }}</span>
+                        <span class="item-total">Subtotal: ${{ (item.cantidad * item.precio_unitario).toFixed(2) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Totales</h4>
+                  <div class="totals-detail">
+                    <div class="total-line">
+                      <span class="total-label">Subtotal:</span>
+                      <span class="total-value">${{ getSubtotal(invoice).toFixed(2) }}</span>
+                    </div>
+                    <div class="total-line" *ngIf="invoice.incluye_iva">
+                      <span class="total-label">IVA (21%):</span>
+                      <span class="total-value">${{ (getSubtotal(invoice) * 0.21).toFixed(2) }}</span>
+                    </div>
+                    <div class="total-line total-final">
+                      <span class="total-label">Total:</span>
+                      <span class="total-value">${{ getTotalAmount(invoice).toFixed(2) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
   </div>

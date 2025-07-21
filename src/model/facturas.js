@@ -36,7 +36,7 @@ async function obtenerFacturas() {
   try {
     const db = await connectDB();
     const resultado = await db.all(
-      "SELECT f.*, c.nombre cliente_nombre FROM facturas f JOIN clientes c ON f.cliente_id = c.id JOIN vehiculos v ON f.vehiculo_id = v.id"
+      "SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje FROM facturas f JOIN clientes c ON f.cliente_id = c.id JOIN vehiculos v ON f.vehiculo_id = v.id"
     );
     //append items
     for (const [index, value] of resultado.entries()) {
@@ -46,6 +46,7 @@ async function obtenerFacturas() {
       );
       resultado[index].items = items;
     }
+    console.log("obtenerFacturas", resultado[0]);
     return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");
