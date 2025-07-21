@@ -12,6 +12,7 @@ export class InvoiceListComponent implements OnInit {
   invoices: Invoice[] = [];
   loading: boolean = false;
   error: string = '';
+  expandedInvoiceId: number | null = null;
 
   constructor(private invoiceService: InvoiceService) {}
 
@@ -61,30 +62,16 @@ export class InvoiceListComponent implements OnInit {
   }
 
   onViewInvoice(invoice: Invoice): void {
-    // For now, show an alert with invoice details
-    // This could be enhanced to show a modal or detailed view
-    console.log(invoice)
-    const items = invoice.items.map(item =>
-      `• ${item.cantidad}x ${item.descripcion} - $${item.precio_unitario.toFixed(2)}`
-    ).join('\n');
+    // Toggle expanded state - if clicked invoice is already expanded, collapse it
+    if (this.expandedInvoiceId === invoice.id) {
+      this.expandedInvoiceId = null;
+    } else {
+      this.expandedInvoiceId = invoice.id || null;
+    }
+  }
 
-    const message = `
-Factura ID: ${invoice.id}
-Cliente: ${invoice.cliente_nombre}
-Fecha: ${this.formatDate(invoice.fecha)}
-Vehículo: ${invoice.marca} ${invoice.modelo}
-Matrícula: ${invoice.matricula}
-Kilometraje: ${invoice.mileage}
-
-Items:
-${items}
-
-Subtotal: $${this.getSubtotal(invoice).toFixed(2)}
-IVA: ${invoice.incluye_iva ? 'Sí' : 'No'}
-Total: $${this.getTotalAmount(invoice).toFixed(2)}
-    `;
-
-    alert(message);
+  isInvoiceExpanded(invoiceId: number): boolean {
+    return this.expandedInvoiceId === invoiceId;
   }
 
   onDownloadPDF(invoice: Invoice): void {
