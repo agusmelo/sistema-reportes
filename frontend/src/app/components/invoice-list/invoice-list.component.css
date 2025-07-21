@@ -346,6 +346,97 @@
   color: #6c757d;
 }
 
+/* Pagination Styles */
+.pagination-container {
+  margin-top: 20px;
+  padding: 20px 0;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.items-per-page select {
+  padding: 5px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.items-per-page select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.page-navigation {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.btn-page {
+  min-width: 40px;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #495057;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.btn-page.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.btn-page.active:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .invoice-list-container {
@@ -397,6 +488,24 @@
     flex-direction: column;
     gap: 4px;
   }
+
+  /* Pagination responsive */
+  .pagination-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-navigation {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-page {
+    min-width: 35px;
+    height: 35px;
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -410,5 +519,21 @@
 
   .totals-detail {
     padding: 10px;
+  }
+
+  /* Pagination for small screens */
+  .pagination-info {
+    font-size: 12px;
+  }
+
+  .items-per-page {
+    font-size: 12px;
+  }
+
+  .btn-page {
+    min-width: 30px;
+    height: 30px;
+    font-size: 11px;
+    padding: 4px 8px;
   }
 }

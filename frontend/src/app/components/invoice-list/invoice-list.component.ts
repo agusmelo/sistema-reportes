@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InvoiceService, Invoice } from '../../services/invoice.service';
+import { InvoiceService, Invoice, PaginationInfo } from '../../services/invoice.service';
 
 @Component({
   selector: 'app-invoice-list',
@@ -14,22 +14,38 @@ export class InvoiceListComponent implements OnInit {
   error: string = '';
   expandedInvoiceId: number | null = null;
 
+  // Backend pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  paginationInfo: PaginationInfo | null = null;
+
+  // For summary statistics (we'll need all invoices for this)
+  allInvoices: Invoice[] = [];
+
   constructor(private invoiceService: InvoiceService) {}
 
   async ngOnInit(): Promise<void> {
     await this.loadInvoices();
+    await this.loadAllInvoicesForSummary();
   }
 
   async loadInvoices(): Promise<void> {
     try {
       this.loading = true;
       this.error = '';
-      const response = await this.invoiceService.getAllInvoices();
+      const response = await this.invoiceService.getPaginatedInvoices(this.currentPage, this.itemsPerPage);
 
-      if (response && response.data) {
+      console.log('Response from API:', response); // Debug log
+
+      if (response && response.data && response.pagination) {
+        // Backend returns { data: Invoice[], pagination: PaginationInfo, message: string }
         this.invoices = response.data;
+        this.paginationInfo = response.pagination;
+        console.log('Invoices loaded:', this.invoices.length); // Debug log
+        console.log('Pagination info:', this.paginationInfo); // Debug log
       } else {
-        this.error = 'No se pudieron cargar las facturas';
+        this.error = 'No se pudieron cargar las facturas - estructura de respuesta inesperada';
+        console.error('Unexpected response structure:', response); // Debug log
       }
     } catch (error: any) {
       console.error('Error loading invoices:', error);
@@ -39,8 +55,22 @@ export class InvoiceListComponent implements OnInit {
     }
   }
 
+  async loadAllInvoicesForSummary(): Promise<void> {
+    try {
+      // Load all invoices for summary statistics (keep existing behavior)
+      const response = await this.invoiceService.getAllInvoices();
+      if (response && response.data) {
+        this.allInvoices = response.data;
+      }
+    } catch (error: any) {
+      console.error('Error loading all invoices for summary:', error);
+      // Don't set error here as it's just for summary stats
+    }
+  }
+
   async refreshInvoices(): Promise<void> {
     await this.loadInvoices();
+    await this.loadAllInvoicesForSummary();
   }
 
   getTotalAmount(invoice: Invoice): number {
@@ -81,10 +111,81 @@ export class InvoiceListComponent implements OnInit {
   }
 
   getTotalAllInvoices(): number {
-    return this.invoices.reduce((sum, invoice) => sum + this.getTotalAmount(invoice), 0);
+    if (!this.allInvoices || this.allInvoices.length === 0) return 0;
+    return this.allInvoices.reduce((sum, invoice) => sum + this.getTotalAmount(invoice), 0);
   }
 
   getInvoicesWithIVA(): number {
-    return this.invoices.filter(invoice => invoice.incluye_iva).length;
+    if (!this.allInvoices || this.allInvoices.length === 0) return 0;
+    return this.allInvoices.filter(invoice => invoice.incluye_iva).length;
+  }
+
+  // Backend pagination methods
+  async goToPage(page: number): Promise<void> {
+    if (this.paginationInfo && page >= 1 && page <= this.paginationInfo.totalPages) {
+      this.currentPage = page;
+      // Collapse any expanded invoice when changing page
+      this.expandedInvoiceId = null;
+      await this.loadInvoices();
+    }
+  }
+
+  async nextPage(): Promise<void> {
+    if (this.paginationInfo?.hasNextPage) {
+      await this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  async previousPage(): Promise<void> {
+    if (this.paginationInfo?.hasPrevPage) {
+      await this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  async changeItemsPerPage(newItemsPerPage: number): Promise<void> {
+    this.itemsPerPage = newItemsPerPage;
+    this.currentPage = 1;
+    await this.loadInvoices();
+  }
+
+  async onItemsPerPageChange(event: Event): Promise<void> {
+    const target = event.target as HTMLSelectElement;
+    await this.changeItemsPerPage(+target.value);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+
+    if (!this.paginationInfo) return [];
+
+    if (this.paginationInfo.totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= this.paginationInfo.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+      const endPage = Math.min(this.paginationInfo.totalPages, startPage + maxPagesToShow - 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  }
+
+  getStartRecord(): number {
+    if (!this.paginationInfo) return 0;
+    return (this.currentPage - 1) * this.itemsPerPage + 1;
+  }
+
+  getEndRecord(): number {
+    if (!this.paginationInfo) return 0;
+    return Math.min(this.currentPage * this.itemsPerPage, this.paginationInfo.totalItems);
+  }
+
+  getTotalRecords(): number {
+    return this.paginationInfo?.totalItems || 0;
   }
 }

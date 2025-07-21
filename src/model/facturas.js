@@ -36,7 +36,7 @@ async function obtenerFacturas() {
   try {
     const db = await connectDB();
     const resultado = await db.all(
-      "SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje FROM facturas f JOIN clientes c ON f.cliente_id = c.id JOIN vehiculos v ON f.vehiculo_id = v.id"
+      "SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje FROM facturas f JOIN clientes c ON f.cliente_id = c.id JOIN vehiculos v ON f.vehiculo_id = v.id ORDER BY f.fecha DESC"
     );
     //append items
     for (const [index, value] of resultado.entries()) {
@@ -48,6 +48,56 @@ async function obtenerFacturas() {
     }
     console.log("obtenerFacturas", resultado[0]);
     return resultado;
+  } catch (error) {
+    handleSQLError(error, "facturas");
+  }
+}
+
+async function obtenerFacturasPaginadas(page = 1, limit = 10) {
+  try {
+    const db = await connectDB();
+    const offset = (page - 1) * limit;
+
+    // Get total count for pagination info
+    const countResult = await db.get("SELECT COUNT(*) as total FROM facturas");
+    const total = countResult.total;
+
+    // Get paginated results
+    const resultado = await db.all(
+      `SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje 
+       FROM facturas f 
+       JOIN clientes c ON f.cliente_id = c.id 
+       JOIN vehiculos v ON f.vehiculo_id = v.id 
+       ORDER BY f.fecha DESC 
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
+    );
+
+    // Append items for each invoice
+    for (const [index, value] of resultado.entries()) {
+      const items = await db.all(
+        "SELECT * FROM items_factura WHERE factura_id = ?",
+        [value.id]
+      );
+      resultado[index].items = items;
+    }
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return {
+      data: resultado,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage,
+        hasPrevPage,
+      },
+    };
   } catch (error) {
     handleSQLError(error, "facturas");
   }
@@ -190,6 +240,7 @@ export default {
   agregarFactura,
   obtenerFactura,
   obtenerFacturas,
+  obtenerFacturasPaginadas,
   actualizarFactura,
   eliminarFactura,
   getInvoiceWithTotal,
