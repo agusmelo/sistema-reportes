@@ -1,3 +1,5 @@
+[-] Agregar opcion para eliminar una factura
+[-] Agregar opcion para editar una factura
 [-] Para el selector, si hay mas de un cliente con el mismo nombre, mostrar los dos y que elija cual, hay que guardar el id del cliente seleccionado en el form
 [-] Validar el fromato de la matricula
 [X]!! Parsear dates

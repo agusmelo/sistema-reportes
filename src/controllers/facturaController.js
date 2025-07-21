@@ -54,7 +54,6 @@ export const createFactura = async (req, res) => {
     } catch (err) {
       return responseHandler.error(res, err.message, 404);
     }
-    console.log(client);
 
     // Handle emergency case
     if (isEmergencia && isEmergencia === "true") {
@@ -89,6 +88,7 @@ export const createFactura = async (req, res) => {
         404
       );
     }
+    console.log("Vehicle:", vehicle);
     if (!vehicle) {
       return responseHandler.error(res, `El vehículo ${plate} no existe`, 404);
     }
