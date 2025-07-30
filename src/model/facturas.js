@@ -46,7 +46,7 @@ async function obtenerFacturas() {
       );
       resultado[index].items = items;
     }
-    console.log("obtenerFacturas", resultado[0]);
+    console.log(" ", resultado[0]);
     return resultado;
   } catch (error) {
     handleSQLError(error, "facturas");

@@ -555,3 +555,42 @@ h2 {
   margin-right: 8px;
   font-size: 1.1em;
 }
+
+/* Orange State Confirmation Dialog Styles */
+.client-vehicle-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+}
+
+.section-title {
+  font-weight: bold;
+  color: #495057;
+  font-size: 1.1em;
+  margin: 15px 0 10px 0;
+  padding: 8px 12px;
+  background: #e9ecef;
+  border-radius: 4px;
+  border-left: 4px solid #fd7e14;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+.client-details {
+  margin-bottom: 20px;
+}
+
+.client-details .detail-row,
+.client-vehicle-details .vehicle-details .detail-row {
+  padding: 6px 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.client-details .detail-row:last-child,
+.client-vehicle-details .vehicle-details .detail-row:last-child {
+  border-bottom: none;
+}
