@@ -144,46 +144,8 @@ h2 {
   color: var(--color-success);
 }
 
-.btn-remove {
-  background-color: var(--color-danger);
-  color: var(--color-white);
-  border: none;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: var(--transition-all);
-}
-
-.btn-remove:hover:not(:disabled) {
-  background-color: var(--color-danger-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-remove:disabled {
-  background-color: var(--color-secondary);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.btn-add-item {
-  background-color: var(--color-success);
-  color: var(--color-white);
-  border: none;
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  transition: var(--transition-all);
-}
-
-.btn-add-item:hover {
-  background-color: var(--color-success-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
+/* Button styles are now handled by the design system
+   through .btn, .btn-danger, .btn-success, .btn-sm classes */
 
 /* Totals Section */
 .totals-section {
@@ -236,94 +198,12 @@ h2 {
   color: var(--color-primary);
 }
 
-/* Action Buttons using design system */
+/* Action Buttons now use DynamicButtonComponent with design system classes */
 .form-actions {
   display: flex;
   gap: var(--space-4);
   justify-content: center;
   margin-top: var(--space-8);
-}
-
-.btn-primary,
-.btn-emergency {
-  padding: var(--space-3) var(--space-8);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: var(--transition-all);
-}
-
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-emergency {
-  background-color: var(--color-orange);
-  color: var(--color-white);
-}
-
-.btn-emergency:hover:not(:disabled) {
-  background-color: var(--color-orange-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-primary:disabled,
-.btn-emergency:disabled {
-  background-color: var(--color-secondary);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Dynamic Button Styles */
-.dynamic-btn {
-  min-width: var(--container-sm);
-  font-size: var(--font-size-lg);
-  padding: var(--space-4) var(--space-6);
-  position: relative;
-  overflow: hidden;
-  transition: var(--transition-all);
-}
-
-.btn-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-}
-
-.btn-icon {
-  font-size: var(--font-size-xl);
-}
-
-.btn-text {
-  font-weight: var(--font-weight-bold);
-}
-
-.btn-processing {
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-/* Emergency Button Small */
-.btn-small {
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--font-size-sm);
-  min-width: auto;
 }
 
 /* State Indicator using design system */
