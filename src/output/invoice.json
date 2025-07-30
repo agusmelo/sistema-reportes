@@ -253,5 +253,30 @@
     "subtotal": 123,
     "total": 123,
     "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\a1x_30_Julio_2025_x1_x1x1x1x1_id115.pdf"
+  },
+  {
+    "id": 116,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-30",
+    "make": "Marca A",
+    "model": "Modelo A",
+    "plate": "ABC123",
+    "mileage": 1,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "bfd16666",
+        "unitPrice": 65654
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 13787.34,
+    "subtotal": 65654,
+    "total": 79441.34,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Modelo-A_ABC123_id116.pdf"
   }
 ]
