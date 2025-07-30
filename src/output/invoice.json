@@ -278,5 +278,30 @@
     "subtotal": 65654,
     "total": 79441.34,
     "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Modelo-A_ABC123_id116.pdf"
+  },
+  {
+    "id": 117,
+    "client": {
+      "id": 2,
+      "nombre": "Cliente 2",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-30",
+    "make": "aa",
+    "model": "aa",
+    "plate": "DEF456",
+    "mileage": 20000,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 111
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 111,
+    "total": 111,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-2_30_Julio_2025_aa_DEF456_id117.pdf"
   }
 ]
