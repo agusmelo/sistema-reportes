@@ -253,6 +253,110 @@ h2 {
   cursor: not-allowed;
 }
 
+/* Dynamic Button Styles */
+.dynamic-btn {
+  min-width: 300px;
+  font-size: 18px;
+  padding: 15px 25px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.btn-text {
+  font-weight: bold;
+}
+
+.btn-processing {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Emergency Button Small */
+.btn-small {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-width: auto;
+}
+
+/* State Indicator */
+.state-indicator {
+  margin-bottom: 15px;
+}
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.state-icon {
+  font-size: 18px;
+}
+
+.state-message {
+  font-size: 14px;
+}
+
+/* Processing Steps */
+.processing-steps {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.processing-steps h4 {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 16px;
+}
+
+.processing-steps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.processing-step {
+  padding: 5px 0;
+  color: #495057;
+  font-size: 14px;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.processing-step:last-child {
+  font-weight: bold;
+  color: #28a745;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .form-row {
@@ -272,4 +376,131 @@ h2 {
   .form-actions {
     flex-direction: column;
   }
+}
+
+/* Vehicle Confirmation Dialog */
+.vehicle-confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.confirmation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.confirmation-card h3 {
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.confirmation-message {
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1em;
+}
+
+.vehicle-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #495057;
+  min-width: 100px;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+  text-align: right;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-confirm,
+.btn-cancel {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-confirm:active,
+.btn-cancel:active {
+  transform: translateY(0);
 }

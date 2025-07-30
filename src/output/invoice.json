@@ -53,5 +53,80 @@
     "subtotal": 0,
     "total": 0,
     "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Modelo-A_ABC123_id107.pdf"
+  },
+  {
+    "id": 108,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-30",
+    "make": "Mi nueva marca",
+    "model": "Mi nuevo modelo",
+    "plate": "MATMIA123",
+    "mileage": 999942,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "Test de nuevo vehiculo same cliente",
+        "unitPrice": 1000
+      }
+    ],
+    "incluye_iva": true,
+    "ivaSolo": 210,
+    "subtotal": 1000,
+    "total": 1210,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Mi-nuevo-modelo_MATMIA123_id108.pdf"
+  },
+  {
+    "id": 109,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-30",
+    "make": "Mi nueva marca",
+    "model": "Mi nuevo modelo",
+    "plate": "MATMIA123",
+    "mileage": 662233,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "test",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 123,
+    "total": 123,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Mi-nuevo-modelo_MATMIA123_id109.pdf"
+  },
+  {
+    "id": 110,
+    "client": {
+      "id": 1,
+      "nombre": "Cliente 1",
+      "created_at": "2025-03-30 08:12:39"
+    },
+    "date": "2025-07-30",
+    "make": "Mi nueva marca",
+    "model": "Mi nuevo modelo",
+    "plate": "MATMIA123",
+    "mileage": 1111,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "asd",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 123,
+    "total": 123,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Mi-nuevo-modelo_MATMIA123_id110.pdf"
   }
 ]

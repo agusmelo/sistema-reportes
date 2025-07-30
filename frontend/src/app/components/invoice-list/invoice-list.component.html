@@ -16,74 +16,74 @@
     <div class="filters-container">
       <div class="filter-group">
         <label for="filterCliente">Cliente:</label>
-        <input 
+        <input
           id="filterCliente"
-          type="text" 
-          [(ngModel)]="filters.cliente_nombre" 
+          type="text"
+          [(ngModel)]="filters.cliente_nombre"
           (ngModelChange)="onFilterChange()"
           placeholder="Buscar por nombre de cliente">
       </div>
-      
+
       <div class="filter-group">
         <label for="filterMarca">Marca:</label>
-        <input 
+        <input
           id="filterMarca"
-          type="text" 
-          [(ngModel)]="filters.marca" 
+          type="text"
+          [(ngModel)]="filters.marca"
           (ngModelChange)="onFilterChange()"
           placeholder="Buscar por marca">
       </div>
-      
+
       <div class="filter-group">
         <label for="filterModelo">Modelo:</label>
-        <input 
+        <input
           id="filterModelo"
-          type="text" 
-          [(ngModel)]="filters.modelo" 
+          type="text"
+          [(ngModel)]="filters.modelo"
           (ngModelChange)="onFilterChange()"
           placeholder="Buscar por modelo">
       </div>
-      
+
       <div class="filter-group">
         <label for="filterMatricula">Matrícula:</label>
-        <input 
+        <input
           id="filterMatricula"
-          type="text" 
-          [(ngModel)]="filters.matricula" 
+          type="text"
+          [(ngModel)]="filters.matricula"
           (ngModelChange)="onFilterChange()"
           placeholder="Buscar por matrícula">
       </div>
-      
+
       <div class="filter-group">
         <label for="filterIva">IVA:</label>
-        <select 
+        <select
           id="filterIva"
-          [(ngModel)]="filters.incluye_iva" 
+          [(ngModel)]="filters.incluye_iva"
           (ngModelChange)="onFilterChange()">
           <option [ngValue]="undefined">Todos</option>
           <option [ngValue]="true">Con IVA</option>
           <option [ngValue]="false">Sin IVA</option>
         </select>
       </div>
-      
+
       <div class="filter-group">
         <label for="filterFechaDesde">Fecha Desde:</label>
-        <input 
+        <input
           id="filterFechaDesde"
-          type="date" 
-          [(ngModel)]="filters.fecha_desde" 
+          type="date"
+          [(ngModel)]="filters.fecha_desde"
           (ngModelChange)="onFilterChange()">
       </div>
-      
+
       <div class="filter-group">
         <label for="filterFechaHasta">Fecha Hasta:</label>
-        <input 
+        <input
           id="filterFechaHasta"
-          type="date" 
-          [(ngModel)]="filters.fecha_hasta" 
+          type="date"
+          [(ngModel)]="filters.fecha_hasta"
           (ngModelChange)="onFilterChange()">
       </div>
-      
+
       <div class="filter-actions">
         <button (click)="clearFilters()" class="btn-clear-filters">
           Limpiar Filtros
@@ -110,7 +110,7 @@
       <div class="summary-stats">
         <div class="stat-item">
           <span class="stat-label">Total Facturas:</span>
-          <span class="stat-value">{{ allInvoices?.length || 0 }}</span>
+          <span class="stat-value">{{ allInvoices.length || 0 }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Monto Total:</span>
@@ -239,7 +239,7 @@
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">Kilometraje:</span>
-                      <span class="detail-value">{{ invoice.mileage }}</span>
+                      <span class="detail-value">{{ invoice.kilometraje }}</span>
                     </div>
                   </div>
                 </div>
@@ -304,7 +304,7 @@
           <button
             class="btn-page"
             (click)="previousPage()"
-            [disabled]="!paginationInfo?.hasPrevPage"
+            [disabled]="!paginationInfo.hasPrevPage"
             title="Página anterior">
             &#8249;
           </button>
@@ -320,7 +320,7 @@
           <button
             class="btn-page"
             (click)="nextPage()"
-            [disabled]="!paginationInfo?.hasNextPage"
+            [disabled]="!paginationInfo.hasNextPage"
             title="Página siguiente">
             &#8250;
           </button>
