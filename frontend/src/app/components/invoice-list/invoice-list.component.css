@@ -19,6 +19,35 @@
   margin: 0;
 }
 
+.header-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-filters {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-filters:hover {
+  background-color: #218838;
+}
+
+.btn-filters.active {
+  background-color: #dc3545;
+}
+
+.btn-filters.active:hover {
+  background-color: #c82333;
+}
+
 .btn-refresh {
   background-color: #007bff;
   color: white;
@@ -37,6 +66,70 @@
 .btn-refresh:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+}
+
+/* Filters Section */
+.filters-section {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.filters-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: bold;
+  color: #495057;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.filter-actions {
+  display: flex;
+  align-items: end;
+}
+
+.btn-clear-filters {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background-color: #545b62;
 }
 
 .error-message {
@@ -130,6 +223,29 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  padding: 8px;
+}
+
+/* Sort buttons in table headers */
+.sort-button {
+  background: none;
+  border: none;
+  color: #495057;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sort-button:hover {
+  background-color: #e9ecef;
 }
 
 .invoice-row:hover {

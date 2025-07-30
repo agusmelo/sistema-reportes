@@ -285,6 +285,39 @@ export const getFacturasPaginated = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const sortBy = req.query.sortBy || "fecha";
+    const sortOrder = req.query.sortOrder || "DESC";
+
+    // Parse filters from query parameters
+    const filters = {};
+
+    if (req.query.cliente_nombre) {
+      filters.cliente_nombre = req.query.cliente_nombre;
+    }
+
+    if (req.query.marca) {
+      filters.marca = req.query.marca;
+    }
+
+    if (req.query.modelo) {
+      filters.modelo = req.query.modelo;
+    }
+
+    if (req.query.matricula) {
+      filters.matricula = req.query.matricula;
+    }
+
+    if (req.query.incluye_iva !== undefined) {
+      filters.incluye_iva = req.query.incluye_iva === "true";
+    }
+
+    if (req.query.fecha_desde) {
+      filters.fecha_desde = req.query.fecha_desde;
+    }
+
+    if (req.query.fecha_hasta) {
+      filters.fecha_hasta = req.query.fecha_hasta;
+    }
 
     // Validate pagination parameters
     if (page < 1 || limit < 1 || limit > 100) {
@@ -295,7 +328,13 @@ export const getFacturasPaginated = async (req, res) => {
       });
     }
 
-    const result = await FacturaModel.obtenerFacturasPaginadas(page, limit);
+    const result = await FacturaModel.obtenerFacturasPaginadas(
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      filters
+    );
 
     res.status(200).json({
       message: "Lista de facturas paginadas obtenida con éxito",

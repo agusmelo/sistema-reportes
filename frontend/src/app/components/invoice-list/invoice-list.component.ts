@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InvoiceService, Invoice, PaginationInfo } from '../../services/invoice.service';
+import { FormsModule } from '@angular/forms';
+import { InvoiceService, Invoice, PaginationInfo, InvoiceFilters, SortOptions } from '../../services/invoice.service';
 
 @Component({
   selector: 'app-invoice-list',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './invoice-list.component.html',
   styleUrl: './invoice-list.component.css'
 })
@@ -18,6 +19,16 @@ export class InvoiceListComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 10;
   paginationInfo: PaginationInfo | null = null;
+
+  // Sorting properties
+  sortOptions: SortOptions = {
+    sortBy: 'fecha',
+    sortOrder: 'DESC'
+  };
+
+  // Filtering properties
+  filters: InvoiceFilters = {};
+  showFilters: boolean = false;
 
   // For summary statistics (we'll need all invoices for this)
   allInvoices: Invoice[] = [];
@@ -33,7 +44,12 @@ export class InvoiceListComponent implements OnInit {
     try {
       this.loading = true;
       this.error = '';
-      const response = await this.invoiceService.getPaginatedInvoices(this.currentPage, this.itemsPerPage);
+      const response = await this.invoiceService.getPaginatedInvoices(
+        this.currentPage,
+        this.itemsPerPage,
+        this.sortOptions,
+        this.filters
+      );
 
       console.log('Response from API:', response); // Debug log
 
@@ -187,5 +203,51 @@ export class InvoiceListComponent implements OnInit {
 
   getTotalRecords(): number {
     return this.paginationInfo?.totalItems || 0;
+  }
+
+  // Sorting methods
+  async sortBy(column: string): Promise<void> {
+    if (this.sortOptions.sortBy === column) {
+      // Toggle sort order if same column
+      this.sortOptions.sortOrder = this.sortOptions.sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      // Set new column with default DESC order
+      this.sortOptions.sortBy = column;
+      this.sortOptions.sortOrder = 'DESC';
+    }
+
+    this.currentPage = 1; // Reset to first page when sorting
+    this.expandedInvoiceId = null; // Collapse any expanded invoice
+    await this.loadInvoices();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortOptions.sortBy !== column) {
+      return '↕️'; // Both arrows for unsorted
+    }
+    return this.sortOptions.sortOrder === 'ASC' ? '⬆️' : '⬇️';
+  }
+
+  // Filtering methods
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  async applyFilters(): Promise<void> {
+    this.currentPage = 1; // Reset to first page when filtering
+    this.expandedInvoiceId = null; // Collapse any expanded invoice
+    await this.loadInvoices();
+  }
+
+  async clearFilters(): Promise<void> {
+    this.filters = {};
+    this.currentPage = 1;
+    this.expandedInvoiceId = null;
+    await this.loadInvoices();
+  }
+
+  onFilterChange(): void {
+    // Auto-apply filters as user types (with debounce would be better, but this works for now)
+    this.applyFilters();
   }
 }

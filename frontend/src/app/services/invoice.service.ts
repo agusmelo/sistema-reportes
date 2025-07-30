@@ -36,6 +36,21 @@ export interface PaginationInfo {
   hasPrevPage: boolean;
 }
 
+export interface InvoiceFilters {
+  cliente_nombre?: string;
+  marca?: string;
+  modelo?: string;
+  matricula?: string;
+  incluye_iva?: boolean;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+}
+
+export interface SortOptions {
+  sortBy: string;
+  sortOrder: 'ASC' | 'DESC';
+}
+
 export interface PaginatedInvoicesResponse {
   data: Invoice[];
   pagination: PaginationInfo;
@@ -52,8 +67,27 @@ export class InvoiceService {
     return firstValueFrom(this.api.get<ApiResponse<Invoice[]>>('/facturas/all'));
   }
 
-  getPaginatedInvoices(page: number = 1, limit: number = 10): Promise<{data: Invoice[], pagination: PaginationInfo, message: string}> {
-    return firstValueFrom(this.api.get<{data: Invoice[], pagination: PaginationInfo, message: string}>(`/facturas/paginated?page=${page}&limit=${limit}`));
+  getPaginatedInvoices(
+    page: number = 1, 
+    limit: number = 10, 
+    sortOptions?: SortOptions,
+    filters?: InvoiceFilters
+  ): Promise<{data: Invoice[], pagination: PaginationInfo, message: string}> {
+    let queryParams = `page=${page}&limit=${limit}`;
+    
+    if (sortOptions) {
+      queryParams += `&sortBy=${sortOptions.sortBy}&sortOrder=${sortOptions.sortOrder}`;
+    }
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams += `&${key}=${encodeURIComponent(value)}`;
+        }
+      });
+    }
+    
+    return firstValueFrom(this.api.get<{data: Invoice[], pagination: PaginationInfo, message: string}>(`/facturas/paginated?${queryParams}`));
   }
 
   getInvoiceById(id: number): Promise<ApiResponse<Invoice>> {
