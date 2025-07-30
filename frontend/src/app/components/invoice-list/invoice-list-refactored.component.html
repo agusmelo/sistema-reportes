@@ -1,0 +1,271 @@
+<div class="invoice-list-container">
+  <div class="header">
+    <h1>Lista de Facturas</h1>
+    <div class="header-controls">
+      <button (click)="toggleFilters()" class="btn-filters" [class.active]="showFilters()">
+        {{ showFilters() ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+      </button>
+      <button (click)="refreshInvoices()" class="btn-refresh" [disabled]="loading()">
+        {{ loading() ? 'Cargando...' : 'Actualizar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Statistics -->
+  <div class="summary-section">
+    <div class="summary-card">
+      <h3>📊 Resumen</h3>
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total Facturas:</span>
+          <span class="stat-value">{{ totalInvoices() }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Monto Total:</span>
+          <span class="stat-value">{{ formatCurrency(totalAmount()) }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Promedio:</span>
+          <span class="stat-value">{{ formatCurrency(averageAmount()) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div *ngIf="showFilters()" class="filters-section">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="filterCliente">Cliente:</label>
+        <input
+          id="filterCliente"
+          type="text"
+          [value]="filters().cliente_nombre || ''"
+          (input)="updateFilter('cliente_nombre', $event.target.value); onFilterChange()"
+          placeholder="Buscar por nombre de cliente">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterMarca">Marca:</label>
+        <input
+          id="filterMarca"
+          type="text"
+          [value]="filters().marca || ''"
+          (input)="updateFilter('marca', $event.target.value); onFilterChange()"
+          placeholder="Buscar por marca">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterModelo">Modelo:</label>
+        <input
+          id="filterModelo"
+          type="text"
+          [value]="filters().modelo || ''"
+          (input)="updateFilter('modelo', $event.target.value); onFilterChange()"
+          placeholder="Buscar por modelo">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterMatricula">Matrícula:</label>
+        <input
+          id="filterMatricula"
+          type="text"
+          [value]="filters().matricula || ''"
+          (input)="updateFilter('matricula', $event.target.value); onFilterChange()"
+          placeholder="Buscar por matrícula">
+      </div>
+
+      <div class="filter-group">
+        <label for="filterIva">IVA:</label>
+        <select
+          id="filterIva"
+          [value]="filters().incluye_iva || ''"
+          (change)="updateFilter('incluye_iva', $event.target.value === 'true' ? true : $event.target.value === 'false' ? false : undefined); onFilterChange()">
+          <option value="">Todos</option>
+          <option value="true">Con IVA</option>
+          <option value="false">Sin IVA</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button (click)="clearFilters()" class="btn-clear-filters">
+          Limpiar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <div class="loading-spinner">🔄</div>
+    <p>Cargando facturas...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="error-container">
+    <div class="error-message">
+      <span class="error-icon">❌</span>
+      <span>{{ error() }}</span>
+    </div>
+    <button (click)="refreshInvoices()" class="btn-retry">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Invoices Table -->
+  <div *ngIf="!loading() && !error() && invoices().length > 0" class="invoices-table-container">
+    <table class="invoices-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('id')" class="sortable">
+            ID {{ getSortIcon('id') }}
+          </th>
+          <th (click)="sortBy('cliente_nombre')" class="sortable">
+            Cliente {{ getSortIcon('cliente_nombre') }}
+          </th>
+          <th (click)="sortBy('fecha')" class="sortable">
+            Fecha {{ getSortIcon('fecha') }}
+          </th>
+          <th (click)="sortBy('marca')" class="sortable">
+            Marca {{ getSortIcon('marca') }}
+          </th>
+          <th (click)="sortBy('modelo')" class="sortable">
+            Modelo {{ getSortIcon('modelo') }}
+          </th>
+          <th (click)="sortBy('matricula')" class="sortable">
+            Matrícula {{ getSortIcon('matricula') }}
+          </th>
+          <th (click)="sortBy('kilometraje')" class="sortable">
+            Kilometraje {{ getSortIcon('kilometraje') }}
+          </th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let invoice of invoices()">
+          <tr class="invoice-row">
+            <td>{{ invoice.id }}</td>
+            <td>{{ invoice.cliente_nombre }}</td>
+            <td>{{ formatDate(invoice.fecha) }}</td>
+            <td>{{ invoice.marca }}</td>
+            <td>{{ invoice.modelo }}</td>
+            <td>{{ invoice.matricula }}</td>
+            <td>{{ invoice.kilometraje }} km</td>
+            <td>{{ formatCurrency(getSubtotal(invoice)) }}</td>
+            <td>{{ invoice.incluye_iva ? 'Sí' : 'No' }}</td>
+            <td>{{ formatCurrency(getTotalAmount(invoice)) }}</td>
+            <td class="actions-cell">
+              <button 
+                (click)="toggleInvoiceDetails(invoice.id || 0)" 
+                class="btn-toggle"
+                title="Ver detalles">
+                {{ isInvoiceExpanded(invoice.id || 0) ? '🔼' : '🔽' }} Ver
+              </button>
+              <button 
+                class="btn-download" 
+                title="Descargar PDF" 
+                (click)="onDownloadPDF(invoice)">
+                📄 PDF
+              </button>
+            </td>
+          </tr>
+
+          <!-- Collapsible detail row -->
+          <tr *ngIf="isInvoiceExpanded(invoice.id || 0)" class="detail-row">
+            <td colspan="11" class="detail-cell">
+              <div class="invoice-details">
+                <div class="detail-section">
+                  <h4>Información del Cliente</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-label">Nombre:</span>
+                      <span class="detail-value">{{ invoice.cliente_nombre }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Fecha:</span>
+                      <span class="detail-value">{{ formatDate(invoice.fecha) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Información del Vehículo</h4>
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-label">Marca:</span>
+                      <span class="detail-value">{{ invoice.marca }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Modelo:</span>
+                      <span class="detail-value">{{ invoice.modelo }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Matrícula:</span>
+                      <span class="detail-value">{{ invoice.matricula }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Kilometraje:</span>
+                      <span class="detail-value">{{ invoice.kilometraje }} km</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Items</h4>
+                  <div class="items-detail">
+                    <div *ngFor="let item of invoice.items" class="item-row">
+                      <span class="item-quantity">{{ item.cantidad }}x</span>
+                      <span class="item-description">{{ item.descripcion }}</span>
+                      <span class="item-price">{{ formatCurrency(item.precio_unitario) }}</span>
+                      <span class="item-total">{{ formatCurrency(item.cantidad * item.precio_unitario) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h4>Totales</h4>
+                  <div class="totals-detail">
+                    <div class="total-line">
+                      <span>Subtotal:</span>
+                      <span>{{ formatCurrency(getSubtotal(invoice)) }}</span>
+                    </div>
+                    <div class="total-line" *ngIf="invoice.incluye_iva">
+                      <span>IVA (21%):</span>
+                      <span>{{ formatCurrency(getTotalAmount(invoice) - getSubtotal(invoice)) }}</span>
+                    </div>
+                    <div class="total-line total-final">
+                      <span><strong>Total:</strong></span>
+                      <span><strong>{{ formatCurrency(getTotalAmount(invoice)) }}</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && !error() && invoices().length === 0" class="empty-state">
+    <div class="empty-icon">📄</div>
+    <h3>No se encontraron facturas</h3>
+    <p>No hay facturas que coincidan con los criterios de búsqueda.</p>
+    <button (click)="clearFilters()" class="btn-clear-filters">
+      Limpiar Filtros
+    </button>
+  </div>
+
+  <!-- Pagination using reusable component -->
+  <app-pagination
+    [paginationInfo]="paginationInfo()"
+    [itemsPerPageOptions]="[5, 10, 20, 50]"
+    [maxVisiblePages]="5"
+    (pageChanged)="onPageChanged($event)"
+    (itemsPerPageChanged)="onItemsPerPageChanged($event)">
+  </app-pagination>
+</div>
