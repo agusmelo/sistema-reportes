@@ -428,6 +428,7 @@ export const deleteFactura = async (req, res) => {
 // (3) Naranja: Cliente no existe + auto no existe: Se agrega el auto y el cliente al sistema + se genera la factura
 // (4) Deshabilitado: El cliente no existe + el auto existe
 // -> Generar emergencia: Boton chico que bypassea guardar las cosas en la base de datos estructurada: Guarda los archivos, intenta (sin bloquear) guardar la factura en una json, y genera el pdf
+
 //Validation will be implemented with ajv
 //PRE: cliente existe + auto existe
 //POST: cliente existe + auto existe + se actualiza el kilometraje + se genera la factura + (if !emergencia) -> se guarda en la base de datos estructurada

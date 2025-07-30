@@ -66,7 +66,11 @@
             formControlName="mileage"
             placeholder="0"
             min="0"
-            required>
+            required
+            [class.mileage-warning]="isMileageLowerThanDatabase">
+          <div class="mileage-validation-message" *ngIf="isMileageLowerThanDatabase">
+            {{ getMileageValidationMessage() }}
+          </div>
         </div>
       </div>
     </div>
@@ -155,17 +159,93 @@
 
     <!-- Action Buttons -->
     <div class="form-actions">
+      <!-- State Indicator -->
+      <div class="state-indicator" *ngIf="currentState !== 'checking'">
+        <div class="state-badge" [style.background-color]="getStateColor()">
+          <span class="state-icon">{{ getStateIcon() }}</span>
+          <span class="state-message">{{ stateMessage }}</span>
+        </div>
+      </div>
+
+      <!-- Processing Steps -->
+      <div class="processing-steps" *ngIf="isProcessing && processingSteps.length > 0">
+        <h4>Procesando...</h4>
+        <ul>
+          <li *ngFor="let step of processingSteps" class="processing-step">
+            {{ step }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Vehicle Confirmation Dialog for Yellow State -->
+      <div class="vehicle-confirmation-dialog" *ngIf="showVehicleConfirmation && vehicleToConfirm">
+        <div class="confirmation-card">
+          <h3>🚗 Confirmar Información del Vehículo</h3>
+          <p class="confirmation-message">
+            Se agregará el siguiente vehículo al cliente <strong>{{ vehicleToConfirm.cliente }}</strong>:
+          </p>
+
+          <div class="vehicle-details">
+            <div class="detail-row">
+              <span class="detail-label">Marca:</span>
+              <span class="detail-value">{{ vehicleToConfirm.marca }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Modelo:</span>
+              <span class="detail-value">{{ vehicleToConfirm.modelo }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Matrícula:</span>
+              <span class="detail-value">{{ vehicleToConfirm.matricula }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Kilometraje:</span>
+              <span class="detail-value">{{ vehicleToConfirm.kilometraje }} km</span>
+            </div>
+          </div>
+
+          <div class="confirmation-actions">
+            <button type="button"
+                    class="btn-confirm"
+                    (click)="confirmVehicleAndProceed()">
+              ✅ Confirmar y Generar Factura
+            </button>
+            <button type="button"
+                    class="btn-cancel"
+                    (click)="cancelVehicleConfirmation()">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Generate Button -->
       <button type="submit"
-              class="btn-primary"
-              [disabled]="invoiceForm.invalid">
-        Generar Factura
+              class="btn-primary dynamic-btn"
+              [class.btn-green]="currentState === 'green'"
+              [class.btn-yellow]="currentState === 'yellow'"
+              [class.btn-orange]="currentState === 'orange'"
+              [class.btn-disabled]="currentState === 'disabled'"
+              [class.btn-processing]="isProcessing"
+              [style.background-color]="getStateColor()"
+              [disabled]="isButtonDisabled()">
+        <span class="btn-content">
+          <span class="btn-icon">{{ getStateIcon() }}</span>
+          <span class="btn-text" *ngIf="!isProcessing">
+            {{ getButtonText() }}
+          </span>
+          <span class="btn-text" *ngIf="isProcessing">
+            Procesando...
+          </span>
+        </span>
       </button>
 
+      <!-- Emergency Button (smaller) -->
       <button type="button"
               (click)="onEmergencySubmit()"
-              class="btn-emergency"
-              [disabled]="invoiceForm.invalid">
-        Factura de Emergencia
+              class="btn-emergency btn-small"
+              [disabled]="invoiceForm.invalid || isProcessing">
+        🚨 Emergencia
       </button>
     </div>
   </form>

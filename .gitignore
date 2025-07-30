@@ -2,7 +2,7 @@ node_modules
 public/ultima_factura_generada/*
 /src/db/*.db
 /src/db/*.sqlite
-/src/output/*.pdf
+/src/output/*
 .env
 /output/
 /db/*.db

@@ -4,7 +4,7 @@ import responseHandler from "../utils/responseHandler.js";
 // TODO: agregar error handling y validacion de tipos
 // if the client already exists, return an error code 409
 // if the client does not exist, create a new client
-export const createClient = async (req, xres) => {
+export const createClient = async (req, res) => {
   const { nombre } = req.body;
   try {
     // Check if the client already exists
@@ -34,7 +34,6 @@ export const createClient = async (req, xres) => {
 export const getAllClients = async (req, res) => {
   try {
     const clientes = await ClientModel.obtenerClientes();
-    console.log("clientes: ", clientes);
     res.status(200).json({
       message: "Lista de clientes obtenida con éxito",
       data: clientes,

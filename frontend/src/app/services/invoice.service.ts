@@ -16,7 +16,7 @@ export interface Invoice {
   marca: string;
   modelo: string;
   matricula: string;
-  mileage: number;
+  kilometraje: number;
   incluye_iva: boolean;
   items: InvoiceItem[];
 }
@@ -68,17 +68,17 @@ export class InvoiceService {
   }
 
   getPaginatedInvoices(
-    page: number = 1, 
-    limit: number = 10, 
+    page: number = 1,
+    limit: number = 10,
     sortOptions?: SortOptions,
     filters?: InvoiceFilters
   ): Promise<{data: Invoice[], pagination: PaginationInfo, message: string}> {
     let queryParams = `page=${page}&limit=${limit}`;
-    
+
     if (sortOptions) {
       queryParams += `&sortBy=${sortOptions.sortBy}&sortOrder=${sortOptions.sortOrder}`;
     }
-    
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -86,7 +86,7 @@ export class InvoiceService {
         }
       });
     }
-    
+
     return firstValueFrom(this.api.get<{data: Invoice[], pagination: PaginationInfo, message: string}>(`/facturas/paginated?${queryParams}`));
   }
 
