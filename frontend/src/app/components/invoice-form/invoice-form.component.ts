@@ -1,77 +1,119 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { debounceTime } from 'rxjs/operators';
-import { SearchableSelectComponent } from '../searchable-select/searchable-select.component';
+
+// Services
 import { ClientService, Client } from '../../services/client.service';
 import { VehicleService, Vehicle } from '../../services/vehicle.service';
-import { InvoiceService, Invoice, InvoiceItem } from '../../services/invoice.service';
+import { InvoiceService, Invoice } from '../../services/invoice.service';
+
+// Shared components and services
+import { SearchableSelectComponent } from '../searchable-select/searchable-select.component';
+import {
+  ConfirmationDialogComponent,
+  ProcessingStepsComponent,
+  ValidationMessageComponent,
+  StateIndicatorComponent,
+  DynamicButtonComponent
+} from '../../shared/components';
+import { FormStateManagerService } from '../../shared/composables/form-state-manager.service';
+import { StateUtilsService } from '../../shared/services/state-utils.service';
+import {
+  ConfirmationData,
+  DetailSection,
+  ValidationMessage,
+  StateIndicatorInfo
+} from '../../shared/interfaces/common.interface';
 
 @Component({
   selector: 'app-invoice-form',
-  imports: [CommonModule, ReactiveFormsModule, SearchableSelectComponent],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    SearchableSelectComponent,
+    ConfirmationDialogComponent,
+    ProcessingStepsComponent,
+    ValidationMessageComponent,
+    StateIndicatorComponent,
+    DynamicButtonComponent
+  ],
   templateUrl: './invoice-form.component.html',
   styleUrl: './invoice-form.component.css'
 })
 export class InvoiceFormComponent implements OnInit {
+
+  // Form
   invoiceForm: FormGroup;
-  clients: Client[] = [];
-  clientNames: string[] = [];
-  client_id:string = '';
-  vehicleBrands: string[] = [];
-  vehicleModels: string[] = [];
-  vehiclePlates: string[] = [];
 
-  currentClient: Client | null = null;
-  currentVehicles: Vehicle[] = [];
+  // Data signals
+  clients = signal<Client[]>([]);
+  clientNames = signal<string[]>([]);
+  currentClient = signal<Client | null>(null);
+  currentVehicles = signal<Vehicle[]>([]);
+  vehicleBrands = signal<string[]>([]);
+  vehicleModels = signal<string[]>([]);
+  vehiclePlates = signal<string[]>([]);
 
-  // Dynamic state management
-  currentState: 'green' | 'yellow' | 'orange' | 'disabled' | 'checking' = 'checking';
-  stateMessage: string = '';
-  isProcessing: boolean = false;
-  processingSteps: string[] = [];
+  // State managers
+  formStateManager: any;
+  mileageValidationManager: any;
+  yellowConfirmationManager: any;
+  orangeConfirmationManager: any;
 
-  // Vehicle confirmation properties for yellow state
-  showVehicleConfirmation = false;
-  vehicleToConfirm: any = null;
+  // Computed properties
+  stateIndicatorInfo = computed<StateIndicatorInfo>(() => ({
+    state: this.formStateManager?.currentState() || 'checking',
+    message: this.formStateManager?.stateMessage() || 'Iniciando...'
+  }));
 
-  // Client and vehicle confirmation properties for orange state
-  showClientVehicleConfirmation = false;
-  clientVehicleToConfirm: any = null;
+  mainButtonState = computed(() => this.formStateManager?.buttonState() || {
+    state: 'checking' as const,
+    text: 'Cargando...',
+    icon: '⏳',
+    color: 'var(--color-secondary)',
+    disabled: true
+  });
 
-  // Mileage validation properties
-  databaseMileage: number | null = null;
-  isMileageLowerThanDatabase = false;
+  emergencyButtonState = computed(() => ({
+    state: 'orange' as const,
+    text: '🚨 Emergencia',
+    icon: '🚨',
+    color: 'var(--color-orange)',
+    disabled: this.invoiceForm?.invalid || this.formStateManager?.isProcessing() || false
+  }));
 
   constructor(
     private fb: FormBuilder,
     private clientService: ClientService,
     private vehicleService: VehicleService,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
+    private formStateManagerService: FormStateManagerService,
+    private stateUtils: StateUtilsService
   ) {
     this.invoiceForm = this.createForm();
+    this.initializeStateManagers();
   }
 
-  ngOnInit() {
-    this.loadClients();
+  async ngOnInit() {
+    await this.loadClients();
     this.setCurrentDate();
+    this.setupFormChangeSubscription();
+    await this.updateState();
+  }
 
-    // Subscribe to form changes to update state dynamically with debounce
-    this.invoiceForm.valueChanges.pipe(
-      debounceTime(500) // Wait 500ms after user stops typing
-    ).subscribe(() => {
-      this.updateState();
-      this.checkMileageValidation(); // Check mileage validation on form changes
-    });
-
-    // Initial state check
-    this.updateState();
+  private initializeStateManagers(): void {
+    this.formStateManager = this.formStateManagerService.createFormStateManager(this.invoiceForm);
+    this.mileageValidationManager = this.formStateManagerService.createMileageValidationManager();
+    this.yellowConfirmationManager = this.formStateManagerService.createConfirmationDialogManager();
+    this.orangeConfirmationManager = this.formStateManagerService.createConfirmationDialogManager();
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
       client_name: ['', Validators.required],
-      client_id:[''],
+      client_id: [''],
       date: ['', Validators.required],
       make: ['', Validators.required],
       model: ['', Validators.required],
@@ -90,6 +132,16 @@ export class InvoiceFormComponent implements OnInit {
     });
   }
 
+  private setupFormChangeSubscription(): void {
+    this.invoiceForm.valueChanges.pipe(
+      debounceTime(500)
+    ).subscribe(() => {
+      this.updateState();
+      this.updateMileageValidation();
+    });
+  }
+
+  // Form array methods
   get items(): FormArray {
     return this.invoiceForm.get('items') as FormArray;
   }
@@ -111,47 +163,46 @@ export class InvoiceFormComponent implements OnInit {
     return quantity * unitPrice;
   }
 
+  // Calculation methods
   getSubTotal(): number {
-    let total = 0;
-    for (let i = 0; i < this.items.length; i++) {
-      total += this.getItemLineTotal(i);
-    }
-    return total;
+    return this.items.controls.reduce((sum, item) => {
+      const quantity = item.get('quantity')?.value || 0;
+      const unitPrice = item.get('unitPrice')?.value || 0;
+      return sum + (quantity * unitPrice);
+    }, 0);
   }
 
   getIVAAmount(): number {
-    const includeIVA = this.invoiceForm.get('incluye_iva')?.value;
-    return includeIVA ? this.getSubTotal() * 0.22 : 0;
+    const subtotal = this.getSubTotal();
+    return this.invoiceForm.get('incluye_iva')?.value ? subtotal * 0.22 : 0;
   }
 
   getGrandTotal(): number {
     return this.getSubTotal() + this.getIVAAmount();
   }
 
+  // Data loading methods
   private async loadClients(): Promise<void> {
     try {
       const response = await this.clientService.getAllClients();
-      if (response && response.data && Array.isArray(response.data)) {
-        this.clients = response.data;
-        this.clientNames = this.clients.map(client => client.nombre);
-      } else {
-        console.error('Invalid clients response structure:', response);
-        this.clients = [];
-        this.clientNames = [];
+      if (response?.data) {
+        this.clients.set(response.data);
+        this.clientNames.set(response.data.map(client => client.nombre));
       }
     } catch (error) {
       console.error('Error loading clients:', error);
-      this.clients = [];
-      this.clientNames = [];
+      this.clients.set([]);
+      this.clientNames.set([]);
     }
   }
 
   onClientSelected(clientName: string): void {
-    this.currentClient = this.clients.find(c => c.nombre === clientName) || null;
+    const client = this.clients().find(c => c.nombre === clientName) || null;
+    this.currentClient.set(client);
 
-    if (this.currentClient) {
-      this.invoiceForm.patchValue({ client_id: this.currentClient.id });
-      this.loadVehiclesForClient(this.currentClient.id);
+    if (client) {
+      this.invoiceForm.patchValue({ client_id: client.id });
+      this.loadVehiclesForClient(client.id);
     } else {
       this.invoiceForm.patchValue({ client_id: '' });
       this.clearVehicleOptions();
@@ -161,14 +212,11 @@ export class InvoiceFormComponent implements OnInit {
   private async loadVehiclesForClient(clientId: number): Promise<void> {
     try {
       const response = await this.vehicleService.getVehiclesByClientId(clientId);
-      if (response && response.data && Array.isArray(response.data)) {
-        this.currentVehicles = response.data;
-        this.vehicleBrands = [...new Set(this.currentVehicles.map(v => v.marca))];
-        this.vehicleModels = [...new Set(this.currentVehicles.map(v => v.modelo))];
-        this.vehiclePlates = this.currentVehicles.map(v => v.matricula);
-      } else {
-        console.error('Invalid vehicles response structure:', response);
-        this.clearVehicleOptions();
+      if (response?.data) {
+        this.currentVehicles.set(response.data);
+        this.vehicleBrands.set([...new Set(response.data.map(v => v.marca))]);
+        this.vehicleModels.set([...new Set(response.data.map(v => v.modelo))]);
+        this.vehiclePlates.set(response.data.map(v => v.matricula));
       }
     } catch (error) {
       console.error('Error loading vehicles:', error);
@@ -177,56 +225,40 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   onVehiclePlateSelected(plate: string): void {
-    const vehicle = this.currentVehicles.find(v => v.matricula === plate);
+    const vehicle = this.currentVehicles().find(v => v.matricula === plate);
     if (vehicle) {
-      this.databaseMileage = vehicle.kilometraje;
+      this.mileageValidationManager.setDatabaseMileage(vehicle.kilometraje);
       this.invoiceForm.patchValue({
         make: vehicle.marca,
         model: vehicle.modelo,
         mileage: vehicle.kilometraje
       });
-      // Start monitoring mileage changes
-      this.checkMileageValidation();
     } else {
-      this.databaseMileage = null;
-      this.isMileageLowerThanDatabase = false;
+      this.mileageValidationManager.reset();
     }
   }
 
   private clearVehicleOptions(): void {
-    this.currentVehicles = [];
-    this.vehicleBrands = [];
-    this.vehicleModels = [];
-    this.vehiclePlates = [];
-    // Clear mileage validation data
-    this.databaseMileage = null;
-    this.isMileageLowerThanDatabase = false;
+    this.currentVehicles.set([]);
+    this.vehicleBrands.set([]);
+    this.vehicleModels.set([]);
+    this.vehiclePlates.set([]);
+    this.mileageValidationManager.reset();
   }
 
   private setCurrentDate(): void {
-    const today = new Date();
-    const dateString = today.toISOString().split('T')[0];
-    this.invoiceForm.patchValue({ date: dateString });
+    const today = new Date().toISOString().split('T')[0];
+    this.invoiceForm.patchValue({ date: today });
   }
 
-  // Dynamic state management methods
+  // State management
   private async updateState(): Promise<void> {
     const formValue = this.invoiceForm.value;
     const clientName = formValue.client_name?.trim();
-    const make = formValue.make?.trim();
-    const model = formValue.model?.trim();
     const plate = formValue.plate?.trim();
 
-    if (!clientName || !make || !model || !plate) {
-      this.currentState = 'checking';
-      this.stateMessage = 'Complete todos los campos para verificar el estado';
-      return;
-    }
-
-    // Prevent unnecessary API calls for very short inputs
-    if (clientName.length < 2 || plate.length < 3) {
-      this.currentState = 'checking';
-      this.stateMessage = 'Complete los campos para verificar el estado';
+    if (!clientName || !plate || clientName.length < 2 || plate.length < 3) {
+      this.formStateManager.updateState('checking', 'Complete los campos para verificar el estado');
       return;
     }
 
@@ -237,35 +269,32 @@ export class InvoiceFormComponent implements OnInit {
       ]);
 
       if (clientExists && vehicleExists) {
-        // (1) Verde: Cliente existe + auto existe
-        this.currentState = 'green';
-        this.stateMessage = 'Cliente y vehículo existen. Solo se actualizará el kilometraje.';
+        this.formStateManager.updateState('green', 'Cliente y vehículo existen. Solo se actualizará el kilometraje.');
       } else if (clientExists && !vehicleExists) {
-        // (2) Amarillo: Cliente existe + auto no existe
-        this.currentState = 'yellow';
-        this.stateMessage = 'Cliente existe. Se agregará el vehículo al sistema.';
+        this.formStateManager.updateState('yellow', 'Cliente existe. Se agregará el vehículo al sistema.');
       } else if (!clientExists && !vehicleExists) {
-        // (3) Naranja: Cliente no existe + auto no existe
-        this.currentState = 'orange';
-        this.stateMessage = 'Se agregarán el cliente y vehículo al sistema.';
+        this.formStateManager.updateState('orange', 'Se agregarán el cliente y vehículo al sistema.');
       } else {
-        // (4) Deshabilitado: Cliente no existe + auto existe
-        this.currentState = 'disabled';
-        this.stateMessage = 'Error: El vehículo existe pero pertenece a otro cliente.';
+        this.formStateManager.updateState('disabled', 'Error: El vehículo existe pero pertenece a otro cliente.');
       }
     } catch (error) {
       console.error('Error checking state:', error);
-      this.currentState = 'checking';
-      this.stateMessage = 'Error al verificar el estado. Intente nuevamente.';
+      this.formStateManager.updateState('checking', 'Error al verificar el estado. Intente nuevamente.');
+    }
+  }
+
+  private updateMileageValidation(): void {
+    const currentMileage = this.invoiceForm.get('mileage')?.value;
+    if (currentMileage !== null && currentMileage !== undefined) {
+      this.mileageValidationManager.setCurrentMileage(Number(currentMileage));
     }
   }
 
   private async checkClientExists(clientName: string): Promise<boolean> {
     try {
       const response = await this.clientService.getClientByName(clientName);
-      return response && response.data && response.data.length > 0;
+      return response?.data?.length > 0;
     } catch (error) {
-      console.error('Error checking client:', error);
       return false;
     }
   }
@@ -273,156 +302,162 @@ export class InvoiceFormComponent implements OnInit {
   private async checkVehicleExists(plate: string): Promise<boolean> {
     try {
       const response = await this.vehicleService.getVehicleByMatricula(plate);
-      return response && response.data && response.data.id !== undefined;
+      return response?.data?.id !== undefined;
     } catch (error) {
-      // If vehicle doesn't exist, API might return 404, which is expected
       return false;
     }
   }
 
-  // Mileage validation method
-  private checkMileageValidation(): void {
-    if (this.databaseMileage !== null) {
-      const currentMileage = this.invoiceForm.get('mileage')?.value;
-      if (currentMileage !== null && currentMileage !== undefined && currentMileage !== '') {
-        this.isMileageLowerThanDatabase = Number(currentMileage) < this.databaseMileage;
-      } else {
-        this.isMileageLowerThanDatabase = false;
-      }
-    } else {
-      this.isMileageLowerThanDatabase = false;
-    }
-  }
-
-  // Method to get mileage validation message
-  getMileageValidationMessage(): string {
-    if (this.isMileageLowerThanDatabase && this.databaseMileage !== null) {
-      return `El kilometraje actual (${this.invoiceForm.get('mileage')?.value}) es menor que el registrado en la base de datos (${this.databaseMileage} km)`;
-    }
-    return '';
-  }
-
-  getStateColor(): string {
-    switch (this.currentState) {
-      case 'green': return '#28a745';
-      case 'yellow': return '#ffc107';
-      case 'orange': return '#fd7e14';
-      case 'disabled': return '#6c757d';
-      default: return '#007bff';
-    }
-  }
-
-  getStateIcon(): string {
-    switch (this.currentState) {
-      case 'green': return '✅';
-      case 'yellow': return '⚠️';
-      case 'orange': return '🟠';
-      case 'disabled': return '❌';
-      default: return '🔄';
-    }
-  }
-
-  isButtonDisabled(): boolean {
-    return this.invoiceForm.invalid || this.currentState === 'disabled' || this.isProcessing;
-  }
-
-  getButtonText(): string {
-    switch (this.currentState) {
-      case 'green': return 'Generar Factura (Actualizar Kilometraje)';
-      case 'yellow': return 'Revisar Vehículo y Generar Factura';
-      case 'orange': return 'Revisar Cliente y Vehículo y Generar Factura';
-      case 'disabled': return 'No Permitido (Vehículo de Otro Cliente)';
-      default: return 'Verificando...';
-    }
-  }
-
+  // Form submission
   async onSubmit(): Promise<void> {
-    if (this.invoiceForm.valid && !this.isButtonDisabled()) {
+    if (!this.invoiceForm.valid || this.formStateManager?.isFormDisabled()) return;
 
-      // Special handling for yellow state - show confirmation first
-      if (this.currentState === 'yellow') {
-        this.showVehicleConfirmationDialog();
-        return;
+    const currentState = this.formStateManager?.currentState();
+
+    if (currentState === 'yellow') {
+      this.showYellowConfirmation();
+      return;
+    }
+
+    if (currentState === 'orange') {
+      this.showOrangeConfirmation();
+      return;
+    }
+
+    await this.executeWorkflow();
+  }
+
+  private showYellowConfirmation(): void {
+    const formValue = this.invoiceForm.value;
+
+    const confirmationData: ConfirmationData = {
+      title: '🚗 Confirmar Información del Vehículo',
+      message: `Se agregará el siguiente vehículo al cliente ${formValue.client_name}:`
+    };
+
+    const sections: DetailSection[] = [{
+      title: 'Información del Vehículo',
+      icon: '🚗',
+      items: [
+        { label: 'Marca', value: formValue.make },
+        { label: 'Modelo', value: formValue.model },
+        { label: 'Matrícula', value: formValue.plate },
+        { label: 'Kilometraje', value: `${formValue.mileage} km` }
+      ]
+    }];
+
+    this.yellowConfirmationManager.show(confirmationData, sections);
+  }
+
+  private showOrangeConfirmation(): void {
+    const formValue = this.invoiceForm.value;
+
+    const confirmationData: ConfirmationData = {
+      title: '👤🚗 Confirmar Información del Cliente y Vehículo',
+      message: 'Se creará el siguiente cliente y se agregará el vehículo al sistema:'
+    };
+
+    const sections: DetailSection[] = [
+      {
+        title: 'Información del Cliente',
+        icon: '📋',
+        items: [
+          { label: 'Nombre', value: formValue.client_name }
+        ]
+      },
+      {
+        title: 'Información del Vehículo',
+        icon: '🚗',
+        items: [
+          { label: 'Marca', value: formValue.make },
+          { label: 'Modelo', value: formValue.model },
+          { label: 'Matrícula', value: formValue.plate },
+          { label: 'Kilometraje', value: `${formValue.mileage} km` }
+        ]
       }
+    ];
 
-      // Special handling for orange state - show confirmation first
-      if (this.currentState === 'orange') {
-        this.showClientVehicleConfirmationDialog();
-        return;
-      }
+    this.orangeConfirmationManager.show(confirmationData, sections);
+  }
 
-      this.isProcessing = true;
-      this.processingSteps = [];
+  async onConfirmYellow(): Promise<void> {
+    this.yellowConfirmationManager.hide();
+    await this.executeWorkflow();
+  }
 
-      try {
-        const formValue = this.invoiceForm.value;
-        await this.executeWorkflowByState(formValue);
-      } catch (error: any) {
-        console.error('Error in workflow:', error);
-        alert('Error processing invoice: ' + (error.error?.message || error.message || 'Unknown error'));
-      } finally {
-        this.isProcessing = false;
-        this.processingSteps = [];
-      }
-    } else {
-      alert('Please fill all required fields correctly');
+  onCancelYellow(): void {
+    this.yellowConfirmationManager.hide();
+  }
+
+  async onConfirmOrange(): Promise<void> {
+    this.orangeConfirmationManager.hide();
+    await this.executeWorkflow();
+  }
+
+  onCancelOrange(): void {
+    this.orangeConfirmationManager.hide();
+  }
+
+  private async executeWorkflow(): Promise<void> {
+    this.formStateManager.setProcessing(true);
+
+    try {
+      const formValue = this.invoiceForm.value;
+      await this.executeWorkflowByState(formValue);
+    } catch (error: any) {
+      console.error('Error in workflow:', error);
+      alert('Error processing invoice: ' + (error.error?.message || error.message || 'Unknown error'));
+    } finally {
+      this.formStateManager.setProcessing(false);
     }
   }
 
   private async executeWorkflowByState(formValue: any): Promise<void> {
     const clientName = formValue.client_name.trim();
-    const plate = formValue.plate.trim();
+    const state = this.formStateManager.currentState();
 
-    switch (this.currentState) {
+    const steps = this.stateUtils.getCommonProcessingSteps();
+
+    switch (state) {
       case 'green':
-        // (1) Verde: Cliente existe + auto existe, solo actualizar kilometraje
-        this.addProcessingStep('✅ Cliente y vehículo encontrados');
-        this.addProcessingStep('🔄 Actualizando kilometraje...');
+        this.formStateManager.addProcessingStep(steps.clientFound);
+        this.formStateManager.addProcessingStep(steps.updatingMileage);
         await this.createInvoiceDirectly(formValue);
-        this.addProcessingStep('📄 Generando factura...');
+        this.formStateManager.addProcessingStep(steps.generatingInvoice);
         break;
 
       case 'yellow':
-        // (2) Amarillo: Cliente existe + auto no existe
-        this.addProcessingStep('✅ Cliente encontrado');
-        this.addProcessingStep('➕ Agregando vehículo...');
+        this.formStateManager.addProcessingStep(steps.clientFound);
+        this.formStateManager.addProcessingStep(steps.addingVehicle);
         await this.createVehicleForClient(formValue);
-        this.addProcessingStep('📄 Generando factura...');
+        this.formStateManager.addProcessingStep(steps.generatingInvoice);
         await this.createInvoiceDirectly(formValue);
         break;
 
       case 'orange':
-        // (3) Naranja: Cliente no existe + auto no existe
-        this.addProcessingStep('➕ Creando cliente...');
+        this.formStateManager.addProcessingStep(steps.creatingClient);
         const newClient = await this.createNewClient(clientName);
-        this.addProcessingStep('➕ Agregando vehículo...');
+        this.formStateManager.addProcessingStep(steps.addingVehicle);
         await this.createVehicleForClient({...formValue, client_id: newClient});
-        this.addProcessingStep('📄 Generando factura...');
-        await this.createInvoiceDirectly({...formValue, client_id: newClient});
+        this.formStateManager.addProcessingStep(steps.generatingInvoice);
+        await this.createInvoiceDirectly(formValue);
         break;
-
-      default:
-        throw new Error('Invalid state for invoice generation');
     }
 
-    this.addProcessingStep('✅ ¡Factura generada exitosamente!');
+    this.formStateManager.addProcessingStep(steps.completed);
   }
 
-  private addProcessingStep(step: string): void {
-    this.processingSteps.push(step);
-  }
-
+  // API methods (keeping existing implementation)
   private async createNewClient(clientName: string): Promise<Client> {
     const response = await this.clientService.createClient({ nombre: clientName });
-
-    if (response.data == undefined) {
+    if (!response.data) {
       throw new Error('Failed to create client');
     }
-    return response.data
+    return response.data;
   }
 
   private async createVehicleForClient(formValue: any): Promise<Vehicle> {
-    const clientId = formValue.client_id || this.currentClient?.id;
+    const clientId = formValue.client_id || this.currentClient()?.id;
     if (!clientId) {
       throw new Error('Client ID not found');
     }
@@ -436,7 +471,7 @@ export class InvoiceFormComponent implements OnInit {
     };
 
     const response = await this.vehicleService.createVehicle(vehicleData);
-    if (!response || !response.data) {
+    if (!response?.data) {
       throw new Error('Failed to create vehicle');
     }
     return response.data;
@@ -449,8 +484,7 @@ export class InvoiceFormComponent implements OnInit {
     };
 
     const response = await this.invoiceService.createInvoice(invoice);
-    if (response && response.data && response.data.pdfUrl) {
-      // Show success and open PDF
+    if (response?.data?.pdfUrl) {
       setTimeout(() => {
         alert(`¡Factura generada exitosamente! PDF: ${response.data.pdfUrl}`);
         window.open(response.data.pdfUrl, '_blank');
@@ -476,84 +510,6 @@ export class InvoiceFormComponent implements OnInit {
         console.error('Error creating emergency invoice:', error);
         alert('Error creating emergency invoice: ' + (error.error?.message || 'Unknown error'));
       }
-    } else {
-      alert('Please fill all required fields');
     }
-  }
-
-  // Vehicle confirmation methods for yellow state
-  showVehicleConfirmationDialog(): void {
-    const formValue = this.invoiceForm.value;
-    this.vehicleToConfirm = {
-      marca: formValue.make,
-      modelo: formValue.model,
-      matricula: formValue.plate,
-      kilometraje: formValue.mileage,
-      cliente: formValue.client_name
-    };
-    this.showVehicleConfirmation = true;
-  }
-
-  async confirmVehicleAndProceed(): Promise<void> {
-    this.showVehicleConfirmation = false;
-    this.isProcessing = true;
-    this.processingSteps = [];
-
-    try {
-      const formValue = this.invoiceForm.value;
-      await this.executeWorkflowByState(formValue);
-    } catch (error: any) {
-      console.error('Error in workflow:', error);
-      alert('Error processing invoice: ' + (error.error?.message || error.message || 'Unknown error'));
-    } finally {
-      this.isProcessing = false;
-      this.processingSteps = [];
-      this.vehicleToConfirm = null;
-    }
-  }
-
-  cancelVehicleConfirmation(): void {
-    this.showVehicleConfirmation = false;
-    this.vehicleToConfirm = null;
-  }
-
-  // Client and vehicle confirmation methods for orange state
-  showClientVehicleConfirmationDialog(): void {
-    const formValue = this.invoiceForm.value;
-    this.clientVehicleToConfirm = {
-      cliente: {
-        nombre: formValue.client_name
-      },
-      vehiculo: {
-        marca: formValue.make,
-        modelo: formValue.model,
-        matricula: formValue.plate,
-        kilometraje: formValue.mileage
-      }
-    };
-    this.showClientVehicleConfirmation = true;
-  }
-
-  async confirmClientVehicleAndProceed(): Promise<void> {
-    this.showClientVehicleConfirmation = false;
-    this.isProcessing = true;
-    this.processingSteps = [];
-
-    try {
-      const formValue = this.invoiceForm.value;
-      await this.executeWorkflowByState(formValue);
-    } catch (error: any) {
-      console.error('Error in workflow:', error);
-      alert('Error processing invoice: ' + (error.error?.message || error.message || 'Unknown error'));
-    } finally {
-      this.isProcessing = false;
-      this.processingSteps = [];
-      this.clientVehicleToConfirm = null;
-    }
-  }
-
-  cancelClientVehicleConfirmation(): void {
-    this.showClientVehicleConfirmation = false;
-    this.clientVehicleToConfirm = null;
   }
 }

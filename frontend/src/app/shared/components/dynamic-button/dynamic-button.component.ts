@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonState } from '../../interfaces/common.interface';
 
@@ -8,7 +8,7 @@ import { ButtonState } from '../../interfaces/common.interface';
   imports: [CommonModule],
   template: `
     <button 
-      type="button"
+      [type]="type()"
       class="btn-dynamic"
       [class]="buttonClasses()"
       [style.background-color]="buttonState().color"
@@ -147,6 +147,9 @@ export class DynamicButtonComponent {
   size = input<'small' | 'medium' | 'large'>('medium');
   type = input<'button' | 'submit'>('button');
 
+  // Outputs
+  clicked = output<void>();
+
   // Computed classes based on state and size
   buttonClasses = computed(() => {
     const state = this.buttonState().state;
@@ -187,7 +190,7 @@ export class DynamicButtonComponent {
   onClick(): void {
     // Only emit if not disabled
     if (!this.buttonState().disabled) {
-      // This component is just for display, the parent handles the logic
+      this.clicked.emit();
     }
   }
 }
