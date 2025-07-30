@@ -1,9 +1,95 @@
 <div class="invoice-list-container">
   <div class="header">
     <h1>Lista de Facturas</h1>
-    <button (click)="refreshInvoices()" class="btn-refresh" [disabled]="loading">
-      {{ loading ? 'Cargando...' : 'Actualizar' }}
-    </button>
+    <div class="header-controls">
+      <button (click)="toggleFilters()" class="btn-filters" [class.active]="showFilters">
+        {{ showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+      </button>
+      <button (click)="refreshInvoices()" class="btn-refresh" [disabled]="loading">
+        {{ loading ? 'Cargando...' : 'Actualizar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div *ngIf="showFilters" class="filters-section">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="filterCliente">Cliente:</label>
+        <input 
+          id="filterCliente"
+          type="text" 
+          [(ngModel)]="filters.cliente_nombre" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Buscar por nombre de cliente">
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterMarca">Marca:</label>
+        <input 
+          id="filterMarca"
+          type="text" 
+          [(ngModel)]="filters.marca" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Buscar por marca">
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterModelo">Modelo:</label>
+        <input 
+          id="filterModelo"
+          type="text" 
+          [(ngModel)]="filters.modelo" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Buscar por modelo">
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterMatricula">Matrícula:</label>
+        <input 
+          id="filterMatricula"
+          type="text" 
+          [(ngModel)]="filters.matricula" 
+          (ngModelChange)="onFilterChange()"
+          placeholder="Buscar por matrícula">
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterIva">IVA:</label>
+        <select 
+          id="filterIva"
+          [(ngModel)]="filters.incluye_iva" 
+          (ngModelChange)="onFilterChange()">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Con IVA</option>
+          <option [ngValue]="false">Sin IVA</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterFechaDesde">Fecha Desde:</label>
+        <input 
+          id="filterFechaDesde"
+          type="date" 
+          [(ngModel)]="filters.fecha_desde" 
+          (ngModelChange)="onFilterChange()">
+      </div>
+      
+      <div class="filter-group">
+        <label for="filterFechaHasta">Fecha Hasta:</label>
+        <input 
+          id="filterFechaHasta"
+          type="date" 
+          [(ngModel)]="filters.fecha_hasta" 
+          (ngModelChange)="onFilterChange()">
+      </div>
+      
+      <div class="filter-actions">
+        <button (click)="clearFilters()" class="btn-clear-filters">
+          Limpiar Filtros
+        </button>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="error" class="error-message">
@@ -42,14 +128,43 @@
     <table class="invoices-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Fecha</th>
-          <th>Vehículo</th>
-          <th>Matrícula</th>
+          <th>
+            <button class="sort-button" (click)="sortBy('id')">
+              ID {{ getSortIcon('id') }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" (click)="sortBy('cliente_nombre')">
+              Cliente {{ getSortIcon('cliente_nombre') }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" (click)="sortBy('fecha')">
+              Fecha {{ getSortIcon('fecha') }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" (click)="sortBy('marca')">
+              Marca {{ getSortIcon('marca') }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" (click)="sortBy('modelo')">
+              Modelo {{ getSortIcon('modelo') }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" (click)="sortBy('matricula')">
+              Matrícula {{ getSortIcon('matricula') }}
+            </button>
+          </th>
           <th>Items</th>
           <th>Subtotal</th>
-          <th>IVA</th>
+          <th>
+            <button class="sort-button" (click)="sortBy('incluye_iva')">
+              IVA {{ getSortIcon('incluye_iva') }}
+            </button>
+          </th>
           <th>Total</th>
           <th>Acciones</th>
         </tr>
@@ -61,7 +176,8 @@
             <td>{{ invoice.id }}</td>
             <td>{{ invoice.cliente_nombre }}</td>
             <td>{{ formatDate(invoice.fecha) }}</td>
-            <td>{{ invoice.marca }} {{ invoice.modelo }}</td>
+            <td>{{ invoice.marca }}</td>
+            <td>{{ invoice.modelo }}</td>
             <td>{{ invoice.matricula }}</td>
             <td class="items-cell">
               <div class="items-summary">
@@ -80,7 +196,7 @@
                 [class.active]="isInvoiceExpanded(invoice.id || 0)"
                 title="Ver detalles"
                 (click)="onViewInvoice(invoice)">
-                {{ isInvoiceExpanded(invoice.id || 0) ? '�' : '🔽' }} Ver
+                {{ isInvoiceExpanded(invoice.id || 0) ? '🔼' : '🔽' }} Ver
               </button>
               <button class="btn-download" title="Descargar PDF" (click)="onDownloadPDF(invoice)">
                 📄 PDF
@@ -90,7 +206,7 @@
 
           <!-- Collapsible detail row -->
           <tr *ngIf="isInvoiceExpanded(invoice.id || 0)" class="detail-row">
-            <td colspan="10" class="detail-cell">
+            <td colspan="11" class="detail-cell">
               <div class="invoice-details">
                 <div class="detail-section">
                   <h4>Información del Cliente</h4>

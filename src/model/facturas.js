@@ -53,25 +53,109 @@ async function obtenerFacturas() {
   }
 }
 
-async function obtenerFacturasPaginadas(page = 1, limit = 10) {
+async function obtenerFacturasPaginadas(
+  page = 1,
+  limit = 10,
+  sortBy = "fecha",
+  sortOrder = "DESC",
+  filters = {}
+) {
   try {
     const db = await connectDB();
     const offset = (page - 1) * limit;
 
-    // Get total count for pagination info
-    const countResult = await db.get("SELECT COUNT(*) as total FROM facturas");
+    // Build WHERE clause for filters
+    let whereClause = "";
+    let whereParams = [];
+
+    if (filters && Object.keys(filters).length > 0) {
+      const conditions = [];
+
+      if (filters.cliente_nombre) {
+        conditions.push("c.nombre LIKE ?");
+        whereParams.push(`%${filters.cliente_nombre}%`);
+      }
+
+      if (filters.marca) {
+        conditions.push("v.marca LIKE ?");
+        whereParams.push(`%${filters.marca}%`);
+      }
+
+      if (filters.modelo) {
+        conditions.push("v.modelo LIKE ?");
+        whereParams.push(`%${filters.modelo}%`);
+      }
+
+      if (filters.matricula) {
+        conditions.push("v.matricula LIKE ?");
+        whereParams.push(`%${filters.matricula}%`);
+      }
+
+      if (filters.incluye_iva !== undefined) {
+        conditions.push("f.incluye_iva = ?");
+        whereParams.push(filters.incluye_iva ? 1 : 0);
+      }
+
+      if (filters.fecha_desde) {
+        conditions.push("f.fecha >= ?");
+        whereParams.push(filters.fecha_desde);
+      }
+
+      if (filters.fecha_hasta) {
+        conditions.push("f.fecha <= ?");
+        whereParams.push(filters.fecha_hasta);
+      }
+
+      if (conditions.length > 0) {
+        whereClause = "WHERE " + conditions.join(" AND ");
+      }
+    }
+
+    // Validate sortBy to prevent SQL injection
+    const allowedSortColumns = [
+      "fecha",
+      "cliente_nombre",
+      "marca",
+      "modelo",
+      "matricula",
+      "incluye_iva",
+      "id",
+    ];
+    const validSortBy = allowedSortColumns.includes(sortBy) ? sortBy : "fecha";
+    const validSortOrder = sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    // Map frontend column names to database column names
+    const columnMapping = {
+      cliente_nombre: "c.nombre",
+      marca: "v.marca",
+      modelo: "v.modelo",
+      matricula: "v.matricula",
+      fecha: "f.fecha",
+      incluye_iva: "f.incluye_iva",
+      id: "f.id",
+    };
+
+    const dbSortColumn = columnMapping[validSortBy] || "f.fecha";
+
+    // Get total count for pagination info (with filters)
+    const countQuery = `SELECT COUNT(*) as total 
+                       FROM facturas f 
+                       JOIN clientes c ON f.cliente_id = c.id 
+                       JOIN vehiculos v ON f.vehiculo_id = v.id 
+                       ${whereClause}`;
+    const countResult = await db.get(countQuery, whereParams);
     const total = countResult.total;
 
-    // Get paginated results
-    const resultado = await db.all(
-      `SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje 
-       FROM facturas f 
-       JOIN clientes c ON f.cliente_id = c.id 
-       JOIN vehiculos v ON f.vehiculo_id = v.id 
-       ORDER BY f.fecha DESC 
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+    // Get paginated results (with filters and sorting)
+    const query = `SELECT f.*, c.nombre cliente_nombre, v.marca, v.modelo, v.matricula, v.kilometraje 
+                   FROM facturas f 
+                   JOIN clientes c ON f.cliente_id = c.id 
+                   JOIN vehiculos v ON f.vehiculo_id = v.id 
+                   ${whereClause}
+                   ORDER BY ${dbSortColumn} ${validSortOrder} 
+                   LIMIT ? OFFSET ?`;
+
+    const resultado = await db.all(query, [...whereParams, limit, offset]);
 
     // Append items for each invoice
     for (const [index, value] of resultado.entries()) {
