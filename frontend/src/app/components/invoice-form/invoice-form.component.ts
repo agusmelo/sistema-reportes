@@ -35,6 +35,10 @@ export class InvoiceFormComponent implements OnInit {
   showVehicleConfirmation = false;
   vehicleToConfirm: any = null;
 
+  // Mileage validation properties
+  databaseMileage: number | null = null;
+  isMileageLowerThanDatabase = false;
+
   constructor(
     private fb: FormBuilder,
     private clientService: ClientService,
@@ -53,6 +57,7 @@ export class InvoiceFormComponent implements OnInit {
       debounceTime(500) // Wait 500ms after user stops typing
     ).subscribe(() => {
       this.updateState();
+      this.checkMileageValidation(); // Check mileage validation on form changes
     });
 
     // Initial state check
@@ -170,11 +175,17 @@ export class InvoiceFormComponent implements OnInit {
   onVehiclePlateSelected(plate: string): void {
     const vehicle = this.currentVehicles.find(v => v.matricula === plate);
     if (vehicle) {
+      this.databaseMileage = vehicle.kilometraje;
       this.invoiceForm.patchValue({
         make: vehicle.marca,
         model: vehicle.modelo,
         mileage: vehicle.kilometraje
       });
+      // Start monitoring mileage changes
+      this.checkMileageValidation();
+    } else {
+      this.databaseMileage = null;
+      this.isMileageLowerThanDatabase = false;
     }
   }
 
@@ -183,6 +194,9 @@ export class InvoiceFormComponent implements OnInit {
     this.vehicleBrands = [];
     this.vehicleModels = [];
     this.vehiclePlates = [];
+    // Clear mileage validation data
+    this.databaseMileage = null;
+    this.isMileageLowerThanDatabase = false;
   }
 
   private setCurrentDate(): void {
@@ -262,6 +276,28 @@ export class InvoiceFormComponent implements OnInit {
     }
   }
 
+  // Mileage validation method
+  private checkMileageValidation(): void {
+    if (this.databaseMileage !== null) {
+      const currentMileage = this.invoiceForm.get('mileage')?.value;
+      if (currentMileage !== null && currentMileage !== undefined && currentMileage !== '') {
+        this.isMileageLowerThanDatabase = Number(currentMileage) < this.databaseMileage;
+      } else {
+        this.isMileageLowerThanDatabase = false;
+      }
+    } else {
+      this.isMileageLowerThanDatabase = false;
+    }
+  }
+
+  // Method to get mileage validation message
+  getMileageValidationMessage(): string {
+    if (this.isMileageLowerThanDatabase && this.databaseMileage !== null) {
+      return `El kilometraje actual (${this.invoiceForm.get('mileage')?.value}) es menor que el registrado en la base de datos (${this.databaseMileage} km)`;
+    }
+    return '';
+  }
+
   getStateColor(): string {
     switch (this.currentState) {
       case 'green': return '#28a745';
@@ -298,7 +334,7 @@ export class InvoiceFormComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.invoiceForm.valid && !this.isButtonDisabled()) {
-      
+
       // Special handling for yellow state - show confirmation first
       if (this.currentState === 'yellow') {
         this.showVehicleConfirmationDialog();

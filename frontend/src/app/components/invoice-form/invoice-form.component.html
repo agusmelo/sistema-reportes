@@ -66,7 +66,11 @@
             formControlName="mileage"
             placeholder="0"
             min="0"
-            required>
+            required
+            [class.mileage-warning]="isMileageLowerThanDatabase">
+          <div class="mileage-validation-message" *ngIf="isMileageLowerThanDatabase">
+            {{ getMileageValidationMessage() }}
+          </div>
         </div>
       </div>
     </div>
