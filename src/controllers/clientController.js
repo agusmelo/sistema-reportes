@@ -9,7 +9,7 @@ export const createClient = async (req, res) => {
   try {
     // Check if the client already exists
     const clienteExistente = await ClientModel.obtenerClientePorNombre(nombre);
-    if (clienteExistente) {
+    if (clienteExistente && clienteExistente.length > 0) {
       console.log(`El cliente ${nombre} ya existe`);
       return responseHandler.fail(
         res,
@@ -18,10 +18,10 @@ export const createClient = async (req, res) => {
         409
       );
     }
-    await ClientModel.agregarCliente(nombre);
+    const { lastID } = await ClientModel.agregarCliente(nombre);
     responseHandler.success(
       res,
-      null,
+      lastID,
       `Cliente ${nombre} creado con éxito`,
       201
     );

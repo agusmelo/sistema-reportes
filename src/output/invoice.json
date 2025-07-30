@@ -178,5 +178,80 @@
     "subtotal": 123,
     "total": 123,
     "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\Cliente-1_30_Julio_2025_Modelo-A_ABC123_id112.pdf"
+  },
+  {
+    "id": 113,
+    "client": {
+      "id": 28,
+      "nombre": "123cc",
+      "created_at": "2025-07-30 08:04:06"
+    },
+    "date": "2025-07-30",
+    "make": "cc",
+    "model": "123",
+    "plate": "123",
+    "mileage": 123,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "123",
+        "unitPrice": 231
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 231,
+    "total": 231,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\123cc_30_Julio_2025_123_123_id113.pdf"
+  },
+  {
+    "id": 114,
+    "client": {
+      "id": 29,
+      "nombre": "NUEVOCLIENTE3",
+      "created_at": "2025-07-30 08:04:34"
+    },
+    "date": "2025-07-30",
+    "make": "MARCANUEVA3",
+    "model": "MARCANUEVA3",
+    "plate": "MATRICULANUEVA3",
+    "mileage": 123,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "123",
+        "unitPrice": 231
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 231,
+    "total": 231,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\NUEVOCLIENTE3_30_Julio_2025_MARCANUEVA3_MATRICULANUEVA3_id114.pdf"
+  },
+  {
+    "id": 115,
+    "client": {
+      "id": 30,
+      "nombre": "a1x",
+      "created_at": "2025-07-30 08:11:16"
+    },
+    "date": "2025-07-30",
+    "make": "x1",
+    "model": "x1",
+    "plate": "x1x1x1x1",
+    "mileage": 1111,
+    "items": [
+      {
+        "quantity": 1,
+        "description": "123",
+        "unitPrice": 123
+      }
+    ],
+    "incluye_iva": false,
+    "ivaSolo": 0,
+    "subtotal": 123,
+    "total": 123,
+    "file_path": "C:\\Users\\amagu\\Desktop\\sistema-reportes\\src\\output\\2025\\Julio\\a1x_30_Julio_2025_x1_x1x1x1x1_id115.pdf"
   }
 ]

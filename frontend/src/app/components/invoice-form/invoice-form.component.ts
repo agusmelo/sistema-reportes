@@ -35,6 +35,10 @@ export class InvoiceFormComponent implements OnInit {
   showVehicleConfirmation = false;
   vehicleToConfirm: any = null;
 
+  // Client and vehicle confirmation properties for orange state
+  showClientVehicleConfirmation = false;
+  clientVehicleToConfirm: any = null;
+
   // Mileage validation properties
   databaseMileage: number | null = null;
   isMileageLowerThanDatabase = false;
@@ -326,7 +330,7 @@ export class InvoiceFormComponent implements OnInit {
     switch (this.currentState) {
       case 'green': return 'Generar Factura (Actualizar Kilometraje)';
       case 'yellow': return 'Revisar Vehículo y Generar Factura';
-      case 'orange': return 'Generar Factura (Crear Cliente y Vehículo)';
+      case 'orange': return 'Revisar Cliente y Vehículo y Generar Factura';
       case 'disabled': return 'No Permitido (Vehículo de Otro Cliente)';
       default: return 'Verificando...';
     }
@@ -338,6 +342,12 @@ export class InvoiceFormComponent implements OnInit {
       // Special handling for yellow state - show confirmation first
       if (this.currentState === 'yellow') {
         this.showVehicleConfirmationDialog();
+        return;
+      }
+
+      // Special handling for orange state - show confirmation first
+      if (this.currentState === 'orange') {
+        this.showClientVehicleConfirmationDialog();
         return;
       }
 
@@ -386,9 +396,9 @@ export class InvoiceFormComponent implements OnInit {
         this.addProcessingStep('➕ Creando cliente...');
         const newClient = await this.createNewClient(clientName);
         this.addProcessingStep('➕ Agregando vehículo...');
-        await this.createVehicleForClient({...formValue, client_id: newClient.id});
+        await this.createVehicleForClient({...formValue, client_id: newClient});
         this.addProcessingStep('📄 Generando factura...');
-        await this.createInvoiceDirectly({...formValue, client_id: newClient.id});
+        await this.createInvoiceDirectly({...formValue, client_id: newClient});
         break;
 
       default:
@@ -404,10 +414,11 @@ export class InvoiceFormComponent implements OnInit {
 
   private async createNewClient(clientName: string): Promise<Client> {
     const response = await this.clientService.createClient({ nombre: clientName });
-    if (!response || !response.data) {
+
+    if (response.data == undefined) {
       throw new Error('Failed to create client');
     }
-    return response.data;
+    return response.data
   }
 
   private async createVehicleForClient(formValue: any): Promise<Vehicle> {
@@ -504,5 +515,45 @@ export class InvoiceFormComponent implements OnInit {
   cancelVehicleConfirmation(): void {
     this.showVehicleConfirmation = false;
     this.vehicleToConfirm = null;
+  }
+
+  // Client and vehicle confirmation methods for orange state
+  showClientVehicleConfirmationDialog(): void {
+    const formValue = this.invoiceForm.value;
+    this.clientVehicleToConfirm = {
+      cliente: {
+        nombre: formValue.client_name
+      },
+      vehiculo: {
+        marca: formValue.make,
+        modelo: formValue.model,
+        matricula: formValue.plate,
+        kilometraje: formValue.mileage
+      }
+    };
+    this.showClientVehicleConfirmation = true;
+  }
+
+  async confirmClientVehicleAndProceed(): Promise<void> {
+    this.showClientVehicleConfirmation = false;
+    this.isProcessing = true;
+    this.processingSteps = [];
+
+    try {
+      const formValue = this.invoiceForm.value;
+      await this.executeWorkflowByState(formValue);
+    } catch (error: any) {
+      console.error('Error in workflow:', error);
+      alert('Error processing invoice: ' + (error.error?.message || error.message || 'Unknown error'));
+    } finally {
+      this.isProcessing = false;
+      this.processingSteps = [];
+      this.clientVehicleToConfirm = null;
+    }
+  }
+
+  cancelClientVehicleConfirmation(): void {
+    this.showClientVehicleConfirmation = false;
+    this.clientVehicleToConfirm = null;
   }
 }

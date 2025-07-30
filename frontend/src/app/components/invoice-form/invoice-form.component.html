@@ -219,6 +219,61 @@
         </div>
       </div>
 
+      <!-- Client and Vehicle Confirmation Dialog for Orange State -->
+      <div class="vehicle-confirmation-dialog" *ngIf="showClientVehicleConfirmation && clientVehicleToConfirm">
+        <div class="confirmation-card">
+          <h3>👤🚗 Confirmar Información del Cliente y Vehículo</h3>
+          <p class="confirmation-message">
+            Se creará el siguiente cliente y se agregará el vehículo al sistema:
+          </p>
+
+          <div class="client-vehicle-details">
+            <!-- Client Information -->
+            <div class="section-title">📋 Información del Cliente</div>
+            <div class="client-details">
+              <div class="detail-row">
+                <span class="detail-label">Nombre:</span>
+                <span class="detail-value">{{ clientVehicleToConfirm.cliente.nombre }}</span>
+              </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="section-title">🚗 Información del Vehículo</div>
+            <div class="vehicle-details">
+              <div class="detail-row">
+                <span class="detail-label">Marca:</span>
+                <span class="detail-value">{{ clientVehicleToConfirm.vehiculo.marca }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Modelo:</span>
+                <span class="detail-value">{{ clientVehicleToConfirm.vehiculo.modelo }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Matrícula:</span>
+                <span class="detail-value">{{ clientVehicleToConfirm.vehiculo.matricula }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Kilometraje:</span>
+                <span class="detail-value">{{ clientVehicleToConfirm.vehiculo.kilometraje }} km</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="confirmation-actions">
+            <button type="button"
+                    class="btn-confirm"
+                    (click)="confirmClientVehicleAndProceed()">
+              ✅ Confirmar y Generar Factura
+            </button>
+            <button type="button"
+                    class="btn-cancel"
+                    (click)="cancelClientVehicleConfirmation()">
+              ❌ Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Dynamic Generate Button -->
       <button type="submit"
               class="btn-primary dynamic-btn"
