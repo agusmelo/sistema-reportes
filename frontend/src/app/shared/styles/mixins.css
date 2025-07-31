@@ -1,0 +1,533 @@
+/* ========================================
+   MIXINS AND UTILITY FUNCTIONS
+   ======================================== */
+
+/* SCSS would be ideal here, but since we're using CSS, 
+   these are CSS custom properties that can be used as "mixins" */
+
+/* ========================================
+   BUTTON MIXINS
+   ======================================== */
+
+.btn-base {
+  /* Base button styles that all buttons inherit */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-tight);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-all);
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-hover-lift {
+  /* Adds a subtle lift effect on hover */
+  transition: var(--transition-all);
+}
+
+.btn-hover-lift:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-with-icon {
+  /* For buttons with icons */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-with-icon .icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   FORM MIXINS
+   ======================================== */
+
+.form-field-base {
+  /* Base styles for all form fields */
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: var(--transition-all);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-field-focus {
+  /* Focus styles for form fields */
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-lighter);
+}
+
+.form-field-error {
+  /* Error styles for form fields */
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-lighter);
+}
+
+.form-field-success {
+  /* Success styles for form fields */
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px var(--color-success-lighter);
+}
+
+.form-field-disabled {
+  /* Disabled styles for form fields */
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ========================================
+   CARD MIXINS
+   ======================================== */
+
+.card-base {
+  /* Base card styles */
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-base);
+  overflow: hidden;
+  transition: var(--transition-all);
+}
+
+.card-hover {
+  /* Card hover effect */
+  transition: var(--transition-all);
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-interactive {
+  /* For clickable cards */
+  cursor: pointer;
+  transition: var(--transition-all);
+}
+
+.card-interactive:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   LAYOUT MIXINS
+   ======================================== */
+
+.flex-center {
+  /* Centers content with flexbox */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  /* Space between with flexbox */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-start {
+  /* Flex start alignment */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.flex-end {
+  /* Flex end alignment */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.flex-column {
+  /* Flex column layout */
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-column-center {
+  /* Centered flex column */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-auto {
+  /* Auto-fit grid */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-4);
+}
+
+.grid-responsive {
+  /* Responsive grid */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+/* ========================================
+   TEXT MIXINS
+   ======================================== */
+
+.text-truncate {
+  /* Truncate text with ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-truncate-lines {
+  /* Truncate to specific number of lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-balance {
+  /* Better text wrapping */
+  text-wrap: balance;
+}
+
+.text-pretty {
+  /* Prevent orphans */
+  text-wrap: pretty;
+}
+
+/* ========================================
+   ANIMATION MIXINS
+   ======================================== */
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.pulse-subtle {
+  animation: pulseSubtle 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ========================================
+   STATE MIXINS
+   ======================================== */
+
+.loading-state {
+  /* Loading state styles */
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.loading-state::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-gray-200);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error-state {
+  /* Error state styles */
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-lighter);
+  color: var(--color-danger-dark);
+}
+
+.success-state {
+  /* Success state styles */
+  border-color: var(--color-success);
+  background-color: var(--color-success-lighter);
+  color: var(--color-success-dark);
+}
+
+.warning-state {
+  /* Warning state styles */
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-lighter);
+  color: var(--color-warning-dark);
+}
+
+/* ========================================
+   FOCUS MIXINS
+   ======================================== */
+
+.focus-ring {
+  /* Custom focus ring */
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-primary-lighter);
+  border-color: var(--color-primary);
+}
+
+.focus-ring-danger:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-danger-lighter);
+  border-color: var(--color-danger);
+}
+
+.focus-ring-success:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-success-lighter);
+  border-color: var(--color-success);
+}
+
+/* ========================================
+   SCROLL MIXINS
+   ======================================== */
+
+.scroll-smooth {
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+.scrollbar-hide {
+  /* Hide scrollbar but keep functionality */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  /* Thin custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-300);
+  border-radius: var(--radius-full);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gray-400);
+}
+
+/* ========================================
+   RESPONSIVE MIXINS
+   ======================================== */
+
+.responsive-text {
+  /* Responsive text sizing */
+  font-size: clamp(var(--font-size-sm), 2vw, var(--font-size-base));
+}
+
+.responsive-heading {
+  /* Responsive heading sizing */
+  font-size: clamp(var(--font-size-lg), 4vw, var(--font-size-2xl));
+}
+
+.responsive-container {
+  /* Responsive container with proper padding */
+  width: 100%;
+  max-width: var(--container-6xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* ========================================
+   PRINT MIXINS
+   ======================================== */
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-visible {
+    display: block !important;
+  }
+  
+  .print-break-before {
+    page-break-before: always;
+  }
+  
+  .print-break-after {
+    page-break-after: always;
+  }
+  
+  .print-no-break {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY MIXINS
+   ======================================== */
+
+.sr-only {
+  /* Screen reader only text */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  /* Skip to content link */
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  z-index: var(--z-modal);
+  transition: var(--transition-all);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+.high-contrast {
+  /* High contrast mode styles */
+  filter: contrast(1.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .respect-motion-preference {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    /* Automatic dark mode adjustments */
+    color-scheme: dark;
+  }
+}
